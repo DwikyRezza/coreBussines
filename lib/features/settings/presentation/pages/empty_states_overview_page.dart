@@ -1,0 +1,190 @@
+// ============================================================
+// FEATURE: Settings — Empty States Overview Page
+// lib/features/settings/presentation/pages/empty_states_overview_page.dart
+// ============================================================
+
+import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+
+class EmptyStatesOverviewPage extends StatelessWidget {
+  const EmptyStatesOverviewPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        titleSpacing: AppSpacing.pagePadding,
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: const Color(0xFF2962FF),
+              child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'CoreFit',
+              style: AppTypography.textTheme.titleLarge?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            onPressed: () {},
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Empty States Overview',
+              style: AppTypography.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1A202C),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Consistent collection of empty states for various contexts across the application.',
+              style: AppTypography.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF4A5568),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
+            // Transactions Empty State
+            _EmptyStateCard(
+              icon: Icons.receipt_long_rounded,
+              title: 'Belum ada transaksi',
+              description: 'Riwayat transaksi Anda akan muncul di sini. Mulai aktivitas baru untuk melihatnya.',
+              buttonText: 'Buat Transaksi Baru',
+              isButtonSolid: true,
+            ),
+            const SizedBox(height: 16),
+
+            // Analytics Empty State
+            _EmptyStateCard(
+              icon: Icons.bar_chart_rounded,
+              title: 'Data Analisis Kosong',
+              description: 'Kumpulkan data lebih banyak untuk melihat tren dan analisis performa Anda.',
+              buttonText: null, // No button
+            ),
+            const SizedBox(height: 16),
+
+            // Schedule Empty State
+            _EmptyStateCard(
+              icon: Icons.calendar_month_rounded,
+              title: 'Jadwal Kosong',
+              description: 'Tidak ada jadwal aktif saat ini. Rencanakan sesi Anda berikutnya.',
+              buttonText: 'Tambah Jadwal',
+              isButtonSolid: true,
+            ),
+            const SizedBox(height: 16),
+
+            // Business Empty State
+            _EmptyStateCard(
+              icon: Icons.storefront_rounded,
+              title: 'Belum ada Bisnis',
+              description: 'Daftarkan bisnis atau cabang baru untuk mulai mengelolanya dari sini.',
+              buttonText: 'Daftar Bisnis',
+              isButtonSolid: false,
+            ),
+            const SizedBox(height: 100), // Bottom shell padding
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final String? buttonText;
+  final bool isButtonSolid;
+
+  const _EmptyStateCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.buttonText,
+    this.isButtonSolid = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF1F5F9), // Light greyish blue
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: const Color(0xFF718096), size: 32),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: AppTypography.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A202C),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            description,
+            style: AppTypography.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF4A5568),
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (buttonText != null) ...[
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isButtonSolid ? const Color(0xFF0D47A1) : const Color(0xFFE2E8F0),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: Text(
+                buttonText!,
+                style: AppTypography.textTheme.labelMedium?.copyWith(
+                  color: isButtonSolid ? Colors.white : const Color(0xFF0D47A1),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
