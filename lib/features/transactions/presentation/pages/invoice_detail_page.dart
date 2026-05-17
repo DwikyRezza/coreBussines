@@ -26,7 +26,7 @@ class InvoiceDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -103,7 +103,7 @@ class InvoiceDetailPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'CoreFit',
+                                  'CoreBusiness',
                                   style: AppTypography.textTheme.headlineSmall?.copyWith(
                                     color: const Color(0xFF0D47A1),
                                     fontWeight: FontWeight.w800,

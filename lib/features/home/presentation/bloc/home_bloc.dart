@@ -4,6 +4,7 @@
 // ============================================================
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/home_entities.dart';
 import '../../domain/repositories/home_repository.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -61,15 +62,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     ).wait;
 
     // Fold all results — if any fails, emit error
-    final summary = summaryResult.fold((f) => null, (s) => s);
-    final transactions = transactionsResult.fold((f) => null, (t) => t);
-    final insight = insightResult.fold((f) => null, (i) => i);
+    final summary = summaryResult.fold<BalanceSummary?>((f) => null, (s) => s);
+    final transactions = transactionsResult.fold<List<Transaction>?>(
+      (f) => null,
+      (t) => t,
+    );
+    final insight = insightResult.fold<InsightCard?>((f) => null, (i) => i);
 
     if (summary == null || transactions == null || insight == null) {
-      final failure = [summaryResult, transactionsResult, insightResult]
-          .firstWhere((r) => r.isLeft())
-          .fold((f) => f, (_) => null);
-      emit(HomeError(failure?.message ?? 'Terjadi kesalahan.'));
+      final errorMessage =
+          summaryResult.fold((f) => f.message, (_) => null) ??
+          transactionsResult.fold((f) => f.message, (_) => null) ??
+          insightResult.fold((f) => f.message, (_) => null);
+
+      emit(HomeError(errorMessage ?? 'Terjadi kesalahan.'));
       return;
     }
 

@@ -9,13 +9,18 @@ import '../../../../core/usecases/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
-class SignInWithGoogle implements UseCase<UserEntity, NoParams> {
+class SignInWithGoogle implements UseCase<UserEntity, SignInWithGoogleParams> {
   final AuthRepository _repository;
 
   const SignInWithGoogle(this._repository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(NoParams params) {
-    return _repository.signInWithGoogle();
+  Future<Either<Failure, UserEntity>> call(SignInWithGoogleParams params) {
+    return _repository.signInWithGoogle(isRegister: params.isRegister);
   }
+}
+
+class SignInWithGoogleParams {
+  final bool isRegister;
+  const SignInWithGoogleParams({this.isRegister = false});
 }

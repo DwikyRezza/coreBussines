@@ -34,7 +34,7 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,

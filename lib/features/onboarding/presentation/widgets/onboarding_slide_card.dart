@@ -6,7 +6,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/onboarding_slide.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class OnboardingSlideCard extends StatelessWidget {

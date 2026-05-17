@@ -9,10 +9,34 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-class EditTransactionPage extends StatelessWidget {
+class EditTransactionPage extends StatefulWidget {
   final String transactionId;
 
   const EditTransactionPage({super.key, required this.transactionId});
+
+  @override
+  State<EditTransactionPage> createState() => _EditTransactionPageState();
+}
+
+class _EditTransactionPageState extends State<EditTransactionPage> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _notesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: 'Makan Siang');
+    _notesController = TextEditingController(
+      text: 'Makan siang bersama tim di Warung Padang.',
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,9 +169,8 @@ class EditTransactionPage extends StatelessWidget {
                             border: Border.all(color: AppColors.outlineVariant),
                           ),
                           child: TextField(
-                            controller:
-                                TextEditingController(text: 'Makan Siang'),
-                            decoration: InputDecoration(
+                            controller: _titleController,
+                            decoration: const InputDecoration(
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 12),
@@ -260,11 +283,9 @@ class EditTransactionPage extends StatelessWidget {
                             border: Border.all(color: AppColors.outlineVariant),
                           ),
                           child: TextField(
-                            controller: TextEditingController(
-                                text:
-                                    'Makan siang bersama tim di Warung Padang.'),
+                            controller: _notesController,
                             maxLines: 3,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.all(16),
                             ),

@@ -4,13 +4,15 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../bloc/settings_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/bloc/auth_event.dart'; // Added this
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -81,7 +83,9 @@ class SettingsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthSignOutRequested());
+              },
               icon: const Icon(Icons.logout_rounded, color: AppColors.expense),
               label: const Text('Keluar',
                   style: TextStyle(color: AppColors.expense, fontWeight: FontWeight.w600)),
@@ -101,36 +105,53 @@ class SettingsPage extends StatelessWidget {
 class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.pagePadding),
-      color: AppColors.surface,
-      child: Row(children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: AppColors.primaryContainer,
-          child: Text('A',
-              style: AppTypography.textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary, fontWeight: FontWeight.w700,
-              )),
-        ),
-        const SizedBox(width: AppSpacing.base),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Alex Chen',
-                style: AppTypography.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                )),
-            Text('alex.chen@gmail.com',
-                style: AppTypography.textTheme.bodySmall?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                )),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        String name = 'Pengguna';
+        String email = '';
+        String? avatarUrl;
+
+        if (state is AuthAuthenticated) {
+          name = state.user.fullName ?? 'Pengguna';
+          email = state.user.email;
+          avatarUrl = state.user.avatarUrl;
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+          color: AppColors.surface,
+          child: Row(children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: AppColors.primaryContainer,
+              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+              child: avatarUrl == null 
+                  ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                      style: AppTypography.textTheme.headlineSmall?.copyWith(
+                        color: AppColors.primary, fontWeight: FontWeight.w700,
+                      ))
+                  : null,
+            ),
+            const SizedBox(width: AppSpacing.base),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(name,
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    )),
+                Text(email,
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    )),
+              ]),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+              onPressed: () {},
+            ),
           ]),
-        ),
-        IconButton(
-          icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
-          onPressed: () {},
-        ),
-      ]),
+        );
+      },
     );
   }
 }

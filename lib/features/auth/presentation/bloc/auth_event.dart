@@ -13,7 +13,11 @@ abstract class AuthEvent extends Equatable {
 }
 
 class AuthGoogleSignInRequested extends AuthEvent {
-  const AuthGoogleSignInRequested();
+  final bool isRegister;
+  const AuthGoogleSignInRequested({this.isRegister = false});
+
+  @override
+  List<Object?> get props => [isRegister];
 }
 
 class AuthSignOutRequested extends AuthEvent {

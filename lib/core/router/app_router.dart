@@ -4,12 +4,18 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../di/service_locator.dart';
+import '../router/router_notifier.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
 
 // Onboarding & Auth
 import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 // Home & Shell
 import '../../features/home/presentation/pages/home_page.dart';
@@ -118,10 +124,34 @@ abstract class AppRoutes {
   static const String catalog = '/catalog';
 }
 
-final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.splash,
-  debugLogDiagnostics: false,
-  routes: [
+// Protected routes — unauthenticated access is blocked.
+const _publicRoutes = {AppRoutes.splash, AppRoutes.onboarding, AppRoutes.login};
+
+GoRouter _buildRouter() {
+  final authRepo = sl<AuthRepository>();
+  final notifier = RouterAuthNotifier(authRepo);
+
+  return GoRouter(
+    initialLocation: AppRoutes.splash,
+    debugLogDiagnostics: false,
+    refreshListenable: notifier,
+    redirect: (context, state) {
+      final location = state.matchedLocation;
+
+      // Check cached user synchronously (no async needed)
+      final cachedUser = (authRepo as AuthRepositoryImpl).cachedUser;
+      final isLoggedIn = cachedUser != null;
+      final isPublic = _publicRoutes.contains(location);
+
+      // Unauthenticated user trying to access a protected route
+      if (!isLoggedIn && !isPublic) return AppRoutes.login;
+
+      // Authenticated user hitting login — redirect to home
+      if (isLoggedIn && isPublic) return AppRoutes.home;
+
+      return null; // No redirect needed
+    },
+    routes: [
     // Top Level Routes
     GoRoute(
       path: AppRoutes.splash,
@@ -136,7 +166,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.login,
       name: 'login',
-      builder: (context, state) => const LoginPage(),
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<AuthBloc>(),
+        child: const LoginPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.addTransaction,
@@ -334,9 +367,13 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const DashboardCustomizePage(),
     ),
   ],
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(
-      child: Text('Route not found: ${state.uri}'),
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('Route not found: ${state.uri}'),
+      ),
     ),
-  ),
-);
+  );
+}
+
+/// Lazily built so DI is initialized before router is created.
+final GoRouter appRouter = _buildRouter();

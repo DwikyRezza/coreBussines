@@ -1,4 +1,4 @@
-package com.example.corebussiness
+package com.example.corebusiness
 
 import io.flutter.embedding.android.FlutterActivity
 

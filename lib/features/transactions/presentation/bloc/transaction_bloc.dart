@@ -1,5 +1,5 @@
 // ============================================================
-// FEATURE: Transactions — BLoC (Detail + Filter + History)
+// FEATURE: Transactions — BLoC (Detail + Filter + Add + Delete)
 // lib/features/transactions/presentation/bloc/transaction_bloc.dart
 // ============================================================
 
@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
+import '../../domain/usecases/add_transaction.dart';
+import '../../domain/usecases/delete_transaction.dart';
 
 // ─── Events ───────────────────────────────────────────────────
 abstract class TransactionEvent extends Equatable {
@@ -28,6 +30,37 @@ class TransactionDeleteRequested extends TransactionEvent {
   const TransactionDeleteRequested(this.id);
   @override
   List<Object?> get props => [id];
+}
+
+/// Fired when user presses "Simpan Transaksi".
+/// All fields must be validated by the UI before dispatching.
+class TransactionSubmitRequested extends TransactionEvent {
+  final String title;
+  final double amount;
+  final bool isIncome;
+  final String category;
+  final String categoryIcon;
+  final String walletName;
+  final String? note;
+
+  const TransactionSubmitRequested({
+    required this.title,
+    required this.amount,
+    required this.isIncome,
+    required this.category,
+    required this.categoryIcon,
+    required this.walletName,
+    this.note,
+  });
+
+  @override
+  List<Object?> get props =>
+      [title, amount, isIncome, category, categoryIcon, walletName, note];
+}
+
+/// Resets BLoC to idle after UI has reacted to success/failure.
+class TransactionReset extends TransactionEvent {
+  const TransactionReset();
 }
 
 // ─── States ───────────────────────────────────────────────────
@@ -52,6 +85,15 @@ class TransactionDetailLoaded extends TransactionState {
   List<Object?> get props => [detail];
 }
 
+/// Covers both add-success and delete-success.
+class TransactionSuccess extends TransactionState {
+  final String message;
+  const TransactionSuccess({this.message = 'Transaksi berhasil disimpan.'});
+  @override
+  List<Object?> get props => [message];
+}
+
+/// Legacy alias kept for backward compat with TransactionDetailPage.
 class TransactionDeleteSuccess extends TransactionState {
   const TransactionDeleteSuccess();
 }
@@ -66,13 +108,21 @@ class TransactionError extends TransactionState {
 // ─── BLoC ─────────────────────────────────────────────────────
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository _repository;
-  bool _isProcessing = false; // Double-submit guard
+  final AddTransaction? _addTransaction;
+  final DeleteTransaction? _deleteUseCase;
 
-  TransactionBloc({required TransactionRepository repository})
-      : _repository = repository,
+  TransactionBloc({
+    required TransactionRepository repository,
+    AddTransaction? addTransaction,
+    DeleteTransaction? deleteTransaction,
+  })  : _repository = repository,
+        _addTransaction = addTransaction,
+        _deleteUseCase = deleteTransaction,
         super(const TransactionInitial()) {
     on<TransactionDetailRequested>(_onDetailRequested);
     on<TransactionDeleteRequested>(_onDeleteRequested);
+    on<TransactionSubmitRequested>(_onSubmitRequested);
+    on<TransactionReset>(_onReset);
   }
 
   Future<void> _onDetailRequested(
@@ -91,20 +141,53 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     TransactionDeleteRequested event,
     Emitter<TransactionState> emit,
   ) async {
-    if (_isProcessing) return; // Prevent double-tap on delete
-    _isProcessing = true;
+    // State-based double-submit guard (more reliable than a boolean flag)
+    if (state is TransactionLoading) return;
 
     emit(const TransactionLoading());
-    final result = await _repository.deleteTransaction(event.id);
+
+    final result = _deleteUseCase != null
+        ? await _deleteUseCase.call(DeleteTransactionParams(id: event.id))
+        : await _repository.deleteTransaction(event.id);
+
     result.fold(
-      (f) {
-        _isProcessing = false;
-        emit(TransactionError(f.message));
-      },
-      (_) {
-        _isProcessing = false;
-        emit(const TransactionDeleteSuccess());
-      },
+      (f) => emit(TransactionError(f.message)),
+      (_) => emit(
+        const TransactionSuccess(message: 'Transaksi berhasil dihapus.'),
+      ),
     );
+  }
+
+  Future<void> _onSubmitRequested(
+    TransactionSubmitRequested event,
+    Emitter<TransactionState> emit,
+  ) async {
+    // State-based double-submit guard
+    if (state is TransactionLoading) return;
+
+    emit(const TransactionLoading());
+
+    final transaction = Transaction(
+      id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
+      title: event.title,
+      amount: event.amount,
+      isIncome: event.isIncome,
+      category: event.category,
+      categoryIcon: event.categoryIcon,
+      dateTime: DateTime.now(),
+    );
+
+    final result = _addTransaction != null
+        ? await _addTransaction.call(AddTransactionParams(transaction: transaction))
+        : await _repository.addTransaction(transaction);
+
+    result.fold(
+      (f) => emit(TransactionError(f.message)),
+      (_) => emit(const TransactionSuccess()),
+    );
+  }
+
+  void _onReset(TransactionReset event, Emitter<TransactionState> emit) {
+    emit(const TransactionInitial());
   }
 }

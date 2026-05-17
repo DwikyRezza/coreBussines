@@ -26,7 +26,7 @@ class SearchPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -67,7 +67,7 @@ class SearchPage extends StatelessWidget {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search CoreFit...',
+                  hintText: 'Search CoreBusiness...',
                   hintStyle: AppTypography.textTheme.bodyLarge?.copyWith(color: const Color(0xFFA0AEC0)),
                   prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D47A1)),
                   suffixIcon: Container(

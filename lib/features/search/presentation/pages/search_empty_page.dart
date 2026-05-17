@@ -8,8 +8,27 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
-class SearchEmptyPage extends StatelessWidget {
+class SearchEmptyPage extends StatefulWidget {
   const SearchEmptyPage({super.key});
+
+  @override
+  State<SearchEmptyPage> createState() => _SearchEmptyPageState();
+}
+
+class _SearchEmptyPageState extends State<SearchEmptyPage> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: 'Pembayaran Netflix');
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +45,7 @@ class SearchEmptyPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -47,7 +66,7 @@ class SearchEmptyPage extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: AppSpacing.md),
-          
+
           // Search Input
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -58,7 +77,7 @@ class SearchEmptyPage extends StatelessWidget {
                 border: Border.all(color: const Color(0xFF2962FF)), // Active search border
               ),
               child: TextField(
-                controller: TextEditingController(text: 'Pembayaran Netflix'),
+                controller: _searchController,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D47A1)),
                   suffixIcon: Container(
@@ -88,7 +107,7 @@ class SearchEmptyPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Empty State Content
           Expanded(
             child: Padding(

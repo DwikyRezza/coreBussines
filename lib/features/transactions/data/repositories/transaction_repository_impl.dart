@@ -8,10 +8,11 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
-import '../datasources/transaction_mock_datasource.dart';
+import '../datasources/transaction_local_datasource.dart';
+import '../../../home/data/models/home_models.dart'; // TransactionModel is defined here
 
 class TransactionRepositoryImpl implements TransactionRepository {
-  final TransactionDataSource _dataSource;
+  final TransactionLocalDataSource _dataSource;
 
   const TransactionRepositoryImpl(this._dataSource);
 
@@ -52,7 +53,6 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<Either<Failure, void>> addTransaction(Transaction transaction) async {
     try {
-      // Create a TransactionModel from the Transaction entity
       final model = TransactionModel(
         id: transaction.id,
         title: transaction.title,

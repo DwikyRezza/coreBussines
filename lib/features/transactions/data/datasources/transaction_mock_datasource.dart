@@ -6,7 +6,6 @@
 import '../models/transaction_detail_model.dart';
 import '../../../home/data/models/home_models.dart';
 import '../../domain/entities/transaction_entities.dart';
-import '../../../home/domain/entities/home_entities.dart';
 
 abstract class TransactionDataSource {
   Future<TransactionDetailModel> getTransactionDetail(String id);
@@ -105,7 +104,7 @@ class TransactionMockDataSource implements TransactionDataSource {
         category: 'Kesehatan & Kebugaran',
         categoryIcon: 'health',
         dateTime: DateTime(2024, 5, 24, 9, 42),
-        paymentMethod: 'Mandiri CoreFit Wallet',
+        paymentMethod: 'Mandiri CoreBusiness Wallet',
         isMainPayment: true,
         note:
             "Pembayaran rutin untuk keanggotaan Gold Gym di Mall Central Park. Termasuk akses kolam renang dan personal trainer session untuk 4 kali pertemuan bulan ini. Kwitansi disimpan di folder 'Finansial 2024'.",
@@ -126,7 +125,7 @@ class TransactionMockDataSource implements TransactionDataSource {
       category: txn.category,
       categoryIcon: txn.categoryIcon,
       dateTime: txn.dateTime,
-      paymentMethod: 'CoreFit Wallet',
+      paymentMethod: 'CoreBusiness Wallet',
       isMainPayment: false,
     );
   }

@@ -26,7 +26,7 @@ class BusinessPortfolioPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -69,7 +69,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
                 children: [
                   _PortfolioCard(
-                    title: 'CoreFit Pusat',
+                    title: 'CoreBusiness Pusat',
                     subtitle: 'Pusat Kebugaran',
                     icon: Icons.fitness_center_rounded,
                     isActive: true,
@@ -94,7 +94,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Ikhtisar CoreFit',
+                    'Ikhtisar CoreBusiness',
                     style: AppTypography.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF1A202C),

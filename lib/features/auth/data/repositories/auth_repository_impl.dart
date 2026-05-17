@@ -3,6 +3,7 @@
 // lib/features/auth/data/repositories/auth_repository_impl.dart
 // ============================================================
 
+import 'dart:async';
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -13,12 +14,39 @@ import '../datasources/auth_remote_datasource.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
 
-  const AuthRepositoryImpl(this._remoteDataSource);
+  // Broadcast so multiple listeners (Router, BLoC) can subscribe.
+  final _authController = StreamController<UserEntity?>.broadcast();
+
+  // Synchronous cache — lets the Router redirect without async.
+  UserEntity? _cachedUser;
+
+  AuthRepositoryImpl(this._remoteDataSource) {
+    // On construction, check if a session is already active
+    // (e.g. Google Sign-In silent sign-in restores previous session).
+    _rehydrate();
+  }
+
+  /// Expose cached user for synchronous router redirect checks.
+  UserEntity? get cachedUser => _cachedUser;
+
+  /// Re-check auth state on cold start (silent sign-in).
+  Future<void> _rehydrate() async {
+    try {
+      final user = await _remoteDataSource.getCurrentUser();
+      _cachedUser = user;
+      _authController.add(user);
+    } catch (_) {
+      _cachedUser = null;
+      _authController.add(null);
+    }
+  }
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
+  Future<Either<Failure, UserEntity>> signInWithGoogle({bool isRegister = false}) async {
     try {
-      final user = await _remoteDataSource.signInWithGoogle();
+      final user = await _remoteDataSource.signInWithGoogle(isRegister: isRegister);
+      _cachedUser = user;
+      _authController.add(user); // ← notify router & BLoC
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -31,6 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> signOut() async {
     try {
       await _remoteDataSource.signOut();
+      _cachedUser = null;
+      _authController.add(null); // ← notify router & BLoC
       return const Right(null);
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -43,6 +73,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
       final user = await _remoteDataSource.getCurrentUser();
+      _cachedUser = user;
+      _authController.add(user);
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -52,5 +84,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<UserEntity?> get authStateChanges => Stream.value(null);
+  Stream<UserEntity?> get authStateChanges => _authController.stream;
+
+  /// Call this when the app is disposed to avoid stream leaks.
+  void dispose() => _authController.close();
 }

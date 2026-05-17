@@ -8,29 +8,31 @@ import '../../domain/entities/user_entity.dart';
 class UserModel extends UserEntity {
   const UserModel({
     required super.id,
-    required super.name,
+    super.fullName,
     required super.email,
-    super.photoUrl,
-    required super.createdAt,
+    super.avatarUrl,
+    required super.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
-      name: json['name'] as String,
+      fullName: json['full_name'] as String? ?? json['name'] as String?,
       email: json['email'] as String,
-      photoUrl: json['photo_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      avatarUrl: json['avatar_url'] as String? ?? json['photo_url'] as String?,
+      updatedAt: DateTime.parse(
+        (json['updated_at'] ?? json['created_at']) as String,
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'full_name': fullName,
       'email': email,
-      'photo_url': photoUrl,
-      'created_at': createdAt.toIso8601String(),
+      'avatar_url': avatarUrl,
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
 
@@ -43,10 +45,10 @@ class UserModel extends UserEntity {
   }) {
     return UserModel(
       id: id,
-      name: name,
+      fullName: name,
       email: email,
-      photoUrl: photoUrl,
-      createdAt: DateTime.now(),
+      avatarUrl: photoUrl,
+      updatedAt: DateTime.now(),
     );
   }
 }

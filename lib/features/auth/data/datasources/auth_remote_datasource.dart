@@ -4,42 +4,80 @@
 // ============================================================
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
+import '../../../../core/config/app_config.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> signInWithGoogle();
+  Future<UserModel> signInWithGoogle({bool isRegister = false});
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final GoogleSignIn _googleSignIn;
+  static const _activeBusinessIdKey = 'active_business_id';
 
-  AuthRemoteDataSourceImpl({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ??
+  final SupabaseClient _supabase;
+  final GoogleSignIn _googleSignIn;
+  final SharedPreferences _prefs;
+
+  AuthRemoteDataSourceImpl({
+    SupabaseClient? supabase,
+    GoogleSignIn? googleSignIn,
+    required SharedPreferences prefs,
+  })  : _supabase = supabase ?? Supabase.instance.client,
+        _googleSignIn = googleSignIn ??
             GoogleSignIn(
+              clientId: AppConfig.googleAndroidClientId,
+              serverClientId: AppConfig.googleWebClientId,
               scopes: ['email', 'profile'],
-            );
+            ),
+        _prefs = prefs;
 
   @override
-  Future<UserModel> signInWithGoogle() async {
+  Future<UserModel> signInWithGoogle({bool isRegister = false}) async {
     try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw const AuthException(message: 'Login dibatalkan oleh pengguna.');
       }
 
-      return UserModel.fromGoogleUser(
-        id: googleUser.id,
+      final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (accessToken == null || idToken == null) {
+        throw const AuthException(message: 'Gagal mendapatkan token Google.');
+      }
+
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      final user = response.user;
+      if (user == null) {
+        throw const AuthException(message: 'Gagal masuk ke sistem.');
+      }
+
+      final userModel = UserModel.fromGoogleUser(
+        id: user.id,
         name: googleUser.displayName ?? 'Pengguna',
         email: googleUser.email,
         photoUrl: googleUser.photoUrl,
       );
+
+      await _ensureWorkspace(userModel);
+      return userModel;
     } on AuthException {
       rethrow;
-    } catch (e) {
-      throw AuthException(message: 'Gagal masuk dengan Google: $e');
+    } catch (e, stack) {
+      print('DEBUG_AUTH_ERROR: $e');
+      print('DEBUG_AUTH_STACK: $stack');
+      throw AuthException(message: 'Detail Error: $e');
     }
   }
 
@@ -47,6 +85,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() async {
     try {
       await _googleSignIn.signOut();
+      await _supabase.auth.signOut();
+      await _prefs.remove(_activeBusinessIdKey);
     } catch (e) {
       throw AuthException(message: 'Gagal keluar: $e');
     }
@@ -54,14 +94,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final account = _googleSignIn.currentUser;
-    if (account == null) return null;
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
 
-    return UserModel.fromGoogleUser(
-      id: account.id,
-      name: account.displayName ?? 'Pengguna',
-      email: account.email,
-      photoUrl: account.photoUrl,
+    final profile = await _supabase
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (profile != null) {
+      final userModel = UserModel.fromJson(profile);
+      await _ensureWorkspace(userModel);
+      return userModel;
+    }
+
+    final metadata = user.userMetadata ?? const <String, dynamic>{};
+    final userModel = UserModel(
+      id: user.id,
+      fullName:
+          metadata['full_name'] as String? ?? metadata['name'] as String?,
+      email: user.email ?? metadata['email'] as String? ?? '',
+      avatarUrl:
+          metadata['avatar_url'] as String? ?? metadata['picture'] as String?,
+      updatedAt: DateTime.now(),
     );
+
+    await _ensureWorkspace(userModel);
+    return userModel;
+  }
+
+  Future<void> _ensureWorkspace(UserModel user) async {
+    final businessId = await _supabase.rpc<String>(
+      'ensure_current_user_workspace',
+      params: {
+        'p_full_name': user.fullName,
+        'p_email': user.email,
+        'p_avatar_url': user.avatarUrl,
+      },
+    );
+
+    if (businessId.isNotEmpty) {
+      await _prefs.setString(_activeBusinessIdKey, businessId);
+    }
   }
 }

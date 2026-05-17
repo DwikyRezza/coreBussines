@@ -29,7 +29,7 @@ class TransactionDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -161,7 +161,7 @@ class TransactionDetailPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Downtown CoreFit Studio', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text('Downtown CoreBusiness Studio', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
                             Text('Studio B, Level 2', style: AppTypography.textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
                           ],
                         ),

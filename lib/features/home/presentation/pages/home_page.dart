@@ -1,8 +1,3 @@
-// ============================================================
-// FEATURE: Home — Page
-// lib/features/home/presentation/pages/home_page.dart
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,8 +5,7 @@ import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/home_widgets.dart';
-import '../../data/datasources/home_mock_datasource.dart';
-import '../../data/repositories/home_repository_impl.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -23,13 +17,13 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeBloc(
-        repository: HomeRepositoryImpl(HomeMockDataSource()),
-      )..add(const HomeLoadRequested()),
+      // Use DI — avoids hardcoded datasource, fully testable via sl mock swap
+      create: (_) => sl<HomeBloc>()..add(const HomeLoadRequested()),
       child: const _HomeView(),
     );
   }
 }
+
 
 class _HomeView extends StatelessWidget {
   const _HomeView();

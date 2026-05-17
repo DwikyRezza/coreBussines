@@ -36,7 +36,7 @@ class TeamManagementPage extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'CoreFit',
+              'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -111,7 +111,7 @@ class TeamManagementPage extends StatelessWidget {
             // Member List
             _MemberCard(
               name: 'Marcus Johnson',
-              email: 'marcus.j@corefit.inc',
+              email: 'marcus.j@CoreBusiness.inc',
               role: 'Owner',
               avatarUrl: 'https://i.pravatar.cc/150?img=11',
               isHighlighted: true,
@@ -119,21 +119,21 @@ class TeamManagementPage extends StatelessWidget {
             const SizedBox(height: 16),
             _MemberCard(
               name: 'Sarah Jenkins',
-              email: 's.jenkins@corefit.inc',
+              email: 's.jenkins@CoreBusiness.inc',
               role: 'Admin',
               initials: 'SJ',
             ),
             const SizedBox(height: 16),
             _MemberCard(
               name: 'Emily Chen',
-              email: 'emily.c@corefit.inc',
+              email: 'emily.c@CoreBusiness.inc',
               role: 'Staff',
               avatarUrl: 'https://i.pravatar.cc/150?img=5',
             ),
             const SizedBox(height: 16),
             _MemberCard(
               name: 'David Rodriguez',
-              email: 'd.rodriguez@corefit.inc',
+              email: 'd.rodriguez@CoreBusiness.inc',
               role: 'Staff',
               avatarUrl: 'https://i.pravatar.cc/150?img=12',
             ),

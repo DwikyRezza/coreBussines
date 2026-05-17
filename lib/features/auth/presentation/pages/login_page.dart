@@ -4,7 +4,6 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
@@ -15,8 +14,15 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _isRegisterMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +96,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
-                    'CoreFit',
+                    'CoreBusiness',
                     style: AppTypography.textTheme.titleLarge?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w800,
@@ -103,7 +109,7 @@ class LoginPage extends StatelessWidget {
               
               // Welcome Text
               Text(
-                'Selamat Datang di\nCoreFit',
+                _isRegisterMode ? 'Buat Akun\nCoreBusiness' : 'Selamat Datang di\nCoreBusiness',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   color: AppColors.onBackground,
@@ -112,10 +118,12 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              
+
               // Subtitle Text
               Text(
-                'Mulai perjalanan sehatmu dan capai\ntarget kebugaran dengan presisi.',
+                _isRegisterMode
+                    ? 'Daftar sekarang untuk memulai perjalanan\nkebugaran dan keuangan Anda.'
+                    : 'Mulai perjalanan sehatmu dan capai\ntarget kebugaran dengan presisi.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
                   color: AppColors.onSurfaceVariant,
@@ -144,7 +152,9 @@ class LoginPage extends StatelessWidget {
                       onPressed: isLoading
                           ? null
                           : () {
-                              context.read<AuthBloc>().add(const AuthGoogleSignInRequested());
+                              context.read<AuthBloc>().add(
+                                AuthGoogleSignInRequested(isRegister: _isRegisterMode),
+                              );
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -177,7 +187,7 @@ class LoginPage extends StatelessWidget {
                                 ),
                                 const SizedBox(width: AppSpacing.sm),
                                 Text(
-                                  'Masuk dengan Google',
+                                  _isRegisterMode ? 'Daftar dengan Google' : 'Masuk dengan Google',
                                   style: AppTypography.textTheme.labelLarge?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -191,7 +201,36 @@ class LoginPage extends StatelessWidget {
               ),
               
               const SizedBox(height: AppSpacing.xl),
-              
+
+              // Mode Toggle
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?',
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isRegisterMode = !_isRegisterMode;
+                      });
+                    },
+                    child: Text(
+                      _isRegisterMode ? 'Masuk' : 'Daftar',
+                      style: AppTypography.textTheme.labelLarge?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
               // Terms & Conditions Footer
               RichText(
                 textAlign: TextAlign.center,
@@ -208,7 +247,6 @@ class LoginPage extends StatelessWidget {
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
-                      recognizer: TapGestureRecognizer()..onTap = () {},
                     ),
                     const TextSpan(text: '\nserta '),
                     TextSpan(
@@ -217,7 +255,6 @@ class LoginPage extends StatelessWidget {
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
-                      recognizer: TapGestureRecognizer()..onTap = () {},
                     ),
                     const TextSpan(text: ' kami.'),
                   ],
