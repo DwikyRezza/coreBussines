@@ -7,44 +7,33 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/core_app_bar.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
+import '../bloc/analytics_bloc.dart';
+import '../../../../core/di/service_locator.dart';
 
 class AnalyticsPage extends StatelessWidget {
   const AnalyticsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => sl<AnalyticsBloc>()..add(const AnalyticsLoadRequested()),
+      child: const _AnalyticsView(),
+    );
+  }
+}
+
+class _AnalyticsView extends StatelessWidget {
+  const _AnalyticsView();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
-              backgroundColor: AppColors.surfaceContainer,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        elevation: 0,
-        backgroundColor: AppColors.background,
-      ),
+      appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(
@@ -88,21 +77,39 @@ class AnalyticsPage extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
 
-            // Summary Cards
-            _SummaryCard(
-              title: 'Omzet Bulan Ini',
-              amount: 'Rp 42.500.000',
-              trend: '12%',
-              isPositiveTrend: true,
-              color: AppColors.primary,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SummaryCard(
-              title: 'Total Pengeluaran',
-              amount: 'Rp 18.230.000',
-              trend: '5%',
-              isPositiveTrend: false,
-              color: const Color(0xFF993300), // Darker red matching screenshot
+            BlocBuilder<AnalyticsBloc, AnalyticsState>(
+              builder: (context, state) {
+                if (state is AnalyticsLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is AnalyticsLoaded) {
+                  final fmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+                  final summary = state.summary;
+                  
+                  return Column(
+                    children: [
+                      // Summary Cards
+                      _SummaryCard(
+                        title: 'Omzet Bulan Ini',
+                        amount: fmt.format(summary.totalIncome),
+                        trend: '${summary.changePercent.toStringAsFixed(1)}%',
+                        isPositiveTrend: summary.changePercent >= 0,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _SummaryCard(
+                        title: 'Total Pengeluaran',
+                        amount: fmt.format(summary.totalExpense),
+                        trend: '-', // Can compute expense trend later
+                        isPositiveTrend: false,
+                        color: const Color(0xFF993300), // Darker red matching screenshot
+                      ),
+                    ],
+                  );
+                } else if (state is AnalyticsError) {
+                  return Center(child: Text(state.message));
+                }
+                return const SizedBox.shrink();
+              },
             ),
             const SizedBox(height: AppSpacing.xl),
 

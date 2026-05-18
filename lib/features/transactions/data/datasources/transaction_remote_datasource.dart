@@ -1,15 +1,26 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/transaction_detail_model.dart';
 import '../../domain/entities/transaction_entities.dart';
-import '../../../home/data/models/home_models.dart'; // TransactionModel is here
-import 'transaction_local_datasource.dart';
+import '../../../home/data/models/home_models.dart';
+import '../../../../core/storage/local_storage_service.dart';
 
-// Actually, let's define TransactionRemoteDataSourceImpl that implements TransactionLocalDataSource (we'll rename the abstract class later if needed, or just implement it for now so we can hot-swap it).
+abstract class TransactionRemoteDataSource {
+  Future<List<TransactionModel>> getFilteredTransactions(TransactionFilter filter);
+  Future<TransactionDetailModel> getTransactionDetail(String id);
+  Future<void> addTransaction(TransactionModel transaction);
+  Future<void> deleteTransaction(String id);
+  Future<List<TransactionModel>> getRecentTransactions({int limit = 5});
+}
 
-class TransactionRemoteDataSourceImpl implements TransactionLocalDataSource {
+class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   final SupabaseClient _supabase;
+  final LocalStorageService _localStorage;
 
-  TransactionRemoteDataSourceImpl({required SupabaseClient supabase}) : _supabase = supabase;
+  TransactionRemoteDataSourceImpl({
+    required SupabaseClient supabase,
+    required LocalStorageService localStorage,
+  })  : _supabase = supabase,
+        _localStorage = localStorage;
 
   @override
   Future<List<TransactionModel>> getFilteredTransactions(TransactionFilter filter) async {
@@ -100,14 +111,20 @@ class TransactionRemoteDataSourceImpl implements TransactionLocalDataSource {
   @override
   Future<void> addTransaction(TransactionModel transaction) async {
     // 1. Get the current user's business ID and default wallet and category
-    // Since we need business_id to insert, we can fetch it via RPC or querying businesses
-    final businessRes = await _supabase.from('business_members')
-        .select('business_id')
-        .eq('user_id', _supabase.auth.currentUser!.id)
-        .limit(1)
-        .single();
-    
-    final businessId = businessRes['business_id'];
+    // Try to get from local storage first (ready for multi-business updates!)
+    String? businessId = _localStorage.activeBusinessId;
+
+    if (businessId == null) {
+      final businessRes = await _supabase.from('business_members')
+          .select('business_id')
+          .eq('user_id', _supabase.auth.currentUser!.id)
+          .limit(1)
+          .single();
+      
+      businessId = businessRes['business_id'] as String;
+      // Cache it for future offline/online operations
+      await _localStorage.setActiveBusinessId(businessId);
+    }
 
     // For simplicity, we just pick the first wallet and a matching category
     final walletRes = await _supabase.from('wallets').select('id').eq('business_id', businessId).limit(1).single();

@@ -4,182 +4,260 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/core_app_bar.dart';
+import '../../../../core/storage/local_storage_service.dart';
+import '../../../../core/di/service_locator.dart';
 
-class WalletsPage extends StatelessWidget {
+class WalletsPage extends StatefulWidget {
   const WalletsPage({super.key});
+
+  @override
+  State<WalletsPage> createState() => _WalletsPageState();
+}
+
+class _WalletsPageState extends State<WalletsPage> {
+  final _supabase = Supabase.instance.client;
+  final _localStorage = sl<LocalStorageService>();
+  final _fmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+  bool _isLoading = true;
+  double _totalNetWorth = 0;
+  List<Map<String, dynamic>> _wallets = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallets();
+  }
+
+  Future<void> _loadWallets() async {
+    try {
+      String? businessId = _localStorage.activeBusinessId;
+      if (businessId == null) {
+        final bRes = await _supabase
+            .from('business_members')
+            .select('business_id')
+            .eq('user_id', _supabase.auth.currentUser!.id)
+            .limit(1)
+            .single();
+        businessId = bRes['business_id'] as String;
+      }
+
+      final res = await _supabase
+          .from('wallets')
+          .select('id, name, type, balance')
+          .eq('business_id', businessId);
+
+      final list = res as List<dynamic>;
+      double total = 0;
+      final walletList = <Map<String, dynamic>>[];
+      for (final w in list) {
+        final balance = (w['balance'] as num?)?.toDouble() ?? 0.0;
+        total += balance;
+        walletList.add({
+          'name': w['name'] ?? 'Wallet',
+          'type': w['type'] ?? 'cash',
+          'balance': balance,
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalNetWorth = total;
+          _wallets = walletList;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  IconData _iconForType(String type) {
+    switch (type.toLowerCase()) {
+      case 'bank':
+        return Icons.account_balance_rounded;
+      case 'ewallet':
+      case 'e-wallet':
+        return Icons.account_balance_wallet_rounded;
+      case 'cash':
+      default:
+        return Icons.payments_rounded;
+    }
+  }
+
+  Color _colorForType(String type) {
+    switch (type.toLowerCase()) {
+      case 'bank':
+        return const Color(0xFF2962FF);
+      case 'ewallet':
+      case 'e-wallet':
+        return const Color(0xFF1A202C);
+      case 'cash':
+      default:
+        return const Color(0xFF1A202C);
+    }
+  }
+
+  Color _bgColorForType(String type) {
+    switch (type.toLowerCase()) {
+      case 'bank':
+        return const Color(0xFFE3F2FD);
+      case 'ewallet':
+      case 'e-wallet':
+        return const Color(0xFFEDF2F7);
+      case 'cash':
+      default:
+        return const Color(0xFFEDF2F7);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
-              backgroundColor: AppColors.surfaceContainer,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-        child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.xl),
-            
-            // Total Net Worth Header
-            Text(
-              'TOTAL NET WORTH',
-              style: AppTypography.textTheme.labelMedium?.copyWith(
-                color: const Color(0xFF4A5568),
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    '\$',
-                    style: AppTypography.textTheme.headlineMedium?.copyWith(
-                      color: const Color(0xFF718096),
-                      fontWeight: FontWeight.w700,
+      backgroundColor: AppColors.background,
+      appBar: const CoreAppBar(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadWallets,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Total Net Worth Header
+                    Text(
+                      'TOTAL NET WORTH',
+                      style: AppTypography.textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFF4A5568),
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
-                ),
-                Text(
-                  '124,500.00',
-                  style: AppTypography.textTheme.displayMedium?.copyWith(
-                    color: const Color(0xFF1A202C),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+                    Text(
+                      _fmt.format(_totalNetWorth),
+                      style: AppTypography.textTheme.displaySmall?.copyWith(
+                        color: const Color(0xFF1A202C),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
-            // Action Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    backgroundColor: const Color(0xFF0D47A1), // Blue
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.add, color: Colors.white, size: 18),
-                      const SizedBox(width: 8),
-                      Text('Add Funds', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    backgroundColor: const Color(0xFFE3F2FD), // Light Blue
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.swap_horiz_rounded, color: Color(0xFF0D47A1), size: 18),
-                      const SizedBox(width: 8),
-                      Text('Transfer', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 48),
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            backgroundColor: const Color(0xFF0D47A1),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.add, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Text('Tambah Dana', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            backgroundColor: const Color(0xFFE3F2FD),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.swap_horiz_rounded, color: Color(0xFF0D47A1), size: 18),
+                              const SizedBox(width: 8),
+                              Text('Transfer', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 48),
 
-            // Your Wallets Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Your Wallets',
-                  style: AppTypography.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1A202C),
-                  ),
-                ),
-                Text(
-                  'Manage',
-                  style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: const Color(0xFF2962FF),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                    // Your Wallets Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Dompet Anda',
+                          style: AppTypography.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1A202C),
+                          ),
+                        ),
+                        Text(
+                          'Kelola',
+                          style: AppTypography.textTheme.labelMedium?.copyWith(
+                            color: const Color(0xFF2962FF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
-            // Wallet Cards
-            _WalletCard(
-              icon: Icons.account_balance_rounded,
-              iconColor: const Color(0xFF2962FF),
-              iconBg: const Color(0xFFE3F2FD),
-              title: 'Bank Accounts',
-              amount: '\$118,250.00',
-              subtitle: '2 Connected Accounts',
-              dotColor: const Color(0xFF2962FF),
+                    if (_wallets.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.account_balance_wallet_outlined,
+                                size: 48, color: AppColors.onSurfaceVariant.withOpacity(0.4)),
+                            const SizedBox(height: 12),
+                            Text('Belum ada dompet',
+                                style: AppTypography.textTheme.bodyMedium
+                                    ?.copyWith(color: AppColors.onSurfaceVariant)),
+                          ],
+                        ),
+                      )
+                    else
+                      ..._wallets.map((w) {
+                        final type = w['type'] as String;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _WalletCard(
+                            icon: _iconForType(type),
+                            iconColor: _colorForType(type),
+                            iconBg: _bgColorForType(type),
+                            title: w['name'] as String,
+                            amount: _fmt.format(w['balance'] as double),
+                            subtitle: type.toUpperCase(),
+                            dotColor: _colorForType(type),
+                          ),
+                        );
+                      }),
+
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            _WalletCard(
-              icon: Icons.account_balance_wallet_rounded,
-              iconColor: const Color(0xFF1A202C),
-              iconBg: const Color(0xFFEDF2F7),
-              title: 'E-Wallets',
-              amount: '\$5,400.00',
-              subtitle: '3 Active Wallets',
-              dotColor: const Color(0xFFC53030), // Red
-            ),
-            const SizedBox(height: 16),
-            _WalletCard(
-              icon: Icons.payments_rounded,
-              iconColor: const Color(0xFF1A202C),
-              iconBg: const Color(0xFFEDF2F7),
-              title: 'Cash',
-              amount: '\$850.00',
-              subtitle: 'Physical Currency',
-              dotColor: const Color(0xFF718096), // Grey
-            ),
-            const SizedBox(height: 100), // Bottom padding
-          ],
-        ),
-      ),
     );
   }
 }

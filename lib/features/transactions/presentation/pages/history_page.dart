@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/widgets/core_app_bar.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -17,35 +18,7 @@ class HistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
-              backgroundColor: AppColors.surfaceContainer,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        elevation: 0,
-        backgroundColor: AppColors.background,
-      ),
+      appBar: const CoreAppBar(),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(

@@ -6,6 +6,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/analytics_entities.dart';
+import '../../../transactions/domain/entities/transaction_entities.dart';
+import '../../../transactions/domain/repositories/transaction_repository.dart';
+import '../../../home/domain/entities/home_entities.dart';
 
 // ─── Events ──────────────────────────────────────────────────
 abstract class AnalyticsEvent extends Equatable {
@@ -63,7 +66,11 @@ class AnalyticsError extends AnalyticsState {
 
 // ─── BLoC ────────────────────────────────────────────────────
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
-  AnalyticsBloc() : super(const AnalyticsInitial()) {
+  final TransactionRepository _transactionRepository;
+
+  AnalyticsBloc({required TransactionRepository transactionRepository}) 
+      : _transactionRepository = transactionRepository,
+        super(const AnalyticsInitial()) {
     on<AnalyticsLoadRequested>(_onLoadRequested);
     on<AnalyticsTabChanged>(_onTabChanged);
   }
@@ -73,11 +80,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     Emitter<AnalyticsState> emit,
   ) async {
     emit(const AnalyticsLoading());
-    await Future.delayed(const Duration(milliseconds: 500));
-    emit(AnalyticsLoaded(
-      summary: _mockSummary(),
-      selectedTabIndex: event.tabIndex,
-    ));
+    await _fetchAndEmitSummary(event.tabIndex, emit);
   }
 
   Future<void> _onTabChanged(
@@ -88,45 +91,101 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       emit((state as AnalyticsLoaded).copyWith(selectedTabIndex: event.tabIndex));
     }
     emit(const AnalyticsLoading());
-    await Future.delayed(const Duration(milliseconds: 300));
-    emit(AnalyticsLoaded(
-      summary: _mockSummary(),
-      selectedTabIndex: event.tabIndex,
-    ));
+    await _fetchAndEmitSummary(event.tabIndex, emit);
   }
 
-  CashFlowSummary _mockSummary() {
-    final now = DateTime.now();
+  Future<void> _fetchAndEmitSummary(int tabIndex, Emitter<AnalyticsState> emit) async {
+    // Determine the date range based on tabIndex
+    DateRangeFilter filterType;
+    switch (tabIndex) {
+      case 0:
+        filterType = DateRangeFilter.thisWeek;
+        break;
+      case 1:
+        filterType = DateRangeFilter.thisMonth;
+        break;
+      case 2:
+      default:
+        filterType = DateRangeFilter.thisYear;
+        break;
+    }
+
+    final result = await _transactionRepository.getFilteredTransactions(
+        TransactionFilter(dateRange: filterType));
+
+    result.fold(
+      (failure) => emit(AnalyticsError(failure.message)),
+      (transactions) {
+        final summary = _generateSummary(transactions, filterType);
+        emit(AnalyticsLoaded(
+          summary: summary,
+          selectedTabIndex: tabIndex,
+        ));
+      },
+    );
+  }
+
+  CashFlowSummary _generateSummary(List<Transaction> transactions, DateRangeFilter filterType) {
+    double totalIncome = 0;
+    double totalExpense = 0;
+    
+    // Calculate totals
+    for (var txn in transactions) {
+      if (txn.isIncome) {
+        totalIncome += txn.amount;
+      } else {
+        totalExpense += txn.amount;
+      }
+    }
+    
+    final totalBalance = totalIncome - totalExpense;
+    final changeAmount = totalBalance; // Simplified
+    final changePercent = totalIncome > 0 ? (totalBalance / totalIncome) * 100 : 0.0;
+
+    // Group transactions by date
+    final Map<DateTime, CashFlowPoint> pointsMap = {};
+    for (var txn in transactions) {
+      final date = DateTime(txn.dateTime.year, txn.dateTime.month, txn.dateTime.day);
+      if (!pointsMap.containsKey(date)) {
+        pointsMap[date] = CashFlowPoint(date: date, income: 0, expense: 0);
+      }
+      final current = pointsMap[date]!;
+      pointsMap[date] = CashFlowPoint(
+        date: date,
+        income: current.income + (txn.isIncome ? txn.amount : 0),
+        expense: current.expense + (!txn.isIncome ? txn.amount : 0),
+      );
+    }
+
+    final trendPoints = pointsMap.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+
+    // Daily flows
+    final dailyFlows = trendPoints.map((p) {
+      final isSurplus = p.income > p.expense;
+      final netAmount = (p.income - p.expense).abs();
+      // simplified transaction count
+      final count = transactions.where((t) => 
+        t.dateTime.year == p.date.year && 
+        t.dateTime.month == p.date.month && 
+        t.dateTime.day == p.date.day).length;
+        
+      return DailyFlow(
+        date: p.date,
+        dayLabel: p.date.weekday.toString(), // e.g., '1' for Monday
+        transactionCount: count,
+        netAmount: netAmount,
+        isSurplus: isSurplus,
+      );
+    }).toList();
+
     return CashFlowSummary(
-      totalBalance: 12450000,
-      changeAmount: 12450000,
-      changePercent: 14.2,
-      trendPoints: List.generate(30, (i) {
-        final date = DateTime(now.year, 3, i + 1);
-        final income = 400000 + (i * 15000) + (i % 5 == 0 ? 500000 : 0);
-        final expense = 250000 + (i * 8000) + (i % 7 == 0 ? 200000 : 0);
-        return CashFlowPoint(
-          date: date, income: income.toDouble(), expense: expense.toDouble(),
-        );
-      }),
-      dailyFlows: [
-        DailyFlow(
-          date: DateTime(2024, 3, 25), dayLabel: 'S',
-          transactionCount: 3, netAmount: 1200000, isSurplus: true,
-        ),
-        DailyFlow(
-          date: DateTime(2024, 3, 26), dayLabel: 'S',
-          transactionCount: 5, netAmount: 450000, isSurplus: false,
-        ),
-        DailyFlow(
-          date: DateTime(2024, 3, 27), dayLabel: 'R',
-          transactionCount: 2, netAmount: 2800000, isSurplus: true,
-        ),
-        DailyFlow(
-          date: DateTime(2024, 3, 28), dayLabel: 'K',
-          transactionCount: 8, netAmount: 1120000, isSurplus: false,
-        ),
-      ],
+      totalBalance: totalBalance,
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+      changeAmount: changeAmount,
+      changePercent: changePercent,
+      trendPoints: trendPoints,
+      dailyFlows: dailyFlows,
     );
   }
 }

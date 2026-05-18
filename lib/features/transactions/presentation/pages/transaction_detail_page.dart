@@ -4,10 +4,10 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/core_app_bar.dart';
 
 class TransactionDetailPage extends StatelessWidget {
   final String transactionId;
@@ -18,25 +18,7 @@ class TransactionDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
-              backgroundColor: AppColors.surfaceContainer,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
+      appBar: CoreAppBar(
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
@@ -44,12 +26,6 @@ class TransactionDetailPage extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
-        elevation: 0,
-        backgroundColor: AppColors.background,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primary),
-          onPressed: () => context.pop(),
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),

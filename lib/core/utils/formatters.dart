@@ -4,13 +4,27 @@
 // ============================================================
 
 import 'package:intl/intl.dart';
+import '../di/service_locator.dart';
+import '../storage/local_storage_service.dart';
 
 abstract class AppFormatter {
-  /// Format to Rp currency: "Rp 1.200.000"
+  static String get _currencySymbol {
+    try {
+      final currency = sl<LocalStorageService>().activeCurrency;
+      return currency == 'USD' ? '\$ ' : 'Rp ';
+    } catch (_) {
+      return 'Rp ';
+    }
+  }
+
+  /// Format to currency based on settings: "Rp 1.200.000" or "$ 120,000"
   static String currency(double amount, {bool showSign = false}) {
+    final symbol = _currencySymbol;
+    final locale = symbol.contains('\$') ? 'en_US' : 'id_ID';
+    
     final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
+      locale: locale,
+      symbol: symbol,
       decimalDigits: 0,
     );
     final formatted = formatter.format(amount.abs());
@@ -22,12 +36,21 @@ abstract class AppFormatter {
   static String compactCurrency(double amount) {
     final abs = amount.abs();
     final sign = amount >= 0 ? '+' : '-';
+    final symbol = _currencySymbol;
+    final isUsd = symbol.contains('\$');
+    
     if (abs >= 1000000) {
-      return '${sign}Rp ${(abs / 1000000).toStringAsFixed(1).replaceAll('.', ',')}jt';
+      final val = abs / 1000000;
+      final formattedVal = isUsd ? val.toStringAsFixed(1) : val.toStringAsFixed(1).replaceAll('.', ',');
+      final suffix = isUsd ? 'M' : 'jt';
+      return '$sign$symbol$formattedVal$suffix';
     } else if (abs >= 1000) {
-      return '${sign}Rp ${(abs / 1000).toStringAsFixed(0)}rb';
+      final val = abs / 1000;
+      final formattedVal = val.toStringAsFixed(0);
+      final suffix = isUsd ? 'k' : 'rb';
+      return '$sign$symbol$formattedVal$suffix';
     }
-    return '${sign}Rp ${abs.toStringAsFixed(0)}';
+    return '$sign$symbol${abs.toStringAsFixed(0)}';
   }
 
   /// Date: "Senin, 24 Mei 2024"

@@ -1,5 +1,5 @@
 // ============================================================
-// FEATURE: Auth — Remote Data Source (Mock / Google Sign-In)
+// FEATURE: Auth — Remote Data Source (Google Sign-In)
 // lib/features/auth/data/datasources/auth_remote_datasource.dart
 // ============================================================
 

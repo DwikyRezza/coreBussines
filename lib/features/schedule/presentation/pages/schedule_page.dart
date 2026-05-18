@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/core_app_bar.dart';
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -15,35 +16,7 @@ class SchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'), // Male avatar
-              backgroundColor: AppColors.surfaceContainer,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
+      appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,8 +316,8 @@ class _TimelineCard extends StatelessWidget {
                             height: 30,
                             child: Stack(
                               children: [
-                                Positioned(left: 0, child: CircleAvatar(radius: 15, backgroundImage: const NetworkImage('https://i.pravatar.cc/100?img=1'))),
-                                Positioned(left: 20, child: CircleAvatar(radius: 15, backgroundImage: const NetworkImage('https://i.pravatar.cc/100?img=2'))),
+                                Positioned(left: 0, child: CircleAvatar(radius: 15, backgroundColor: const Color(0xFF0D47A1), child: Text('A', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
+                                Positioned(left: 20, child: CircleAvatar(radius: 15, backgroundColor: const Color(0xFF2962FF), child: Text('B', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
                                 Positioned(
                                   left: 40,
                                   child: CircleAvatar(

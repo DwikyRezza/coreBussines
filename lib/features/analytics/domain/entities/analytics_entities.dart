@@ -41,6 +41,8 @@ class DailyFlow extends Equatable {
 
 class CashFlowSummary extends Equatable {
   final double totalBalance;
+  final double totalIncome;
+  final double totalExpense;
   final double changeAmount;
   final double changePercent;
   final List<CashFlowPoint> trendPoints;
@@ -48,6 +50,8 @@ class CashFlowSummary extends Equatable {
 
   const CashFlowSummary({
     required this.totalBalance,
+    required this.totalIncome,
+    required this.totalExpense,
     required this.changeAmount,
     required this.changePercent,
     required this.trendPoints,
@@ -56,6 +60,6 @@ class CashFlowSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalBalance, changeAmount, changePercent, trendPoints, dailyFlows
+        totalBalance, totalIncome, totalExpense, changeAmount, changePercent, trendPoints, dailyFlows
       ];
 }

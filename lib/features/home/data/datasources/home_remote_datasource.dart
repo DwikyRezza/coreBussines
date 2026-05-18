@@ -1,28 +1,38 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/home_models.dart'; // TransactionModel is here
-import 'home_mock_datasource.dart'; // For the HomeDataSource interface
+import 'home_datasource.dart'; // For the HomeDataSource interface
 import '../../../auth/data/repositories/auth_repository_impl.dart';
+
+import '../../../../core/storage/local_storage_service.dart';
 
 class HomeRemoteDataSourceImpl implements HomeDataSource {
   final SupabaseClient _supabase;
   final AuthRepositoryImpl _authRepository;
+  final LocalStorageService _localStorage;
 
   HomeRemoteDataSourceImpl({
     required SupabaseClient supabase,
     required AuthRepositoryImpl authRepository,
+    required LocalStorageService localStorage,
   })  : _supabase = supabase,
-        _authRepository = authRepository;
+        _authRepository = authRepository,
+        _localStorage = localStorage;
 
   @override
   Future<BalanceSummaryModel> getBalanceSummary() async {
     // We need the user's business ID first
-    final businessRes = await _supabase.from('business_members')
-        .select('business_id')
-        .eq('user_id', _supabase.auth.currentUser!.id)
-        .limit(1)
-        .single();
-    
-    final businessId = businessRes['business_id'];
+    String? businessId = _localStorage.activeBusinessId;
+
+    if (businessId == null) {
+      final businessRes = await _supabase.from('business_members')
+          .select('business_id')
+          .eq('user_id', _supabase.auth.currentUser!.id)
+          .limit(1)
+          .single();
+      
+      businessId = businessRes['business_id'] as String;
+      await _localStorage.setActiveBusinessId(businessId);
+    }
 
     // Call the RPC get_dashboard_summary
     final response = await _supabase.rpc('get_dashboard_summary', params: {

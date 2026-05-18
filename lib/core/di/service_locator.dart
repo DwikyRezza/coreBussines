@@ -10,6 +10,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../storage/local_storage_service.dart';
 
 // Auth
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -19,10 +20,13 @@ import '../../features/auth/domain/usecases/sign_in_with_google.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../features/home/data/datasources/home_remote_datasource.dart';
-import '../../features/home/data/datasources/home_mock_datasource.dart'; // For HomeDataSource
+import '../../features/home/data/datasources/home_datasource.dart'; // For HomeDataSource
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
+
+// Analytics
+import '../../features/analytics/presentation/bloc/analytics_bloc.dart';
 
 // Transactions
 import '../../features/transactions/data/datasources/transaction_local_datasource.dart';
@@ -51,6 +55,9 @@ Future<void> initDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
 
+  // Storage Service
+  sl.registerLazySingleton<LocalStorageService>(() => LocalStorageService(sl()));
+
   // ─── Auth Feature ─────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(googleSignIn: sl(), prefs: sl()),
@@ -75,11 +82,22 @@ Future<void> initDependencies() async {
 
   // ─── Transactions Feature ─────────────────────────────────
   sl.registerLazySingleton<TransactionLocalDataSource>(
-    () => TransactionRemoteDataSourceImpl(supabase: sl()),
+    () => TransactionLocalDataSourceImpl(prefs: sl()),
+  );
+
+  sl.registerLazySingleton<TransactionRemoteDataSource>(
+    () => TransactionRemoteDataSourceImpl(
+      supabase: sl(),
+      localStorage: sl(),
+    ),
   );
 
   sl.registerLazySingleton<TransactionRepository>(
-    () => TransactionRepositoryImpl(sl()),
+    () => TransactionRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+      localStorage: sl(),
+    ),
   );
 
   sl.registerLazySingleton(() => AddTransaction(sl()));
@@ -99,15 +117,21 @@ Future<void> initDependencies() async {
     () => HomeRemoteDataSourceImpl(
       supabase: sl(),
       authRepository: sl<AuthRepositoryImpl>(),
+      localStorage: sl(),
     ),
   );
 
   sl.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(sl<HomeDataSource>()),
+    () => HomeRepositoryImpl(sl<HomeDataSource>(), sl()),
   );
 
   // Factory: fresh HomeBloc per page.
   sl.registerFactory(
     () => HomeBloc(repository: sl()),
+  );
+
+  // ─── Analytics Feature ────────────────────────────────────
+  sl.registerFactory(
+    () => AnalyticsBloc(transactionRepository: sl()),
   );
 }

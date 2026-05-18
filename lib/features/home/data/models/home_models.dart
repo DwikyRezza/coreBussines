@@ -23,6 +23,16 @@ class BalanceSummaryModel extends BalanceSummary {
       userPhotoUrl: json['user_photo_url'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total_balance': totalBalance,
+      'monthly_change': monthlyChange,
+      'monthly_change_percent': monthlyChangePercent,
+      'user_name': userName,
+      'user_photo_url': userPhotoUrl,
+    };
+  }
 }
 
 class TransactionModel extends Transaction {
@@ -74,5 +84,13 @@ class InsightCardModel extends InsightCard {
       message: json['message'] as String,
       type: json['type'] as String,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'message': message,
+      'type': type,
+    };
   }
 }

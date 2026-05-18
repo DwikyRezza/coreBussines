@@ -6,6 +6,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../auth/data/repositories/auth_repository_impl.dart';
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});
@@ -47,9 +50,20 @@ class EditProfilePage extends StatelessWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const CircleAvatar(
-                          radius: 56,
-                          backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'), // Avatar example
+                        child: Builder(
+                          builder: (context) {
+                            final user = sl<AuthRepositoryImpl>().cachedUser;
+                            final avatarUrl = user?.photoUrl;
+                            final initial = (user?.name ?? 'U')[0].toUpperCase();
+                            return CircleAvatar(
+                              radius: 56,
+                              backgroundColor: AppColors.primaryContainer,
+                              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                              child: avatarUrl == null
+                                  ? Text(initial, style: AppTypography.textTheme.displaySmall?.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700))
+                                  : null,
+                            );
+                          },
                         ),
                       ),
                       Positioned(
@@ -82,13 +96,13 @@ class EditProfilePage extends StatelessWidget {
             // Form Fields
             _FormField(
               label: 'Nama Lengkap',
-              initialValue: 'Alexandra Smith',
+              initialValue: sl<AuthRepositoryImpl>().cachedUser?.name ?? '',
               icon: Icons.person_outline_rounded,
             ),
             const SizedBox(height: 16),
             _FormField(
               label: 'Alamat Email',
-              initialValue: 'alexandra.smith@example.com',
+              initialValue: sl<AuthRepositoryImpl>().cachedUser?.email ?? '',
               icon: Icons.mail_outline_rounded,
               keyboardType: TextInputType.emailAddress,
             ),
