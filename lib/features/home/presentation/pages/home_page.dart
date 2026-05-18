@@ -64,9 +64,11 @@ class _HomeContent extends StatelessWidget {
       color: AppColors.primary,
       backgroundColor: AppColors.surface,
       onRefresh: () async {
-        context.read<HomeBloc>().add(const HomeRefreshRequested());
-        // Wait for state to update
-        await Future.delayed(const Duration(milliseconds: 800));
+        final bloc = context.read<HomeBloc>();
+        bloc.add(const HomeRefreshRequested());
+        // Tunggu hingga state berubah menjadi Loaded atau Error
+        await bloc.stream.firstWhere(
+            (state) => state is HomeLoaded || state is HomeError);
       },
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -78,16 +80,8 @@ class _HomeContent extends StatelessWidget {
             backgroundColor: AppColors.background,
             elevation: 0,
             scrolledUnderElevation: 0,
-            expandedHeight: 72,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.fromLTRB(
-                AppSpacing.pagePadding,
-                0,
-                AppSpacing.pagePadding,
-                12,
-              ),
-              title: _HomeAppBar(state: state),
-            ),
+            titleSpacing: AppSpacing.pagePadding,
+            title: _HomeAppBar(state: state),
           ),
 
           SliverList(

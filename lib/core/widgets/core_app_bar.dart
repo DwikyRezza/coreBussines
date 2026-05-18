@@ -31,14 +31,14 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: 14,
             backgroundColor: AppColors.primaryContainer,
             backgroundImage:
                 avatarUrl != null ? NetworkImage(avatarUrl) : null,
             child: avatarUrl == null
                 ? Text(
                     initial,
-                    style: AppTypography.textTheme.labelLarge?.copyWith(
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -48,7 +48,7 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: AppSpacing.sm),
           Text(
             'CoreBusiness',
-            style: AppTypography.textTheme.titleLarge?.copyWith(
+            style: AppTypography.textTheme.titleMedium?.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w800,
             ),
