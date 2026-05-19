@@ -10,6 +10,8 @@ import '../../domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
 import '../../domain/usecases/add_transaction.dart';
 import '../../domain/usecases/delete_transaction.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../data/datasources/ai_receipt_scanner.dart';
 
 // ─── Events ───────────────────────────────────────────────────
 abstract class TransactionEvent extends Equatable {
@@ -63,6 +65,14 @@ class TransactionReset extends TransactionEvent {
   const TransactionReset();
 }
 
+class TransactionScanRequested extends TransactionEvent {
+  final XFile photo;
+  const TransactionScanRequested(this.photo);
+
+  @override
+  List<Object?> get props => [photo.path];
+}
+
 // ─── States ───────────────────────────────────────────────────
 abstract class TransactionState extends Equatable {
   const TransactionState();
@@ -98,6 +108,13 @@ class TransactionDeleteSuccess extends TransactionState {
   const TransactionDeleteSuccess();
 }
 
+class TransactionScanSuccess extends TransactionState {
+  final Transaction scannedTransaction;
+  const TransactionScanSuccess(this.scannedTransaction);
+  @override
+  List<Object?> get props => [scannedTransaction];
+}
+
 class TransactionError extends TransactionState {
   final String message;
   const TransactionError(this.message);
@@ -106,23 +123,65 @@ class TransactionError extends TransactionState {
 }
 
 // ─── BLoC ─────────────────────────────────────────────────────
+
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository _repository;
   final AddTransaction? _addTransaction;
   final DeleteTransaction? _deleteUseCase;
+  final AiReceiptScanner? _scanner;
 
   TransactionBloc({
     required TransactionRepository repository,
     AddTransaction? addTransaction,
     DeleteTransaction? deleteTransaction,
+    AiReceiptScanner? scanner,
   })  : _repository = repository,
         _addTransaction = addTransaction,
         _deleteUseCase = deleteTransaction,
+        _scanner = scanner,
         super(const TransactionInitial()) {
     on<TransactionDetailRequested>(_onDetailRequested);
     on<TransactionDeleteRequested>(_onDeleteRequested);
     on<TransactionSubmitRequested>(_onSubmitRequested);
     on<TransactionReset>(_onReset);
+    on<TransactionScanRequested>(_onScanRequested);
+  }
+
+  Future<void> _onScanRequested(
+    TransactionScanRequested event,
+    Emitter<TransactionState> emit,
+  ) async {
+    if (_scanner == null) {
+      emit(const TransactionError('AI Scanner belum dikonfigurasi.'));
+      return;
+    }
+    emit(const TransactionLoading());
+    try {
+      final result = await _scanner.scanReceipt(event.photo);
+      
+      final scannedTxn = Transaction(
+        id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
+        title: result['title'] ?? 'Scan Struk Baru',
+        amount: (result['amount'] as num?)?.toDouble() ?? 0.0,
+        isIncome: result['isIncome'] ?? false,
+        category: result['category'] ?? 'Lainnya',
+        categoryIcon: 'bill', // Default icon
+        dateTime: DateTime.now(),
+      );
+      
+      // Auto save the scanned transaction directly (or emit success to open form pre-filled)
+      // Based on user request: "langsung mengscan struk dengan kamera belakang, lalu ai akan menyimpan hasil scan ke database"
+      final saveResult = _addTransaction != null
+          ? await _addTransaction.call(AddTransactionParams(transaction: scannedTxn))
+          : await _repository.addTransaction(scannedTxn);
+
+      saveResult.fold(
+        (f) => emit(TransactionError(f.message)),
+        (_) => emit(TransactionScanSuccess(scannedTxn)),
+      );
+    } catch (e) {
+      emit(TransactionError('Gagal memproses struk: $e'));
+    }
   }
 
   Future<void> _onDetailRequested(

@@ -29,6 +29,7 @@ import '../../features/home/presentation/bloc/home_bloc.dart';
 import '../../features/analytics/presentation/bloc/analytics_bloc.dart';
 
 // Transactions
+import '../../features/transactions/data/datasources/ai_receipt_scanner.dart';
 import '../../features/transactions/data/datasources/transaction_local_datasource.dart';
 import '../../features/transactions/data/datasources/transaction_remote_datasource.dart';
 import '../../features/transactions/data/repositories/transaction_repository_impl.dart';
@@ -81,6 +82,9 @@ Future<void> initDependencies() async {
   );
 
   // ─── Transactions Feature ─────────────────────────────────
+  sl.registerLazySingleton<AiReceiptScanner>(
+    () => AiReceiptScanner(),
+  );
   sl.registerLazySingleton<TransactionLocalDataSource>(
     () => TransactionLocalDataSourceImpl(prefs: sl()),
   );
@@ -103,12 +107,12 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AddTransaction(sl()));
   sl.registerLazySingleton(() => DeleteTransaction(sl()));
 
-  // Factory: fresh TransactionBloc per page.
   sl.registerFactory(
     () => TransactionBloc(
       repository: sl(),
       addTransaction: sl(),
       deleteTransaction: sl(),
+      scanner: sl(),
     ),
   );
 

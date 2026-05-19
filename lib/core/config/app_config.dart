@@ -1,8 +1,11 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AppConfig {
-  static const supabaseUrl = 'https://mvjkapkiblwfyygjwuzj.supabase.co';
-  static const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12amthcGtpYmx3Znl5Z2p3dXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDczOTcsImV4cCI6MjA5MzkyMzM5N30.PxCJly2oDBggkKqWknNs2bf1kzafShF6Nm1zzcW7Rug';
-  static const googleWebClientId = '285167183652-1fq3bkgsm44painh30gfsfjk2bjf0g10.apps.googleusercontent.com';
-  static const googleAndroidClientId = '285167183652-oqjvhe205s9uoptjqfafmvd3n7cipa59.apps.googleusercontent.com';
+  static String get supabaseUrl => dotenv.env['SUPABASE_URL'] ?? '';
+  static String get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  static String get googleWebClientId => dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+  static String get googleAndroidClientId => dotenv.env['GOOGLE_ANDROID_CLIENT_ID'] ?? '';
+  static String get geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
   const AppConfig._();
 
@@ -10,7 +13,7 @@ class AppConfig {
     if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
       throw StateError(
         'Supabase belum dikonfigurasi. Tambahkan SUPABASE_URL dan '
-        'SUPABASE_ANON_KEY.',
+        'SUPABASE_ANON_KEY di file .env.',
       );
     }
   }

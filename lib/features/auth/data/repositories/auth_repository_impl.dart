@@ -5,6 +5,7 @@
 
 import 'dart:async';
 import 'package:dartz/dartz.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
@@ -24,6 +25,16 @@ class AuthRepositoryImpl implements AuthRepository {
     // On construction, check if a session is already active
     // (e.g. Google Sign-In silent sign-in restores previous session).
     _rehydrate();
+    
+    // Dengarkan perubahan state asli dari Supabase (token expired, logout dari device lain, dll)
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final session = data.session;
+      if (session == null && _cachedUser != null) {
+        // Token kedaluwarsa atau user di-logout paksa
+        _cachedUser = null;
+        _authController.add(null);
+      }
+    });
   }
 
   /// Expose cached user for synchronous router redirect checks.

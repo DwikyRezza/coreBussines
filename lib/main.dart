@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/config/app_config.dart';
 import 'core/di/service_locator.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
     ),
   );
 
+  await dotenv.load(fileName: ".env");
   AppConfig.validate();
 
   await Supabase.initialize(

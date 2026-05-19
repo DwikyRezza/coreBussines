@@ -4,140 +4,222 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../bloc/transaction_bloc.dart';
 
 class ScanReceiptIntroPage extends StatelessWidget {
   const ScanReceiptIntroPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: Color(0xFF1A202C)),
-          onPressed: () => context.pop(),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 60),
+    return BlocProvider(
+      create: (_) => sl<TransactionBloc>(),
+      child: const _ScanReceiptView(),
+    );
+  }
+}
 
-              // Hero Graphic
-              Container(
-                width: 280,
-                height: 280,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEDF2F7), // Light blue-grey background
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
+class _ScanReceiptView extends StatelessWidget {
+  const _ScanReceiptView();
+
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    final picker = ImagePicker();
+    final photo = await picker.pickImage(source: source);
+    
+    if (photo != null && context.mounted) {
+      context.read<TransactionBloc>().add(TransactionScanRequested(photo));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<TransactionBloc, TransactionState>(
+      listener: (context, state) {
+        if (state is TransactionScanSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Struk berhasil diproses dan disimpan!'),
+              backgroundColor: AppColors.income,
+            ),
+          );
+          context.pop(); // Kembali ke home/sebelumnya
+        } else if (state is TransactionError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.expense,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is TransactionLoading;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.close_rounded, color: Color(0xFF1A202C)),
+              onPressed: () => context.pop(),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Mock Image of Phone scanning receipt
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(140),
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80',
-                          fit: BoxFit.cover,
-                          width: 240,
-                          height: 240,
-                          color: Colors.white.withOpacity(0.5),
-                          colorBlendMode: BlendMode.lighten,
+                      const SizedBox(height: 60),
+
+                      // Hero Graphic
+                      Container(
+                        width: 280,
+                        height: 280,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEDF2F7), // Light blue-grey background
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Mock Image of Phone scanning receipt
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(140),
+                                child: Image.network(
+                                  'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80',
+                                  fit: BoxFit.cover,
+                                  width: 240,
+                                  height: 240,
+                                  color: Colors.white.withOpacity(0.5),
+                                  colorBlendMode: BlendMode.lighten,
+                                ),
+                              ),
+                              // Mock blue scan line over the image
+                              Container(
+                                width: 200,
+                                height: 2,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2962FF),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF2962FF).withOpacity(0.5),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      // Mock blue scan line over the image
-                      Container(
-                        width: 200,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2962FF),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF2962FF).withOpacity(0.5),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
+                      const SizedBox(height: 48),
+
+                      // Text Content
+                      Text(
+                        'Pindai Struk',
+                        style: AppTypography.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1A202C),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Ambil foto struk fisik Anda untuk mencatat pengeluaran secara otomatis menggunakan AI.',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF4A5568),
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+
+                      // Action Buttons
+                      ElevatedButton(
+                        onPressed: isLoading ? null : () => _pickImage(context, ImageSource.camera),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20),
+                            const SizedBox(width: 12),
+                            Text('Buka Kamera', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : () => _pickImage(context, ImageSource.gallery),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          backgroundColor: const Color(0xFFE2E8F0), // Light grey
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.photo_library_outlined, color: Color(0xFF0D47A1), size: 20),
+                            const SizedBox(width: 12),
+                            Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 48),
-
-              // Text Content
-              Text(
-                'Pindai Struk',
-                style: AppTypography.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A202C),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Ambil foto struk fisik Anda untuk mencatat pengeluaran secara otomatis dengan akurasi tinggi.',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.textTheme.bodyLarge?.copyWith(
-                    color: const Color(0xFF4A5568),
-                    height: 1.5,
+              
+              // Loading Overlay
+              if (isLoading)
+                Container(
+                  color: Colors.black.withOpacity(0.4),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(color: AppColors.primary),
+                          const SizedBox(height: 16),
+                          Text(
+                            'AI sedang membaca struk...',
+                            style: AppTypography.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-
-              // Action Buttons
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFF0D47A1), // Deep Blue
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20),
-                    const SizedBox(width: 12),
-                    Text('Buka Kamera', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFFE2E8F0), // Light grey
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.photo_library_outlined, color: Color(0xFF0D47A1), size: 20),
-                    const SizedBox(width: 12),
-                    Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
