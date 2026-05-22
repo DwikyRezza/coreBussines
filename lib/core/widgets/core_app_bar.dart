@@ -5,7 +5,6 @@
 
 import 'package:flutter/material.dart';
 import '../di/service_locator.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -22,6 +21,7 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final user = sl<AuthRepositoryImpl>().cachedUser;
     final avatarUrl = user?.photoUrl;
     final initial = (user?.name ?? 'U')[0].toUpperCase();
@@ -32,14 +32,14 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: AppColors.primaryContainer,
+            backgroundColor: colors.primaryContainer,
             backgroundImage:
                 avatarUrl != null ? NetworkImage(avatarUrl) : null,
             child: avatarUrl == null
                 ? Text(
                     initial,
                     style: AppTypography.textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: colors.onPrimaryContainer,
                       fontWeight: FontWeight.w700,
                     ),
                   )
@@ -49,7 +49,7 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
           Text(
             'CoreBusiness',
             style: AppTypography.textTheme.titleMedium?.copyWith(
-              color: AppColors.primary,
+              color: colors.primary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -58,8 +58,8 @@ class CoreAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions ??
           [
             IconButton(
-              icon: const Icon(Icons.notifications_none_rounded,
-                  color: AppColors.primary),
+              icon: Icon(Icons.notifications_none_rounded,
+                  color: colors.primary),
               onPressed: () {},
             ),
             const SizedBox(width: AppSpacing.sm),

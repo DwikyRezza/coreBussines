@@ -24,6 +24,7 @@ class HomeLoading extends HomeState {
 class HomeLoaded extends HomeState {
   final BalanceSummary summary;
   final List<Transaction> recentTransactions;
+  final List<Transaction> allTransactions;
   final InsightCard insight;
   final int selectedTabIndex;
   final bool isRefreshing;
@@ -31,6 +32,7 @@ class HomeLoaded extends HomeState {
   const HomeLoaded({
     required this.summary,
     required this.recentTransactions,
+    required this.allTransactions,
     required this.insight,
     this.selectedTabIndex = 0,
     this.isRefreshing = false,
@@ -39,6 +41,7 @@ class HomeLoaded extends HomeState {
   HomeLoaded copyWith({
     BalanceSummary? summary,
     List<Transaction>? recentTransactions,
+    List<Transaction>? allTransactions,
     InsightCard? insight,
     int? selectedTabIndex,
     bool? isRefreshing,
@@ -46,6 +49,7 @@ class HomeLoaded extends HomeState {
     return HomeLoaded(
       summary: summary ?? this.summary,
       recentTransactions: recentTransactions ?? this.recentTransactions,
+      allTransactions: allTransactions ?? this.allTransactions,
       insight: insight ?? this.insight,
       selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
       isRefreshing: isRefreshing ?? this.isRefreshing,
@@ -56,6 +60,7 @@ class HomeLoaded extends HomeState {
   List<Object?> get props => [
         summary,
         recentTransactions,
+        allTransactions,
         insight,
         selectedTabIndex,
         isRefreshing,

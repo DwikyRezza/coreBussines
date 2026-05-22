@@ -139,7 +139,11 @@ class _LoginPageState extends State<LoginPage> {
                   if (state is AuthAuthenticated) {
                     context.go(AppRoutes.home);
                   } else if (state is AuthFailureState) {
-                    _showErrorBottomSheet(context, state.message);
+                    _showErrorBottomSheet(
+                      context,
+                      state.message,
+                      _isRegisterMode ? 'Gagal Daftar' : 'Gagal Masuk',
+                    );
                   }
                 },
                 builder: (context, state) {
@@ -267,7 +271,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _showErrorBottomSheet(BuildContext context, String message) {
+  void _showErrorBottomSheet(
+    BuildContext context,
+    String message,
+    String title,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -303,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Gagal Masuk',
+              title,
               style: AppTypography.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: AppColors.onBackground,

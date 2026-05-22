@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/services/scan_usage_limiter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -29,12 +30,107 @@ class _ScanReceiptView extends StatelessWidget {
   const _ScanReceiptView();
 
   Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    final limiter = sl<ScanUsageLimiter>();
+    final status = limiter.status();
+    if (!status.canScan) {
+      _showPremiumSheet(context, status);
+      return;
+    }
+
     final picker = ImagePicker();
     final photo = await picker.pickImage(source: source);
     
     if (photo != null && context.mounted) {
+      await limiter.recordScan();
       context.read<TransactionBloc>().add(TransactionScanRequested(photo));
     }
+  }
+
+  void _showPremiumSheet(BuildContext context, ScanUsageStatus status) {
+    final seconds = status.retryAfter.inSeconds.clamp(1, 60);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: AppColors.primary,
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Limit Scan Tercapai',
+                style: AppTypography.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.onBackground,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Anda bisa scan maksimal 5x dalam 1 menit. Tunggu $seconds detik atau upgrade Premium untuk scan tanpa batas.',
+                textAlign: TextAlign.center,
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await sl<ScanUsageLimiter>().setPremium(true);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Premium aktif. Scan tanpa batas sudah terbuka.'),
+                          backgroundColor: AppColors.income,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.lock_open_rounded),
+                  label: const Text('Upgrade Premium'),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Nanti Saja'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override

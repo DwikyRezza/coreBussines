@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../domain/entities/home_entities.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
@@ -101,7 +103,7 @@ class _HomeContent extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
 
               // Weekly Chart Placeholder
-              _WeeklyChartSection(),
+              _FinanceChartSection(transactions: state.allTransactions),
               const SizedBox(height: AppSpacing.xl),
 
               // Recent Transactions
@@ -293,6 +295,364 @@ class _WeeklyChartSection extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 // SKELETON LOADER
 // ─────────────────────────────────────────────────────────────
+enum _ChartPeriod { weekly, monthly, yearly, custom }
+
+class _FinanceChartSection extends StatefulWidget {
+  final List<Transaction> transactions;
+
+  const _FinanceChartSection({required this.transactions});
+
+  @override
+  State<_FinanceChartSection> createState() => _FinanceChartSectionState();
+}
+
+class _FinanceChartSectionState extends State<_FinanceChartSection> {
+  _ChartPeriod _period = _ChartPeriod.weekly;
+  DateTimeRange? _customRange;
+
+  Future<void> _pickCustomRange() async {
+    final now = DateTime.now();
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: _customRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 6)),
+            end: now,
+          ),
+    );
+
+    if (range == null) return;
+    setState(() {
+      _period = _ChartPeriod.custom;
+      _customRange = range;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final buckets = _buildBuckets();
+    final maxValue = buckets.fold<double>(0, (max, bucket) {
+      final bucketMax =
+          bucket.income > bucket.expense ? bucket.income : bucket.expense;
+      return max > bucketMax ? max : bucketMax;
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: _title,
+          actionLabel: 'Lihat Detail',
+          onAction: () => context.go(AppRoutes.analytics),
+        ),
+        const SizedBox(height: AppSpacing.base),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+          padding: const EdgeInsets.all(AppSpacing.base),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _PeriodChip(
+                      label: 'Mingguan',
+                      selected: _period == _ChartPeriod.weekly,
+                      onTap: () => setState(() => _period = _ChartPeriod.weekly),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _PeriodChip(
+                      label: 'Bulanan',
+                      selected: _period == _ChartPeriod.monthly,
+                      onTap: () => setState(() => _period = _ChartPeriod.monthly),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _PeriodChip(
+                      label: 'Tahunan',
+                      selected: _period == _ChartPeriod.yearly,
+                      onTap: () => setState(() => _period = _ChartPeriod.yearly),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _pickCustomRange,
+                  icon: const Icon(Icons.date_range_rounded, size: 18),
+                  label: Text(
+                    _customRangeLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 130,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: buckets.map((bucket) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _FinanceBar(
+                              value: bucket.income,
+                              maxValue: maxValue,
+                              color: AppColors.income,
+                            ),
+                            const SizedBox(width: 4),
+                            _FinanceBar(
+                              value: bucket.expense,
+                              maxValue: maxValue,
+                              color: AppColors.expense,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        SizedBox(
+                          width: 38,
+                          child: Text(
+                            bucket.label,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.textTheme.labelSmall?.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _LegendDot(color: AppColors.income, label: 'Pemasukan'),
+                  SizedBox(width: 16),
+                  _LegendDot(color: AppColors.expense, label: 'Pengeluaran'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String get _title {
+    switch (_period) {
+      case _ChartPeriod.weekly:
+        return 'Analisis Mingguan';
+      case _ChartPeriod.monthly:
+        return 'Analisis Bulanan';
+      case _ChartPeriod.yearly:
+        return 'Analisis Tahunan';
+      case _ChartPeriod.custom:
+        return 'Analisis Kustom';
+    }
+  }
+
+  String get _customRangeLabel {
+    if (_customRange == null) return 'Pilih tanggal sendiri';
+    final formatter = DateFormat('d MMM yyyy', 'id_ID');
+    return '${formatter.format(_customRange!.start)} - ${formatter.format(_customRange!.end)}';
+  }
+
+  List<_ChartBucket> _buildBuckets() {
+    final now = DateTime.now();
+    switch (_period) {
+      case _ChartPeriod.weekly:
+        final start = DateTime(now.year, now.month, now.day)
+            .subtract(Duration(days: now.weekday - 1));
+        const labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+        return List.generate(7, (index) {
+          final date = start.add(Duration(days: index));
+          return _bucketFor(labels[index], date, date);
+        });
+      case _ChartPeriod.monthly:
+        final first = DateTime(now.year, now.month);
+        return List.generate(5, (index) {
+          final start = first.add(Duration(days: index * 7));
+          final end = start.add(const Duration(days: 6));
+          return _bucketFor('M${index + 1}', start, end);
+        });
+      case _ChartPeriod.yearly:
+        return List.generate(12, (index) {
+          final start = DateTime(now.year, index + 1);
+          final end =
+              DateTime(now.year, index + 2).subtract(const Duration(days: 1));
+          return _bucketFor(DateFormat('MMM', 'id_ID').format(start), start, end);
+        });
+      case _ChartPeriod.custom:
+        final range = _customRange ??
+            DateTimeRange(
+              start: now.subtract(const Duration(days: 6)),
+              end: now,
+            );
+        final totalDays = range.end.difference(range.start).inDays + 1;
+        if (totalDays <= 10) {
+          return List.generate(totalDays, (index) {
+            final date = range.start.add(Duration(days: index));
+            return _bucketFor(DateFormat('d/M').format(date), date, date);
+          });
+        }
+
+        const bucketCount = 6;
+        final step = (totalDays / bucketCount).ceil();
+        return List.generate(bucketCount, (index) {
+          final start = range.start.add(Duration(days: index * step));
+          var end = start.add(Duration(days: step - 1));
+          if (end.isAfter(range.end)) end = range.end;
+          return _bucketFor(DateFormat('d/M').format(start), start, end);
+        });
+    }
+  }
+
+  _ChartBucket _bucketFor(String label, DateTime start, DateTime end) {
+    final normalizedStart = DateTime(start.year, start.month, start.day);
+    final normalizedEnd = DateTime(end.year, end.month, end.day, 23, 59, 59);
+    double income = 0;
+    double expense = 0;
+
+    for (final transaction in widget.transactions) {
+      final date = transaction.dateTime;
+      if (date.isBefore(normalizedStart) || date.isAfter(normalizedEnd)) {
+        continue;
+      }
+
+      if (transaction.isIncome) {
+        income += transaction.amount;
+      } else {
+        expense += transaction.amount;
+      }
+    }
+
+    return _ChartBucket(label: label, income: income, expense: expense);
+  }
+}
+
+class _ChartBucket {
+  final String label;
+  final double income;
+  final double expense;
+
+  const _ChartBucket({
+    required this.label,
+    required this.income,
+    required this.expense,
+  });
+}
+
+class _FinanceBar extends StatelessWidget {
+  final double value;
+  final double maxValue;
+  final Color color;
+
+  const _FinanceBar({
+    required this.value,
+    required this.maxValue,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final height = maxValue <= 0 ? 6.0 : 8 + (value / maxValue * 82);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      width: 12,
+      height: height,
+      decoration: BoxDecoration(
+        color: value <= 0 ? color.withOpacity(0.18) : color,
+        borderRadius: BorderRadius.circular(999),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendDot({
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: AppTypography.textTheme.labelSmall),
+      ],
+    );
+  }
+}
+
+class _PeriodChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PeriodChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surfaceContainer,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.textTheme.labelSmall?.copyWith(
+            color: selected ? Colors.white : AppColors.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HomeSkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

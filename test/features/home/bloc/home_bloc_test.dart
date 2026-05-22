@@ -48,6 +48,8 @@ void main() {
             .thenAnswer((_) async => const Right(_fakeBalance));
         when(() => mockRepository.getRecentTransactions(limit: 5))
             .thenAnswer((_) async => const Right(_fakeTransactions));
+        when(() => mockRepository.getRecentTransactions(limit: 500))
+            .thenAnswer((_) async => const Right(_fakeTransactions));
         when(() => mockRepository.getCurrentInsight())
             .thenAnswer((_) async => const Right(_fakeInsight));
         return HomeBloc(repository: mockRepository);
@@ -69,6 +71,8 @@ void main() {
         );
         when(() => mockRepository.getRecentTransactions(limit: 5))
             .thenAnswer((_) async => const Right(_fakeTransactions));
+        when(() => mockRepository.getRecentTransactions(limit: 500))
+            .thenAnswer((_) async => const Right(_fakeTransactions));
         when(() => mockRepository.getCurrentInsight())
             .thenAnswer((_) async => const Right(_fakeInsight));
         return HomeBloc(repository: mockRepository);
@@ -89,6 +93,8 @@ void main() {
             .thenAnswer((_) async => const Right(_fakeBalance));
         when(() => mockRepository.getRecentTransactions(limit: 5))
             .thenAnswer((_) async => const Right(_fakeTransactions));
+        when(() => mockRepository.getRecentTransactions(limit: 500))
+            .thenAnswer((_) async => const Right(_fakeTransactions));
         when(() => mockRepository.getCurrentInsight())
             .thenAnswer((_) async => const Right(_fakeInsight));
         return HomeBloc(repository: mockRepository);
@@ -96,6 +102,7 @@ void main() {
       seed: () => const HomeLoaded(
         summary: _fakeBalance,
         recentTransactions: _fakeTransactions,
+        allTransactions: _fakeTransactions,
         insight: _fakeInsight,
       ),
       act: (bloc) => bloc.add(const HomeRefreshRequested()),

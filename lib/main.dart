@@ -10,6 +10,7 @@ import 'core/config/app_config.dart';
 import 'core/di/service_locator.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 
@@ -47,13 +48,41 @@ class CoreBusinessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = sl<ThemeController>();
+
     return BlocProvider(
       create: (_) => sl<AuthBloc>()..add(const AuthCheckCurrentUserRequested()),
-      child: MaterialApp.router(
-        title: 'CoreBusiness',
-        theme: AppTheme.lightTheme,
-        debugShowCheckedModeBanner: false,
-        routerConfig: routerConfig ?? appRouter,
+      child: AnimatedBuilder(
+        animation: themeController,
+        builder: (context, _) {
+          final platformBrightness =
+              WidgetsBinding.instance.platformDispatcher.platformBrightness;
+          final isDark = themeController.themeMode == ThemeMode.dark ||
+              (themeController.themeMode == ThemeMode.system &&
+                  platformBrightness == Brightness.dark);
+
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
+              statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+              systemNavigationBarColor:
+                  isDark ? const Color(0xFF101218) : Colors.white,
+              systemNavigationBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
+            ),
+          );
+
+          return MaterialApp.router(
+            title: 'CoreBusiness',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeController.themeMode,
+            debugShowCheckedModeBanner: false,
+            routerConfig: routerConfig ?? appRouter,
+          );
+        },
       ),
     );
   }

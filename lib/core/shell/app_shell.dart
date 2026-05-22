@@ -280,7 +280,7 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                     color: AppColors.primary,
                                     onTap: () {
                                       _toggle();
-                                      context.push(AppRoutes.addTransaction);
+                                      context.push('${AppRoutes.addTransaction}?type=income');
                                     },
                                   ),
                                   const SizedBox(width: 14),
@@ -291,7 +291,7 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                     color: AppColors.expense,
                                     onTap: () {
                                       _toggle();
-                                      context.push(AppRoutes.addTransaction);
+                                      context.push('${AppRoutes.addTransaction}?type=expense');
                                     },
                                   ),
                                 ],

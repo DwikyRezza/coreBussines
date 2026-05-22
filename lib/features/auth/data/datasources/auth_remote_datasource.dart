@@ -68,6 +68,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthException(message: 'Gagal masuk ke sistem.');
       }
 
+      final profileRef = _firestore.collection('users').doc(user.uid);
+      final profileSnapshot = await profileRef.get();
+      final isRegistered = profileSnapshot.exists;
+
+      if (!isRegister && !isRegistered) {
+        try {
+          await user.delete();
+        } catch (_) {
+          // If deletion is blocked for any reason, signing out still prevents access.
+        }
+        await _googleSignIn.signOut();
+        await _auth.signOut();
+        throw const AuthException(
+          message:
+              'Akun ini belum terdaftar. Silakan daftar dahulu dengan akun Google tersebut.',
+        );
+      }
+
+      if (isRegister && isRegistered) {
+        await _googleSignIn.signOut();
+        await _auth.signOut();
+        throw const AuthException(
+          message:
+              'Akun ini sudah pernah dibuat. Silakan masuk melalui menu Login dengan akun yang sama.',
+        );
+      }
+
       final userModel = UserModel.fromGoogleUser(
         id: user.uid,
         name: user.displayName ?? googleUser.displayName ?? 'Pengguna',
@@ -119,16 +146,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return userModel;
     }
 
-    final userModel = UserModel(
-      id: user.uid,
-      fullName: user.displayName,
-      email: user.email ?? '',
-      avatarUrl: user.photoURL,
-      updatedAt: DateTime.now(),
-    );
-
-    await _ensureWorkspace(userModel);
-    return userModel;
+    return null;
   }
 
   Future<void> _ensureWorkspace(UserModel user) async {

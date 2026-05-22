@@ -59,26 +59,36 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // Parallel fetch — all 3 requests execute simultaneously
     final (
       Either<Failure, BalanceSummary> summaryResult,
-      Either<Failure, List<Transaction>> transactionsResult,
+      Either<Failure, List<Transaction>> recentTransactionsResult,
+      Either<Failure, List<Transaction>> allTransactionsResult,
       Either<Failure, InsightCard> insightResult,
     ) = await (
       _repository.getBalanceSummary(),
       _repository.getRecentTransactions(limit: 5),
+      _repository.getRecentTransactions(limit: 500),
       _repository.getCurrentInsight(),
     ).wait;
 
     // Fold all results — if any fails, emit error
     final summary = summaryResult.fold<BalanceSummary?>((f) => null, (s) => s);
-    final transactions = transactionsResult.fold<List<Transaction>?>(
+    final recentTransactions = recentTransactionsResult.fold<List<Transaction>?>(
+      (f) => null,
+      (t) => t,
+    );
+    final allTransactions = allTransactionsResult.fold<List<Transaction>?>(
       (f) => null,
       (t) => t,
     );
     final insight = insightResult.fold<InsightCard?>((f) => null, (i) => i);
 
-    if (summary == null || transactions == null || insight == null) {
+    if (summary == null ||
+        recentTransactions == null ||
+        allTransactions == null ||
+        insight == null) {
       final errorMessage =
           summaryResult.fold((f) => f.message, (_) => null) ??
-          transactionsResult.fold((f) => f.message, (_) => null) ??
+          recentTransactionsResult.fold((f) => f.message, (_) => null) ??
+          allTransactionsResult.fold((f) => f.message, (_) => null) ??
           insightResult.fold((f) => f.message, (_) => null);
 
       emit(HomeError(errorMessage ?? 'Terjadi kesalahan.'));
@@ -87,7 +97,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     emit(HomeLoaded(
       summary: summary,
-      recentTransactions: transactions,
+      recentTransactions: recentTransactions,
+      allTransactions: allTransactions,
       insight: insight,
       selectedTabIndex: tabIndex,
       isRefreshing: false,

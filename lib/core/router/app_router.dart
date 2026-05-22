@@ -175,7 +175,10 @@ GoRouter _buildRouter() {
     GoRoute(
       path: AppRoutes.addTransaction,
       name: 'addTransaction',
-      builder: (context, state) => const AddTransactionPage(),
+      builder: (context, state) {
+        final type = state.uri.queryParameters['type'];
+        return AddTransactionPage(initialType: type == 'income' ? 1 : 0);
+      },
     ),
     GoRoute(
       path: AppRoutes.aiDetection,

@@ -5,7 +5,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
@@ -19,8 +18,9 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Pengaturan')),
       body: ListView(
         children: [
@@ -86,12 +86,17 @@ class SettingsPage extends StatelessWidget {
               onPressed: () {
                 context.read<AuthBloc>().add(const AuthSignOutRequested());
               },
-              icon: const Icon(Icons.logout_rounded, color: AppColors.expense),
-              label: const Text('Keluar',
-                  style: TextStyle(color: AppColors.expense, fontWeight: FontWeight.w600)),
+              icon: Icon(Icons.logout_rounded, color: colors.error),
+              label: Text(
+                'Keluar',
+                style: TextStyle(
+                  color: colors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
-                side: const BorderSide(color: AppColors.expense),
+                side: BorderSide(color: colors.error),
               ),
             ),
           ),
@@ -105,6 +110,8 @@ class SettingsPage extends StatelessWidget {
 class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         String name = 'Pengguna';
@@ -119,16 +126,17 @@ class _ProfileHeader extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.all(AppSpacing.pagePadding),
-          color: AppColors.surface,
+          color: colors.surface,
           child: Row(children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: AppColors.primaryContainer,
+              backgroundColor: colors.primaryContainer,
               backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
               child: avatarUrl == null 
                   ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'U',
                       style: AppTypography.textTheme.headlineSmall?.copyWith(
-                        color: AppColors.primary, fontWeight: FontWeight.w700,
+                        color: colors.onPrimaryContainer,
+                        fontWeight: FontWeight.w700,
                       ))
                   : null,
             ),
@@ -137,16 +145,17 @@ class _ProfileHeader extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(name,
                     style: AppTypography.textTheme.titleMedium?.copyWith(
+                      color: colors.onSurface,
                       fontWeight: FontWeight.w700,
                     )),
                 Text(email,
                     style: AppTypography.textTheme.bodySmall?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     )),
               ]),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+              icon: Icon(Icons.edit_outlined, color: colors.primary),
               onPressed: () => context.push(AppRoutes.editProfile),
             ),
           ]),
@@ -163,23 +172,25 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(
             AppSpacing.pagePadding, AppSpacing.base, AppSpacing.pagePadding, AppSpacing.xs),
         child: Text(title,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
               letterSpacing: 0.8,
             )),
       ),
       Container(
-        color: AppColors.surface,
+        color: colors.surface,
         child: Column(children: [
           ...items.map((item) => Column(children: [
             item,
             if (item != items.last)
-              Divider(height: 1, indent: 56, color: AppColors.outlineVariant.withOpacity(0.4)),
+              Divider(height: 1, indent: 56, color: colors.outlineVariant.withOpacity(0.4)),
           ])),
         ]),
       ),
@@ -198,25 +209,28 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return ListTile(
       onTap: onTap,
       leading: Container(
         width: 36, height: 36,
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainer,
+          color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 18),
+        child: Icon(icon, color: colors.primary, size: 18),
       ),
       title: Text(title, style: AppTypography.textTheme.bodyMedium?.copyWith(
+        color: colors.onSurface,
         fontWeight: FontWeight.w500,
       )),
       subtitle: subtitle != null
           ? Text(subtitle!, style: AppTypography.textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant))
+              color: colors.onSurfaceVariant))
           : null,
-      trailing: const Icon(Icons.chevron_right_rounded,
-          color: AppColors.onSurfaceVariant, size: 18),
+      trailing: Icon(Icons.chevron_right_rounded,
+          color: colors.onSurfaceVariant, size: 18),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.pagePadding, vertical: AppSpacing.xs,
       ),

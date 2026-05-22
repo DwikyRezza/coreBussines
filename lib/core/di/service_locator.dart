@@ -14,6 +14,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../storage/local_storage_service.dart';
 import '../config/app_config.dart';
+import '../services/scan_usage_limiter.dart';
+import '../theme/theme_controller.dart';
 
 // Auth
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -65,6 +67,8 @@ Future<void> initDependencies() async {
 
   // Storage Service
   sl.registerLazySingleton<LocalStorageService>(() => LocalStorageService(sl()));
+  sl.registerLazySingleton<ThemeController>(() => ThemeController(sl()));
+  sl.registerLazySingleton<ScanUsageLimiter>(() => ScanUsageLimiter(sl()));
 
   // ─── Auth Feature ─────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(

@@ -54,7 +54,12 @@ const _incomeCategories = [
 const _wallets = ['Bank', 'Tunai', 'E-Wallet'];
 
 class AddTransactionPage extends StatefulWidget {
-  const AddTransactionPage({super.key});
+  final int initialType;
+
+  const AddTransactionPage({
+    super.key,
+    this.initialType = 0,
+  });
 
   @override
   State<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -78,6 +83,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     _notesController.dispose();
     _titleController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _transactionType = widget.initialType;
   }
 
   List<_Category> get _categories =>

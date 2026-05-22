@@ -1,89 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/theme/app_colors.dart';
+
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme_controller.dart';
 
-class ThemeSettingsPage extends StatefulWidget {
+class ThemeSettingsPage extends StatelessWidget {
   const ThemeSettingsPage({super.key});
 
-  @override
-  State<ThemeSettingsPage> createState() => _ThemeSettingsPageState();
-}
-
-class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
-  static const _keyThemeMode = 'theme_mode';
-  String _selected = 'system';
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    setState(() => _selected = prefs.getString(_keyThemeMode) ?? 'system');
-  }
-
-  Future<void> _select(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyThemeMode, value);
-    if (!mounted) return;
-    setState(() => _selected = value);
+  Future<void> _select(BuildContext context, ThemeMode mode) async {
+    await sl<ThemeController>().setThemeMode(mode);
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Preferensi tema disimpan')),
+      const SnackBar(content: Text('Tema aplikasi diperbarui')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Tema Aplikasi')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
-        children: [
-          Text(
-            'Pilih tampilan yang nyaman untuk Anda.',
-            style: AppTypography.textTheme.bodyLarge?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+    final themeController = sl<ThemeController>();
+
+    return AnimatedBuilder(
+      animation: themeController,
+      builder: (context, _) {
+        final colors = Theme.of(context).colorScheme;
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Tema Aplikasi')),
+          body: ListView(
+            padding: const EdgeInsets.all(AppSpacing.pagePadding),
+            children: [
+              Text(
+                'Pilih tampilan yang nyaman untuk seluruh aplikasi.',
+                style: AppTypography.textTheme.bodyLarge?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _ThemeOption(
+                icon: Icons.light_mode_rounded,
+                title: 'Terang',
+                subtitle: 'Tampilan bersih untuk penggunaan harian',
+                selected: themeController.themeMode == ThemeMode.light,
+                onTap: () => _select(context, ThemeMode.light),
+              ),
+              const SizedBox(height: 12),
+              _ThemeOption(
+                icon: Icons.dark_mode_rounded,
+                title: 'Gelap',
+                subtitle: 'Mode gelap aktif di seluruh aplikasi',
+                selected: themeController.themeMode == ThemeMode.dark,
+                onTap: () => _select(context, ThemeMode.dark),
+              ),
+              const SizedBox(height: 12),
+              _ThemeOption(
+                icon: Icons.settings_suggest_rounded,
+                title: 'Ikuti Sistem',
+                subtitle: 'Menyesuaikan pengaturan perangkat',
+                selected: themeController.themeMode == ThemeMode.system,
+                onTap: () => _select(context, ThemeMode.system),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          _ThemeOption(
-            icon: Icons.light_mode_rounded,
-            title: 'Terang',
-            subtitle: 'Tampilan bersih untuk penggunaan harian',
-            selected: _selected == 'light',
-            onTap: () => _select('light'),
-          ),
-          const SizedBox(height: 12),
-          _ThemeOption(
-            icon: Icons.dark_mode_rounded,
-            title: 'Gelap',
-            subtitle: 'Lebih nyaman di tempat minim cahaya',
-            selected: _selected == 'dark',
-            onTap: () => _select('dark'),
-          ),
-          const SizedBox(height: 12),
-          _ThemeOption(
-            icon: Icons.settings_suggest_rounded,
-            title: 'Ikuti Sistem',
-            subtitle: 'Menyesuaikan pengaturan perangkat',
-            selected: _selected == 'system',
-            onTap: () => _select('system'),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Catatan: preferensi sudah tersimpan. Integrasi tema gelap penuh bisa diaktifkan saat theme dark tersedia di design system.',
-            style: AppTypography.textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -105,17 +85,26 @@ class _ThemeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.outlineVariant,
+            color: selected ? colors.primary : colors.outlineVariant,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -123,25 +112,48 @@ class _ThemeOption extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: selected ? AppColors.primaryContainer : AppColors.surfaceContainer,
+                color: selected
+                    ? colors.primaryContainer
+                    : colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: AppColors.primary),
+              child: Icon(
+                icon,
+                color: selected ? colors.onPrimaryContainer : colors.primary,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: AppTypography.textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(width: 12),
             Icon(
-              selected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-              color: selected ? AppColors.primary : AppColors.outline,
+              selected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: selected ? colors.primary : colors.outline,
             ),
           ],
         ),

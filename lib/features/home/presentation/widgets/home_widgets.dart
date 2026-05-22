@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/home_entities.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -160,10 +161,20 @@ class _QuickActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           child: InkWell(
             onTap: () {
-              // TODO: Route to specific action
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(action.id)),
-              );
+              switch (action.id) {
+                case 'add_income':
+                  context.push('${AppRoutes.addTransaction}?type=income');
+                  break;
+                case 'add_expense':
+                  context.push('${AppRoutes.addTransaction}?type=expense');
+                  break;
+                case 'scan':
+                  context.push(AppRoutes.scanReceiptIntro);
+                  break;
+                case 'schedule':
+                  context.push(AppRoutes.addSchedule);
+                  break;
+              }
             },
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             child: Container(
@@ -271,7 +282,7 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => context.push(
-        '/transaction/${transaction.id}',
+        AppRoutes.transactionDetail.replaceAll(':id', transaction.id),
       ),
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Padding(
