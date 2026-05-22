@@ -8,20 +8,10 @@ class AiReceiptScanner {
 
   AiReceiptScanner()
       : _model = GenerativeModel(
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash',
           apiKey: AppConfig.geminiApiKey,
           generationConfig: GenerationConfig(
             responseMimeType: 'application/json',
-            responseSchema: Schema.object(
-              properties: {
-                'title': Schema.string(description: 'Nama merchant atau toko'),
-                'amount': Schema.number(description: 'Total harga akhir yang dibayar'),
-                'isIncome': Schema.boolean(description: 'Pemasukan (true) atau pengeluaran (false). Selalu false untuk struk belanja.'),
-                'category': Schema.string(description: 'Kategori belanja (misal: Makanan, Transportasi, Belanja, Hiburan, dll)'),
-                'note': Schema.string(description: 'Rincian barang, digabung dengan koma. Contoh: "Beras, Susu, Gula"'),
-              },
-              requiredProperties: ['title', 'amount', 'isIncome', 'category', 'note'],
-            ),
           ),
         );
 
@@ -36,6 +26,8 @@ class AiReceiptScanner {
     - isIncome: selalu false karena ini struk belanja.
     - category: kelompokkan ke salah satu (Makanan, Transportasi, Belanja, Hiburan, Tagihan, Kesehatan, Pendidikan, Lainnya).
     - note: daftar item yang dibeli, pisahkan dengan koma.
+    Balas hanya JSON valid tanpa markdown dengan format:
+    {"title":"...","amount":0,"isIncome":false,"category":"...","note":"..."}
     ''');
     
     final imagePart = DataPart('image/jpeg', imageBytes);
@@ -49,6 +41,16 @@ class AiReceiptScanner {
       throw Exception('Gagal mengekstrak data dari struk.');
     }
     
-    return jsonDecode(text) as Map<String, dynamic>;
+    return jsonDecode(_cleanJsonResponse(text)) as Map<String, dynamic>;
+  }
+
+  String _cleanJsonResponse(String text) {
+    final trimmed = text.trim();
+    if (!trimmed.startsWith('```')) return trimmed;
+
+    return trimmed
+        .replaceFirst(RegExp(r'^```(?:json)?\s*'), '')
+        .replaceFirst(RegExp(r'\s*```$'), '')
+        .trim();
   }
 }

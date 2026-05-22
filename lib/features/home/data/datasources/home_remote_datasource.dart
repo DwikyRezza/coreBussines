@@ -1,54 +1,109 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/home_models.dart'; // TransactionModel is here
-import 'home_datasource.dart'; // For the HomeDataSource interface
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import '../models/home_models.dart';
+import 'home_datasource.dart';
 import '../../../auth/data/repositories/auth_repository_impl.dart';
 
 import '../../../../core/storage/local_storage_service.dart';
 
 class HomeRemoteDataSourceImpl implements HomeDataSource {
-  final SupabaseClient _supabase;
+  final firebase_auth.FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
   final AuthRepositoryImpl _authRepository;
   final LocalStorageService _localStorage;
 
   HomeRemoteDataSourceImpl({
-    required SupabaseClient supabase,
+    required firebase_auth.FirebaseAuth auth,
+    required FirebaseFirestore firestore,
     required AuthRepositoryImpl authRepository,
     required LocalStorageService localStorage,
-  })  : _supabase = supabase,
+  })  : _auth = auth,
+        _firestore = firestore,
         _authRepository = authRepository,
         _localStorage = localStorage;
 
-  @override
-  Future<BalanceSummaryModel> getBalanceSummary() async {
-    // We need the user's business ID first
-    String? businessId = _localStorage.activeBusinessId;
+  CollectionReference<Map<String, dynamic>> _transactionsRef(
+    String businessId,
+  ) {
+    return _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('transactions');
+  }
 
-    if (businessId == null) {
-      final businessRes = await _supabase.from('business_members')
-          .select('business_id')
-          .eq('user_id', _supabase.auth.currentUser!.id)
-          .limit(1)
-          .single();
-      
-      businessId = businessRes['business_id'] as String;
-      await _localStorage.setActiveBusinessId(businessId);
+  Future<String> _getBusinessId() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('User belum login.');
     }
 
-    // Call the RPC get_dashboard_summary
-    final response = await _supabase.rpc('get_dashboard_summary', params: {
-      'p_business_id': businessId,
-    }).single();
+    final cachedBusinessId = _localStorage.activeBusinessId;
+    if (cachedBusinessId != null) return cachedBusinessId;
 
-    final totalIncome = (response['total_income'] as num?)?.toDouble() ?? 0.0;
-    final totalExpense = (response['total_expense'] as num?)?.toDouble() ?? 0.0;
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final businessId =
+        userDoc.data()?['active_business_id'] as String? ?? 'business_${user.uid}';
+    await _localStorage.setActiveBusinessId(businessId);
+    return businessId;
+  }
+
+  DateTime _readDateTime(Object? value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
+
+  TransactionModel _transactionFromDoc(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+    return TransactionModel(
+      id: doc.id,
+      title: data['title'] as String? ?? 'Transaksi',
+      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+      isIncome:
+          data['is_income'] as bool? ?? (data['type'] as String?) == 'income',
+      category: data['category'] as String? ?? 'Lainnya',
+      categoryIcon: data['category_icon'] as String? ?? 'category',
+      dateTime: _readDateTime(data['date_time'] ?? data['transaction_date']),
+    );
+  }
+
+  @override
+  Future<BalanceSummaryModel> getBalanceSummary() async {
+    final businessId = await _getBusinessId();
+    final snapshot = await _transactionsRef(businessId).get();
+    final now = DateTime.now();
+
+    double totalIncome = 0.0;
+    double totalExpense = 0.0;
+    double monthIncome = 0.0;
+    double monthExpense = 0.0;
+
+    for (final doc in snapshot.docs) {
+      final transaction = _transactionFromDoc(doc);
+      if (transaction.isIncome) {
+        totalIncome += transaction.amount;
+      } else {
+        totalExpense += transaction.amount;
+      }
+
+      if (transaction.dateTime.year == now.year &&
+          transaction.dateTime.month == now.month) {
+        if (transaction.isIncome) {
+          monthIncome += transaction.amount;
+        } else {
+          monthExpense += transaction.amount;
+        }
+      }
+    }
+
     final totalBalance = totalIncome - totalExpense;
+    final monthlyChange = monthIncome - monthExpense;
+    final monthlyChangePercent =
+        monthIncome == 0 ? 0.0 : (monthlyChange / monthIncome) * 100;
 
-    // Monthly change could be calculated by calling get_monthly_cashflow or just estimating.
-    // For now, we will use totalIncome and totalExpense as the monthly change (since RPC defaults to this month)
-    final monthlyChange = totalBalance;
-    final monthlyChangePercent = totalBalance > 0 ? 100.0 : 0.0; 
-
-    // Read real user from cache
     final cached = _authRepository.cachedUser;
     final userName = cached?.name ?? 'Pengguna';
     final userPhotoUrl = cached?.photoUrl;
@@ -64,43 +119,28 @@ class HomeRemoteDataSourceImpl implements HomeDataSource {
 
   @override
   Future<List<TransactionModel>> getRecentTransactions({int limit = 5}) async {
-    final response = await _supabase.from('transactions').select('''
-      id,
-      amount,
-      type,
-      title,
-      transaction_date,
-      categories (name, icon)
-    ''').order('transaction_date', ascending: false).limit(limit);
+    final businessId = await _getBusinessId();
+    final snapshot = await _transactionsRef(businessId)
+        .orderBy('date_time', descending: true)
+        .limit(limit)
+        .get();
 
-    final List<dynamic> data = response;
-    return data.map((json) {
-      return TransactionModel(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? 'Transaksi',
-        amount: (json['amount'] as num).toDouble(),
-        isIncome: json['type'] == 'income',
-        category: json['categories']?['name'] as String? ?? 'Lainnya',
-        categoryIcon: json['categories']?['icon'] as String? ?? 'category',
-        dateTime: DateTime.parse(json['transaction_date'] as String),
-      );
-    }).toList();
+    return snapshot.docs.map(_transactionFromDoc).toList();
   }
 
   @override
   Future<InsightCardModel> getCurrentInsight() async {
-    // A simplified insight generator based on summary
     try {
       final summary = await getBalanceSummary();
-      final totalBalance = summary.totalBalance;
-      
-      if (totalBalance < 0) {
+      final monthlyChange = summary.monthlyChange;
+
+      if (monthlyChange < 0) {
         return const InsightCardModel(
           title: 'Perhatian: Defisit Anggaran',
           message: 'Pengeluaran Anda bulan ini lebih besar dari pemasukan. Tinjau kembali pengeluaran Anda.',
           type: 'warning',
         );
-      } else if (totalBalance > 0) {
+      } else if (monthlyChange > 0) {
         return const InsightCardModel(
           title: 'Arus Kas Positif!',
           message: 'Bagus! Anda memiliki arus kas yang positif bulan ini. Pertahankan kebiasaan ini.',

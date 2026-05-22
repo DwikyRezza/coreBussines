@@ -4,9 +4,9 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -22,7 +22,8 @@ class WalletsPage extends StatefulWidget {
 }
 
 class _WalletsPageState extends State<WalletsPage> {
-  final _supabase = Supabase.instance.client;
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
   final _localStorage = sl<LocalStorageService>();
   final _fmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
@@ -38,26 +39,29 @@ class _WalletsPageState extends State<WalletsPage> {
 
   Future<void> _loadWallets() async {
     try {
-      String? businessId = _localStorage.activeBusinessId;
-      if (businessId == null) {
-        final bRes = await _supabase
-            .from('business_members')
-            .select('business_id')
-            .eq('user_id', _supabase.auth.currentUser!.id)
-            .limit(1)
-            .single();
-        businessId = bRes['business_id'] as String;
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw StateError('User belum login.');
       }
 
-      final res = await _supabase
-          .from('wallets')
-          .select('id, name, type, balance')
-          .eq('business_id', businessId);
+      String? businessId = _localStorage.activeBusinessId;
+      if (businessId == null) {
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        businessId =
+            userDoc.data()?['active_business_id'] as String? ?? 'business_${user.uid}';
+        await _localStorage.setActiveBusinessId(businessId);
+      }
 
-      final list = res as List<dynamic>;
+      final res = await _firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('wallets')
+          .get();
+
       double total = 0;
       final walletList = <Map<String, dynamic>>[];
-      for (final w in list) {
+      for (final doc in res.docs) {
+        final w = doc.data();
         final balance = (w['balance'] as num?)?.toDouble() ?? 0.0;
         total += balance;
         walletList.add({

@@ -1,11 +1,14 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../models/transaction_detail_model.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../../home/data/models/home_models.dart';
 import '../../../../core/storage/local_storage_service.dart';
 
 abstract class TransactionRemoteDataSource {
-  Future<List<TransactionModel>> getFilteredTransactions(TransactionFilter filter);
+  Future<List<TransactionModel>> getFilteredTransactions(
+    TransactionFilter filter,
+  );
   Future<TransactionDetailModel> getTransactionDetail(String id);
   Future<void> addTransaction(TransactionModel transaction);
   Future<void> deleteTransaction(String id);
@@ -13,174 +16,223 @@ abstract class TransactionRemoteDataSource {
 }
 
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
-  final SupabaseClient _supabase;
+  final firebase_auth.FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
   final LocalStorageService _localStorage;
 
   TransactionRemoteDataSourceImpl({
-    required SupabaseClient supabase,
+    required firebase_auth.FirebaseAuth auth,
+    required FirebaseFirestore firestore,
     required LocalStorageService localStorage,
-  })  : _supabase = supabase,
+  })  : _auth = auth,
+        _firestore = firestore,
         _localStorage = localStorage;
 
-  @override
-  Future<List<TransactionModel>> getFilteredTransactions(TransactionFilter filter) async {
-    // Determine the user's business ID first.
-    // In a real app, this might be cached, but we can query it or use the RPC.
-    // However, RLS policies only return transactions for the user's business anyway!
-    // So we can just query the `transactions` table directly.
+  CollectionReference<Map<String, dynamic>> _transactionsRef(
+    String businessId,
+  ) {
+    return _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('transactions');
+  }
 
-    var query = _supabase.from('transactions').select('''
-      id,
-      amount,
-      type,
-      title,
-      transaction_date,
-      categories (name, icon)
-    ''');
+  CollectionReference<Map<String, dynamic>> _walletsRef(String businessId) {
+    return _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('wallets');
+  }
 
-    // For type filtering
-    if (filter.type == TransactionType.income) {
-      query = query.eq('type', 'income');
-    } else if (filter.type == TransactionType.expense) {
-      query = query.eq('type', 'expense');
+  Future<String> _getBusinessId() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('User belum login.');
     }
 
-    // For categories
-    // PostgREST filtering on joined tables can be tricky, so we filter locally if needed, or we just fetch all and filter.
-    // We will just order them.
-    final response = await query.order('transaction_date', ascending: false);
+    final cachedBusinessId = _localStorage.activeBusinessId;
+    if (cachedBusinessId != null) return cachedBusinessId;
 
-    final List<dynamic> data = response;
-    var all = data.map((json) {
-      return TransactionModel(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? 'Transaksi',
-        amount: (json['amount'] as num).toDouble(),
-        isIncome: json['type'] == 'income',
-        category: json['categories']?['name'] as String? ?? 'Lainnya',
-        categoryIcon: json['categories']?['icon'] as String? ?? 'category',
-        dateTime: DateTime.parse(json['transaction_date'] as String),
-      );
-    }).toList();
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final businessId =
+        userDoc.data()?['active_business_id'] as String? ?? 'business_${user.uid}';
+    await _localStorage.setActiveBusinessId(businessId);
+    return businessId;
+  }
 
-    // Local filtering for dates and categories
+  TransactionModel _transactionFromDoc(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    return _transactionFromMap(doc.id, doc.data());
+  }
+
+  TransactionModel _transactionFromMap(String id, Map<String, dynamic> data) {
+    return TransactionModel(
+      id: id,
+      title: data['title'] as String? ?? 'Transaksi',
+      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+      isIncome:
+          data['is_income'] as bool? ?? (data['type'] as String?) == 'income',
+      category: data['category'] as String? ?? 'Lainnya',
+      categoryIcon: data['category_icon'] as String? ?? 'category',
+      dateTime: _readDateTime(data['date_time'] ?? data['transaction_date']),
+    );
+  }
+
+  DateTime _readDateTime(Object? value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
+
+  @override
+  Future<List<TransactionModel>> getFilteredTransactions(
+    TransactionFilter filter,
+  ) async {
+    final businessId = await _getBusinessId();
+    var query = _transactionsRef(businessId).orderBy(
+      'date_time',
+      descending: true,
+    );
+
+    if (filter.type == TransactionType.income) {
+      query = query.where('type', isEqualTo: 'income');
+    } else if (filter.type == TransactionType.expense) {
+      query = query.where('type', isEqualTo: 'expense');
+    }
+
+    final snapshot = await query.get();
+    var transactions = snapshot.docs.map(_transactionFromDoc).toList();
+
     if (filter.categories.isNotEmpty) {
-      all = all.where((t) => filter.categories.contains(t.category)).toList();
+      transactions = transactions
+          .where((transaction) => filter.categories.contains(transaction.category))
+          .toList();
     }
 
     final now = DateTime.now();
-    all = all.where((t) {
+    transactions = transactions.where((transaction) {
       switch (filter.dateRange) {
         case DateRangeFilter.thisWeek:
-          return t.dateTime.isAfter(now.subtract(const Duration(days: 7)));
+          return transaction.dateTime.isAfter(
+            now.subtract(const Duration(days: 7)),
+          );
         case DateRangeFilter.thisMonth:
-          return t.dateTime.year == now.year && t.dateTime.month == now.month;
+          return transaction.dateTime.year == now.year &&
+              transaction.dateTime.month == now.month;
         case DateRangeFilter.thisYear:
-          return t.dateTime.year == now.year;
+          return transaction.dateTime.year == now.year;
         case DateRangeFilter.custom:
           return true;
       }
     }).toList();
 
-    return all;
+    return transactions;
   }
 
   @override
   Future<TransactionDetailModel> getTransactionDetail(String id) async {
-    final response = await _supabase.from('transactions').select('''
-      id,
-      amount,
-      type,
-      title,
-      transaction_date,
-      categories (name, icon)
-    ''').eq('id', id).single();
+    final businessId = await _getBusinessId();
+    final doc = await _transactionsRef(businessId).doc(id).get();
 
+    if (!doc.exists || doc.data() == null) {
+      throw StateError('Transaksi tidak ditemukan.');
+    }
+
+    final transaction = _transactionFromMap(doc.id, doc.data()!);
     return TransactionDetailModel(
-      id: response['id'] as String,
-      title: response['title'] as String? ?? 'Transaksi',
-      amount: (response['amount'] as num).toDouble(),
-      isIncome: response['type'] == 'income',
-      category: response['categories']?['name'] as String? ?? 'Lainnya',
-      categoryIcon: response['categories']?['icon'] as String? ?? 'category',
-      dateTime: DateTime.parse(response['transaction_date'] as String),
-      paymentMethod: 'Cash', // Default for now
+      id: transaction.id,
+      title: transaction.title,
+      amount: transaction.amount,
+      isIncome: transaction.isIncome,
+      category: transaction.category,
+      categoryIcon: transaction.categoryIcon,
+      dateTime: transaction.dateTime,
+      paymentMethod: doc.data()?['payment_method'] as String? ?? 'Cash',
+      note: doc.data()?['note'] as String?,
+      receiptImageUrl: doc.data()?['receipt_image_url'] as String?,
     );
   }
 
   @override
   Future<void> addTransaction(TransactionModel transaction) async {
-    // 1. Get the current user's business ID and default wallet and category
-    // Try to get from local storage first (ready for multi-business updates!)
-    String? businessId = _localStorage.activeBusinessId;
+    final businessId = await _getBusinessId();
+    final type = transaction.isIncome ? 'income' : 'expense';
+    final walletRef = _walletsRef(businessId).doc('default_cash');
+    final amountDelta = transaction.isIncome
+        ? transaction.amount
+        : -transaction.amount;
 
-    if (businessId == null) {
-      final businessRes = await _supabase.from('business_members')
-          .select('business_id')
-          .eq('user_id', _supabase.auth.currentUser!.id)
-          .limit(1)
-          .single();
-      
-      businessId = businessRes['business_id'] as String;
-      // Cache it for future offline/online operations
-      await _localStorage.setActiveBusinessId(businessId);
-    }
+    await _firestore.runTransaction((firestoreTransaction) async {
+      final walletSnapshot = await firestoreTransaction.get(walletRef);
+      final currentBalance =
+          (walletSnapshot.data()?['balance'] as num?)?.toDouble() ?? 0.0;
 
-    // For simplicity, we just pick the first wallet and a matching category
-    final walletRes = await _supabase.from('wallets').select('id').eq('business_id', businessId).limit(1).single();
-    final walletId = walletRes['id'];
+      final docRef = transaction.id.isEmpty
+          ? _transactionsRef(businessId).doc()
+          : _transactionsRef(businessId).doc(transaction.id);
 
-    // Find category id
-    final typeStr = transaction.isIncome ? 'income' : 'expense';
-    final catRes = await _supabase.from('categories')
-        .select('id')
-        .eq('business_id', businessId)
-        .eq('type', typeStr)
-        .limit(1);
-    
-    String? categoryId;
-    if (catRes.isNotEmpty) {
-      categoryId = catRes.first['id'] as String;
-    }
+      firestoreTransaction.set(docRef, {
+        'title': transaction.title,
+        'amount': transaction.amount,
+        'is_income': transaction.isIncome,
+        'type': type,
+        'category': transaction.category,
+        'category_icon': transaction.categoryIcon,
+        'date_time': Timestamp.fromDate(transaction.dateTime),
+        'wallet_id': walletRef.id,
+        'payment_method': 'Cash',
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
 
-    await _supabase.from('transactions').insert({
-      'business_id': businessId,
-      'wallet_id': walletId,
-      'category_id': categoryId,
-      'type': typeStr,
-      'amount': transaction.amount,
-      'title': transaction.title,
-      'transaction_date': transaction.dateTime.toIso8601String(),
+      firestoreTransaction.set(walletRef, {
+        'name': walletSnapshot.data()?['name'] ?? 'Cash',
+        'type': walletSnapshot.data()?['type'] ?? 'cash',
+        'balance': currentBalance + amountDelta,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     });
   }
 
   @override
   Future<void> deleteTransaction(String id) async {
-    await _supabase.from('transactions').delete().eq('id', id);
+    final businessId = await _getBusinessId();
+    final transactionRef = _transactionsRef(businessId).doc(id);
+    final walletRef = _walletsRef(businessId).doc('default_cash');
+
+    await _firestore.runTransaction((firestoreTransaction) async {
+      final snapshot = await firestoreTransaction.get(transactionRef);
+      if (!snapshot.exists || snapshot.data() == null) return;
+
+      final data = snapshot.data()!;
+      final isIncome =
+          data['is_income'] as bool? ?? (data['type'] as String?) == 'income';
+      final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
+      final amountDelta = isIncome ? -amount : amount;
+      final walletSnapshot = await firestoreTransaction.get(walletRef);
+      final currentBalance =
+          (walletSnapshot.data()?['balance'] as num?)?.toDouble() ?? 0.0;
+
+      firestoreTransaction.delete(transactionRef);
+      firestoreTransaction.set(walletRef, {
+        'name': walletSnapshot.data()?['name'] ?? 'Cash',
+        'type': walletSnapshot.data()?['type'] ?? 'cash',
+        'balance': currentBalance + amountDelta,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    });
   }
 
   @override
   Future<List<TransactionModel>> getRecentTransactions({int limit = 5}) async {
-    final response = await _supabase.from('transactions').select('''
-      id,
-      amount,
-      type,
-      title,
-      transaction_date,
-      categories (name, icon)
-    ''').order('transaction_date', ascending: false).limit(limit);
+    final businessId = await _getBusinessId();
+    final snapshot = await _transactionsRef(businessId)
+        .orderBy('date_time', descending: true)
+        .limit(limit)
+        .get();
 
-    final List<dynamic> data = response;
-    return data.map((json) {
-      return TransactionModel(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? 'Transaksi',
-        amount: (json['amount'] as num).toDouble(),
-        isIncome: json['type'] == 'income',
-        category: json['categories']?['name'] as String? ?? 'Lainnya',
-        categoryIcon: json['categories']?['icon'] as String? ?? 'category',
-        dateTime: DateTime.parse(json['transaction_date'] as String),
-      );
-    }).toList();
+    return snapshot.docs.map(_transactionFromDoc).toList();
   }
 }

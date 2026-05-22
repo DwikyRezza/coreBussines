@@ -3,6 +3,8 @@
 // lib/features/auth/data/models/user_model.dart
 // ============================================================
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
@@ -15,14 +17,18 @@ class UserModel extends UserEntity {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final updatedAt = json['updated_at'] ?? json['created_at'];
+
     return UserModel(
       id: json['id'] as String,
       fullName: json['full_name'] as String? ?? json['name'] as String?,
       email: json['email'] as String,
       avatarUrl: json['avatar_url'] as String? ?? json['photo_url'] as String?,
-      updatedAt: DateTime.parse(
-        (json['updated_at'] ?? json['created_at']) as String,
-      ),
+      updatedAt: updatedAt is DateTime
+          ? updatedAt
+          : updatedAt is Timestamp
+              ? updatedAt.toDate()
+              : DateTime.tryParse(updatedAt as String? ?? '') ?? DateTime.now(),
     );
   }
 

@@ -8,9 +8,12 @@
 // ============================================================
 
 import 'package:get_it/get_it.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../storage/local_storage_service.dart';
+import '../config/app_config.dart';
 
 // Auth
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -37,7 +40,6 @@ import '../../features/transactions/domain/repositories/transaction_repository.d
 import '../../features/transactions/domain/usecases/add_transaction.dart';
 import '../../features/transactions/domain/usecases/delete_transaction.dart';
 import '../../features/transactions/presentation/bloc/transaction_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Global service locator instance.
 final sl = GetIt.instance;
@@ -47,10 +49,15 @@ final sl = GetIt.instance;
 Future<void> initDependencies() async {
   // ─── External Dependencies ────────────────────────────────
   sl.registerLazySingleton<GoogleSignIn>(
-    () => GoogleSignIn(scopes: ['email', 'profile']),
+    () => GoogleSignIn(
+      serverClientId:
+          AppConfig.googleWebClientId.isEmpty ? null : AppConfig.googleWebClientId,
+      scopes: ['email', 'profile'],
+    ),
   );
 
-  sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
+  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+  sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
 
   // SharedPreferences must be awaited before registration.
   final prefs = await SharedPreferences.getInstance();
@@ -61,7 +68,12 @@ Future<void> initDependencies() async {
 
   // ─── Auth Feature ─────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(googleSignIn: sl(), prefs: sl()),
+    () => AuthRemoteDataSourceImpl(
+      auth: sl(),
+      firestore: sl(),
+      googleSignIn: sl(),
+      prefs: sl(),
+    ),
   );
 
   // AuthRepositoryImpl is NOT const (has StreamController) — use factory init.
@@ -91,7 +103,8 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton<TransactionRemoteDataSource>(
     () => TransactionRemoteDataSourceImpl(
-      supabase: sl(),
+      auth: sl(),
+      firestore: sl(),
       localStorage: sl(),
     ),
   );
@@ -119,7 +132,8 @@ Future<void> initDependencies() async {
   // ─── Home Feature ─────────────────────────────────────────
   sl.registerLazySingleton<HomeDataSource>(
     () => HomeRemoteDataSourceImpl(
-      supabase: sl(),
+      auth: sl(),
+      firestore: sl(),
       authRepository: sl<AuthRepositoryImpl>(),
       localStorage: sl(),
     ),

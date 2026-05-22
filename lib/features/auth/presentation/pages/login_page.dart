@@ -139,9 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                   if (state is AuthAuthenticated) {
                     context.go(AppRoutes.home);
                   } else if (state is AuthFailureState) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
+                    _showErrorBottomSheet(context, state.message);
                   }
                 },
                 builder: (context, state) {
@@ -264,6 +262,87 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: AppSpacing.xl),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorBottomSheet(BuildContext context, String message) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.expense.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.expense,
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Gagal Masuk',
+              style: AppTypography.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.textTheme.bodyMedium?.copyWith(
+                color: AppColors.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.expense,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Coba Lagi',
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ),
       ),
     );

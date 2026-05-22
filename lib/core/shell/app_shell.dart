@@ -226,9 +226,13 @@ class _ExpandableFABState extends State<_ExpandableFAB>
   OverlayEntry _createOverlayEntry() {
     return OverlayEntry(
       builder: (context) {
+        final bottomPadding = MediaQuery.of(context).padding.bottom;
+        final actionWidth = ((MediaQuery.of(context).size.width - 46) / 2)
+            .clamp(128.0, 164.0)
+            .toDouble();
+
         return Stack(
           children: [
-            // Blurred Background
             GestureDetector(
               onTap: _toggle,
               child: AnimatedBuilder(
@@ -246,85 +250,82 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                 },
               ),
             ),
-            
-            // Expanded FAB buttons
+
             Positioned(
-              bottom: 40 + MediaQuery.of(context).padding.bottom,
+              bottom: 74 + bottomPadding,
               left: 0,
               right: 0,
               child: Center(
                 child: SizedBox(
-                  width: 320,
-                  height: 320,
+                  width: MediaQuery.of(context).size.width,
+                  height: 220,
                   child: AnimatedBuilder(
                     animation: _expandAnimation,
                     builder: (context, child) {
-                      return Stack(
+                      return Transform.scale(
+                        scale: _expandAnimation.value,
                         alignment: Alignment.bottomCenter,
-                        children: [
-                          // 1. Tambah Pemasukan (Left)
-                          _buildActionItem(
-                            icon: Icons.add,
-                            label: 'Tambah Pemasukan',
-                            angle: -0.6,
-                            distance: 110,
-                            color: AppColors.primary,
-                            onTap: () {
-                              _toggle();
-                              // Add Income Action
-                            },
-                          ),
-                          // 2. Tambah Pengeluaran (Top Left)
-                          _buildActionItem(
-                            icon: Icons.remove,
-                            label: 'Tambah Pengeluaran',
-                            angle: -0.2,
-                            distance: 140,
-                            color: AppColors.expense,
-                            onTap: () {
-                              _toggle();
-                              // Add Expense Action
-                            },
-                          ),
-                          // 3. Scan Struk (Top Right)
-                          _buildActionItem(
-                            icon: Icons.receipt_long_rounded,
-                            label: 'Scan Struk',
-                            angle: 0.2,
-                            distance: 140,
-                            color: AppColors.onBackground,
-                            onTap: () {
-                              _toggle();
-                              // Scan Receipt Action
-                            },
-                          ),
-                          // 4. Tambah Jadwal (Right)
-                          _buildActionItem(
-                            icon: Icons.calendar_today_rounded,
-                            label: 'Tambah Jadwal',
-                            angle: 0.6,
-                            distance: 110,
-                            color: AppColors.expense,
-                            onTap: () {
-                              _toggle();
-                              // Add Schedule Action
-                            },
-                          ),
-                          
-                          // Close Button (Center Bottom)
-                          Positioned(
-                            bottom: 0,
-                            child: Transform.rotate(
-                              angle: _expandAnimation.value * 3.14159 / 4, // rotate + to x
-                              child: FloatingActionButton(
-                                elevation: 0,
-                                backgroundColor: AppColors.primary,
-                                onPressed: _toggle,
-                                child: const Icon(Icons.close, color: Colors.white),
+                        child: Opacity(
+                          opacity: _controller.value.clamp(0.0, 1.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildActionItem(
+                                    icon: Icons.add_rounded,
+                                    label: 'Tambah Pemasukan',
+                                    width: actionWidth,
+                                    color: AppColors.primary,
+                                    onTap: () {
+                                      _toggle();
+                                      context.push(AppRoutes.addTransaction);
+                                    },
+                                  ),
+                                  const SizedBox(width: 14),
+                                  _buildActionItem(
+                                    icon: Icons.remove_rounded,
+                                    label: 'Tambah Pengeluaran',
+                                    width: actionWidth,
+                                    color: AppColors.expense,
+                                    onTap: () {
+                                      _toggle();
+                                      context.push(AppRoutes.addTransaction);
+                                    },
+                                  ),
+                                ],
                               ),
-                            ),
+                              const SizedBox(height: 14),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildActionItem(
+                                    icon: Icons.receipt_long_rounded,
+                                    label: 'Scan Struk',
+                                    width: actionWidth,
+                                    color: AppColors.onBackground,
+                                    onTap: () {
+                                      _toggle();
+                                      context.push(AppRoutes.scanReceiptIntro);
+                                    },
+                                  ),
+                                  const SizedBox(width: 14),
+                                  _buildActionItem(
+                                    icon: Icons.calendar_today_rounded,
+                                    label: 'Tambah Jadwal',
+                                    width: actionWidth,
+                                    color: AppColors.expense,
+                                    onTap: () {
+                                      _toggle();
+                                      context.push(AppRoutes.addSchedule);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       );
                     },
                   ),
@@ -340,50 +341,61 @@ class _ExpandableFABState extends State<_ExpandableFAB>
   Widget _buildActionItem({
     required IconData icon,
     required String label,
-    required double angle, // angle from vertical top
-    required double distance,
+    required double width,
     required Color color,
     required VoidCallback onTap,
   }) {
-    // Math to position icons in an arc
-    final double rad = angle * 3.14159;
-    // We adjust bottom offset. Bottom center is the origin.
-    final double dx = distance * -rad; // approximation for horizontal spread
-    final double dy = distance * (1 - angle.abs()) + 40; // approximation for vertical arc
-
-    return Positioned(
-      bottom: _expandAnimation.value * dy,
-      left: 160 + (_expandAnimation.value * dx) - 40, // 160 is half of 320 width
-      child: Transform.scale(
-        scale: _expandAnimation.value,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 4,
-              child: InkWell(
-                onTap: onTap,
-                customBorder: const CircleBorder(),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Icon(icon, color: color, size: 24),
-                ),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadow.withOpacity(0.16),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
+              child: Icon(icon, color: color, size: 26),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                label,
-                style: AppTypography.textTheme.labelSmall?.copyWith(
-                  color: AppColors.onBackground,
-                  fontWeight: FontWeight.w600,
+            SizedBox(
+              width: width,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withOpacity(0.94),
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow.withOpacity(0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                    color: AppColors.onBackground,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                  ),
                 ),
               ),
             ),

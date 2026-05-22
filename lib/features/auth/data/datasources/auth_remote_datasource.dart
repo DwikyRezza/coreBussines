@@ -4,8 +4,9 @@
 // ============================================================
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
 import '../../../../core/config/app_config.dart';
@@ -19,19 +20,23 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   static const _activeBusinessIdKey = 'active_business_id';
 
-  final SupabaseClient _supabase;
+  final firebase_auth.FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
   final SharedPreferences _prefs;
 
   AuthRemoteDataSourceImpl({
-    SupabaseClient? supabase,
+    required firebase_auth.FirebaseAuth auth,
+    required FirebaseFirestore firestore,
     GoogleSignIn? googleSignIn,
     required SharedPreferences prefs,
-  })  : _supabase = supabase ?? Supabase.instance.client,
+  })  : _auth = auth,
+        _firestore = firestore,
         _googleSignIn = googleSignIn ??
             GoogleSignIn(
-              clientId: AppConfig.googleAndroidClientId,
-              serverClientId: AppConfig.googleWebClientId,
+              serverClientId: AppConfig.googleWebClientId.isEmpty
+                  ? null
+                  : AppConfig.googleWebClientId,
               scopes: ['email', 'profile'],
             ),
         _prefs = prefs;
@@ -52,22 +57,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const AuthException(message: 'Gagal mendapatkan token Google.');
       }
 
-      final response = await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
+      final credential = firebase_auth.GoogleAuthProvider.credential(
         idToken: idToken,
         accessToken: accessToken,
       );
 
-      final user = response.user;
+      final credentialResult = await _auth.signInWithCredential(credential);
+      final user = credentialResult.user;
       if (user == null) {
         throw const AuthException(message: 'Gagal masuk ke sistem.');
       }
 
       final userModel = UserModel.fromGoogleUser(
-        id: user.id,
-        name: googleUser.displayName ?? 'Pengguna',
-        email: googleUser.email,
-        photoUrl: googleUser.photoUrl,
+        id: user.uid,
+        name: user.displayName ?? googleUser.displayName ?? 'Pengguna',
+        email: user.email ?? googleUser.email,
+        photoUrl: user.photoURL ?? googleUser.photoUrl,
       );
 
       await _ensureWorkspace(userModel);
@@ -85,7 +90,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() async {
     try {
       await _googleSignIn.signOut();
-      await _supabase.auth.signOut();
+      await _auth.signOut();
       await _prefs.remove(_activeBusinessIdKey);
     } catch (e) {
       throw AuthException(message: 'Gagal keluar: $e');
@@ -94,29 +99,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final user = _supabase.auth.currentUser;
+    final user = _auth.currentUser;
     if (user == null) return null;
 
-    final profile = await _supabase
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    final profile = await _firestore.collection('users').doc(user.uid).get();
 
-    if (profile != null) {
-      final userModel = UserModel.fromJson(profile);
+    if (profile.exists && profile.data() != null) {
+      final profileData = profile.data()!;
+      final activeBusinessId = profileData['active_business_id'] as String?;
+      if (activeBusinessId != null && activeBusinessId.isNotEmpty) {
+        await _prefs.setString(_activeBusinessIdKey, activeBusinessId);
+      }
+
+      final userModel = UserModel.fromJson({
+        'id': profile.id,
+        ...profileData,
+      });
       await _ensureWorkspace(userModel);
       return userModel;
     }
 
-    final metadata = user.userMetadata ?? const <String, dynamic>{};
     final userModel = UserModel(
-      id: user.id,
-      fullName:
-          metadata['full_name'] as String? ?? metadata['name'] as String?,
-      email: user.email ?? metadata['email'] as String? ?? '',
-      avatarUrl:
-          metadata['avatar_url'] as String? ?? metadata['picture'] as String?,
+      id: user.uid,
+      fullName: user.displayName,
+      email: user.email ?? '',
+      avatarUrl: user.photoURL,
       updatedAt: DateTime.now(),
     );
 
@@ -125,17 +132,57 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   Future<void> _ensureWorkspace(UserModel user) async {
-    final businessId = await _supabase.rpc<String>(
-      'ensure_current_user_workspace',
-      params: {
-        'p_full_name': user.fullName,
-        'p_email': user.email,
-        'p_avatar_url': user.avatarUrl,
+    final businessId = _prefs.getString(_activeBusinessIdKey) ?? 'business_${user.id}';
+    final now = FieldValue.serverTimestamp();
+    final userRef = _firestore.collection('users').doc(user.id);
+    final businessRef = _firestore.collection('businesses').doc(businessId);
+
+    await _firestore.runTransaction((transaction) async {
+      final businessSnapshot = await transaction.get(businessRef);
+
+      transaction.set(
+        userRef,
+        {
+          'full_name': user.fullName,
+          'email': user.email,
+          'avatar_url': user.avatarUrl,
+          'active_business_id': businessId,
+          'updated_at': now,
+        },
+        SetOptions(merge: true),
+      );
+
+      transaction.set(
+        businessRef,
+        {
+          'name': '${user.fullName ?? user.email} Workspace',
+          'owner_id': user.id,
+          'updated_at': now,
+          if (!businessSnapshot.exists) 'created_at': now,
+        },
+        SetOptions(merge: true),
+      );
+    });
+
+    await businessRef.collection('members').doc(user.id).set(
+      {
+        'user_id': user.id,
+        'role': 'owner',
+        'joined_at': now,
       },
+      SetOptions(merge: true),
     );
 
-    if (businessId.isNotEmpty) {
-      await _prefs.setString(_activeBusinessIdKey, businessId);
-    }
+    await businessRef.collection('wallets').doc('default_cash').set(
+      {
+        'name': 'Cash',
+        'type': 'cash',
+        'balance': 0.0,
+        'updated_at': now,
+      },
+      SetOptions(merge: true),
+    );
+
+    await _prefs.setString(_activeBusinessIdKey, businessId);
   }
 }

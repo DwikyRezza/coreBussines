@@ -1,4 +1,4 @@
-package com.example.corebusiness
+package com.rezza.corebusiness
 
 import io.flutter.embedding.android.FlutterActivity
 

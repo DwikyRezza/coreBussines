@@ -3,7 +3,9 @@
 // lib/features/home/presentation/bloc/home_bloc.dart
 // ============================================================
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/home_entities.dart';
 import '../../domain/repositories/home_repository.dart';
 import 'home_event.dart';
@@ -55,7 +57,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     int tabIndex = 0,
   }) async {
     // Parallel fetch — all 3 requests execute simultaneously
-    final (summaryResult, transactionsResult, insightResult) = await (
+    final (
+      Either<Failure, BalanceSummary> summaryResult,
+      Either<Failure, List<Transaction>> transactionsResult,
+      Either<Failure, InsightCard> insightResult,
+    ) = await (
       _repository.getBalanceSummary(),
       _repository.getRecentTransactions(limit: 5),
       _repository.getCurrentInsight(),

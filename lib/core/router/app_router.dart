@@ -4,7 +4,6 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../di/service_locator.dart';
 import '../router/router_notifier.dart';
@@ -15,7 +14,6 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 // Home & Shell
 import '../../features/home/presentation/pages/home_page.dart';
@@ -166,10 +164,7 @@ GoRouter _buildRouter() {
     GoRoute(
       path: AppRoutes.login,
       name: 'login',
-      builder: (context, state) => BlocProvider(
-        create: (_) => sl<AuthBloc>(),
-        child: const LoginPage(),
-      ),
+      builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
       path: AppRoutes.addTransaction,

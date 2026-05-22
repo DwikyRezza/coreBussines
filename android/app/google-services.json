@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "370705304990",
+    "project_id": "corebusiness-1927",
+    "storage_bucket": "corebusiness-1927.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370705304990:android:73783f2b99107dc344da8f",
+        "android_client_info": {
+          "package_name": "com.rezza.corebusiness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370705304990-drc38454ojon7b6af3bafbhib774b9co.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rezza.corebusiness",
+            "certificate_hash": "da68d66c11c8079f80a686d7d7ab3ddbc136f469"
+          }
+        },
+        {
+          "client_id": "370705304990-ksq50g0epb9sgr42tvkrh6mn87qvgadn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAKpwytQo9QrjIy3V43nDsORciLQ_Y05Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370705304990-ksq50g0epb9sgr42tvkrh6mn87qvgadn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
