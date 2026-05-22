@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -41,11 +41,11 @@ class _LoginPageState extends State<LoginPage> {
                 height: 260,
                 width: 240,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadow.withOpacity(0.08),
+                      color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
                       blurRadius: 24,
                       offset: const Offset(0, 12),
                     ),
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.outlineVariant, width: 2),
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 2),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -66,14 +66,14 @@ class _LoginPageState extends State<LoginPage> {
                         Icon(
                           Icons.accessibility_new_rounded,
                           size: 64,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(height: 16),
                         Container(
                           height: 16,
                           width: 80,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainer,
+                            color: Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -89,16 +89,16 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.fitness_center_rounded,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 28,
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     'CoreBusiness',
                     style: AppTypography.textTheme.titleLarge?.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 24,
                     ),
@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                 _isRegisterMode ? 'Buat Akun\nCoreBusiness' : 'Selamat Datang di\nCoreBusiness',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
-                  color: AppColors.onBackground,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                   height: 1.2,
                 ),
@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                     : 'Mulai perjalanan sehatmu dan capai\ntarget kebugaran dengan presisi.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -159,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                               );
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         minimumSize: const Size.fromHeight(56),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -211,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     _isRegisterMode ? 'Sudah punya akun?' : 'Belum punya akun?',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   TextButton(
@@ -223,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       _isRegisterMode ? 'Masuk' : 'Daftar',
                       style: AppTypography.textTheme.labelLarge?.copyWith(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -238,23 +238,23 @@ class _LoginPageState extends State<LoginPage> {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: AppTypography.textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                   children: [
                     const TextSpan(text: 'Dengan masuk, Anda menyetujui '),
                     TextSpan(
                       text: 'Syarat dan Ketentuan',
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const TextSpan(text: '\nserta '),
                     TextSpan(
                       text: 'Kebijakan Privasi',
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -292,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.outlineVariant,
+                color: Theme.of(context).colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -300,12 +300,12 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.expense.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.error_outline_rounded,
-                color: AppColors.expense,
+                color: Theme.of(context).colorScheme.error,
                 size: 48,
               ),
             ),
@@ -314,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
               title,
               style: AppTypography.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: AppColors.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -322,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
               message,
               textAlign: TextAlign.center,
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -332,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.expense,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),

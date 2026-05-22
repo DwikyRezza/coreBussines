@@ -104,10 +104,10 @@ class CameraScanPage extends StatelessWidget {
                           height: 2,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2962FF), // Bright blue
+                            color: Theme.of(context).colorScheme.primary, // Bright blue
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF2962FF).withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                               ),
@@ -130,8 +130,8 @@ class CameraScanPage extends StatelessWidget {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 48),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               ),
               child: Column(
@@ -141,7 +141,7 @@ class CameraScanPage extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFCBD5E0),
+                      color: Theme.of(context).colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -156,10 +156,10 @@ class CameraScanPage extends StatelessWidget {
                         CircularProgressIndicator(
                           value: 0.7,
                           strokeWidth: 4,
-                          color: const Color(0xFF0D47A1),
-                          backgroundColor: const Color(0xFFE2E8F0),
+                          color: Theme.of(context).colorScheme.primary,
+                          backgroundColor: Theme.of(context).colorScheme.outlineVariant,
                         ),
-                        const Icon(Icons.receipt_long_rounded, color: Color(0xFF0D47A1), size: 32),
+                        Icon(Icons.receipt_long_rounded, color: Theme.of(context).colorScheme.primary, size: 32),
                       ],
                     ),
                   ),
@@ -168,7 +168,7 @@ class CameraScanPage extends StatelessWidget {
                     'Menganalisis Struk...',
                     style: AppTypography.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0D47A1),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -176,7 +176,7 @@ class CameraScanPage extends StatelessWidget {
                     'Memproses data transaksi Anda. Pastikan\nperangkat tetap stabil.',
                     textAlign: TextAlign.center,
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF4A5568),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.5,
                     ),
                   ),
@@ -202,10 +202,10 @@ class _CornerBracket extends StatelessWidget {
       child: Container(
         width: 32,
         height: 32,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: Color(0xFF2962FF), width: 4),
-            left: BorderSide(color: Color(0xFF2962FF), width: 4),
+            top: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4),
+            left: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4),
           ),
           borderRadius: BorderRadius.only(topLeft: Radius.circular(12)),
         ),

@@ -9,7 +9,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Tentang Aplikasi')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -17,7 +17,7 @@ class AboutPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
@@ -25,11 +25,11 @@ class AboutPage extends StatelessWidget {
                 Container(
                   width: 72,
                   height: 72,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryContainer,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.fitness_center_rounded, color: AppColors.primary, size: 34),
+                  child: Icon(Icons.fitness_center_rounded, color: Theme.of(context).colorScheme.primary, size: 34),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -42,7 +42,7 @@ class AboutPage extends StatelessWidget {
                 Text(
                   'Versi 1.0.0',
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -50,7 +50,7 @@ class AboutPage extends StatelessWidget {
                   'Aplikasi pencatatan bisnis untuk transaksi, analisis, dompet, dan scan struk berbasis AI.',
                   textAlign: TextAlign.center,
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.45,
                   ),
                 ),
@@ -79,7 +79,7 @@ class _InfoTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -91,7 +91,7 @@ class _InfoTile extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),

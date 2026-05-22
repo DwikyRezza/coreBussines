@@ -30,11 +30,11 @@ class _DashboardCustomizeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Atur Dashboard',
             style: AppTypography.textTheme.titleLarge?.copyWith(
-              color: AppColors.primary, fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700,
             )),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -46,10 +46,10 @@ class _DashboardCustomizeView extends StatelessWidget {
             padding: const EdgeInsets.only(right: AppSpacing.base),
             child: CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.outlineVariant,
+              backgroundColor: Theme.of(context).colorScheme.outlineVariant,
               child: Text('A',
                   style: AppTypography.textTheme.labelLarge?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   )),
             ),
           ),
@@ -58,7 +58,7 @@ class _DashboardCustomizeView extends StatelessWidget {
       body: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +70,7 @@ class _DashboardCustomizeView extends StatelessWidget {
                 child: Text(
                   'Pilih dan atur urutan kartu yang tampil di beranda.',
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -116,9 +116,9 @@ class _DashboardCardTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -129,11 +129,11 @@ class _DashboardCardTile extends StatelessWidget {
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(
-              color: _iconBackground(card.iconName),
+              color: _iconBackground(context, card.iconName),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Icon(_iconData(card.iconName),
-                color: _iconColor(card.iconName), size: 20),
+                color: _iconColor(context, card.iconName), size: 20),
           ),
           const SizedBox(width: AppSpacing.md),
 
@@ -146,7 +146,7 @@ class _DashboardCardTile extends StatelessWidget {
                   )),
               Text(card.subtitle,
                   style: AppTypography.textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   )),
             ]),
           ),
@@ -157,38 +157,38 @@ class _DashboardCardTile extends StatelessWidget {
             child: Switch.adaptive(
               value: card.isEnabled,
               onChanged: (_) => onToggle(),
-              activeColor: AppColors.primary,
+              activeColor: Theme.of(context).colorScheme.primary,
             ),
           ),
 
           // Drag handle
           const SizedBox(width: AppSpacing.xs),
-          const Icon(Icons.drag_indicator_rounded,
-              color: AppColors.onSurfaceVariant, size: 20),
+          Icon(Icons.drag_indicator_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
         ]),
       ),
     );
   }
 
-  Color _iconBackground(String name) {
+  Color _iconBackground(BuildContext context, String name) {
     switch (name) {
-      case 'wallet': return AppColors.primaryContainer;
-      case 'bolt': return AppColors.primaryContainer;
+      case 'wallet': return Theme.of(context).colorScheme.primaryContainer;
+      case 'bolt': return Theme.of(context).colorScheme.primaryContainer;
       case 'chart': return const Color(0xFFFFEDD5);
-      case 'ai': return AppColors.primaryContainer;
-      case 'history': return AppColors.surfaceContainer;
-      default: return AppColors.surfaceContainer;
+      case 'ai': return Theme.of(context).colorScheme.primaryContainer;
+      case 'history': return Theme.of(context).colorScheme.surfaceContainer;
+      default: return Theme.of(context).colorScheme.surfaceContainer;
     }
   }
 
-  Color _iconColor(String name) {
+  Color _iconColor(BuildContext context, String name) {
     switch (name) {
       case 'wallet': return AppColors.primary;
       case 'bolt': return AppColors.primary;
       case 'chart': return const Color(0xFFE65100);
       case 'ai': return AppColors.primary;
-      case 'history': return AppColors.onSurfaceVariant;
-      default: return AppColors.onSurfaceVariant;
+      case 'history': return Theme.of(context).colorScheme.onSurfaceVariant;
+      default: return Theme.of(context).colorScheme.onSurfaceVariant;
     }
   }
 

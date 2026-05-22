@@ -66,7 +66,7 @@ class _ScanReceiptView extends StatelessWidget {
                 width: 48,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.outlineVariant,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -74,13 +74,13 @@ class _ScanReceiptView extends StatelessWidget {
               Container(
                 width: 72,
                 height: 72,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryContainer,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.workspace_premium_rounded,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 40,
                 ),
               ),
@@ -89,7 +89,7 @@ class _ScanReceiptView extends StatelessWidget {
                 'Limit Scan Tercapai',
                 style: AppTypography.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: AppColors.onBackground,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -97,7 +97,7 @@ class _ScanReceiptView extends StatelessWidget {
                 'Anda bisa scan maksimal 5x dalam 1 menit. Tunggu $seconds detik atau upgrade Premium untuk scan tanpa batas.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -110,9 +110,9 @@ class _ScanReceiptView extends StatelessWidget {
                     if (context.mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Premium aktif. Scan tanpa batas sudah terbuka.'),
-                          backgroundColor: AppColors.income,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                         ),
                       );
                     }
@@ -139,9 +139,9 @@ class _ScanReceiptView extends StatelessWidget {
       listener: (context, state) {
         if (state is TransactionScanSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Struk berhasil diproses dan disimpan!'),
-              backgroundColor: AppColors.income,
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
           context.pop(); // Kembali ke home/sebelumnya
@@ -149,7 +149,7 @@ class _ScanReceiptView extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: AppColors.expense,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -158,10 +158,10 @@ class _ScanReceiptView extends StatelessWidget {
         final isLoading = state is TransactionLoading;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.close_rounded, color: Color(0xFF1A202C)),
+              icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () => context.pop(),
             ),
             backgroundColor: Colors.transparent,
@@ -181,8 +181,8 @@ class _ScanReceiptView extends StatelessWidget {
                       Container(
                         width: 280,
                         height: 280,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEDF2F7), // Light blue-grey background
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest, // Light blue-grey background
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -206,10 +206,10 @@ class _ScanReceiptView extends StatelessWidget {
                                 width: 200,
                                 height: 2,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF2962FF),
+                                  color: Theme.of(context).colorScheme.primary,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF2962FF).withOpacity(0.5),
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
                                       blurRadius: 8,
                                       spreadRadius: 2,
                                     ),
@@ -227,7 +227,7 @@ class _ScanReceiptView extends StatelessWidget {
                         'Pindai Struk',
                         style: AppTypography.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1A202C),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -237,7 +237,7 @@ class _ScanReceiptView extends StatelessWidget {
                           'Ambil foto struk fisik Anda untuk mencatat pengeluaran secara otomatis menggunakan AI.',
                           textAlign: TextAlign.center,
                           style: AppTypography.textTheme.bodyLarge?.copyWith(
-                            color: const Color(0xFF4A5568),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -249,7 +249,7 @@ class _ScanReceiptView extends StatelessWidget {
                         onPressed: isLoading ? null : () => _pickImage(context, ImageSource.camera),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                          backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Row(
@@ -266,16 +266,16 @@ class _ScanReceiptView extends StatelessWidget {
                         onPressed: isLoading ? null : () => _pickImage(context, ImageSource.gallery),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: const Color(0xFFE2E8F0), // Light grey
+                          backgroundColor: Theme.of(context).colorScheme.outlineVariant, // Light grey
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.photo_library_outlined, color: Color(0xFF0D47A1), size: 20),
+                            Icon(Icons.photo_library_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
                             const SizedBox(width: 12),
-                            Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                            Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -299,7 +299,7 @@ class _ScanReceiptView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircularProgressIndicator(color: AppColors.primary),
+                          CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                           const SizedBox(height: 16),
                           Text(
                             'AI sedang membaca struk...',

@@ -14,7 +14,7 @@ class AiDetectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Very light gray-blue background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Very light gray-blue background
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -28,7 +28,7 @@ class AiDetectionPage extends StatelessWidget {
                 'AI Detection',
                 style: AppTypography.textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A202C),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -36,7 +36,7 @@ class AiDetectionPage extends StatelessWidget {
                 'Categorizing your transaction automatically.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF4A5568),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -49,7 +49,7 @@ class AiDetectionPage extends StatelessWidget {
                   border: Border.all(color: Colors.white, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0D47A1).withOpacity(0.05),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
@@ -67,7 +67,7 @@ class AiDetectionPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.shadow.withOpacity(0.03),
+                              color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -77,11 +77,11 @@ class AiDetectionPage extends StatelessWidget {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(12),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE2E8F0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.outlineVariant,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF4A5568)),
+                              child: Icon(Icons.receipt_long_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -90,7 +90,7 @@ class AiDetectionPage extends StatelessWidget {
                                 children: [
                                   Text('McDonalds', style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                                   const SizedBox(height: 4),
-                                  Text('Oct 24 • 12:30 PM', style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF718096))),
+                                  Text('Oct 24 • 12:30 PM', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                                 ],
                               ),
                             ),
@@ -116,7 +116,7 @@ class AiDetectionPage extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF0D47A1).withOpacity(0.2),
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                                   blurRadius: 30,
                                   spreadRadius: 10,
                                 ),
@@ -131,7 +131,7 @@ class AiDetectionPage extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  const Color(0xFF0D47A1).withOpacity(0.5),
+                                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
                                   Colors.transparent,
                                 ],
                               ),
@@ -140,8 +140,8 @@ class AiDetectionPage extends StatelessWidget {
                           // Main Icon
                           Container(
                             padding: const EdgeInsets.all(20),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF0D47A1),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.auto_awesome, color: Colors.white, size: 32),
@@ -152,7 +152,7 @@ class AiDetectionPage extends StatelessWidget {
                       Text(
                         'ANALYZING DATA...',
                         style: AppTypography.textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFF0D47A1),
+                          color: Theme.of(context).colorScheme.primary,
                           letterSpacing: 2.0,
                           fontWeight: FontWeight.w700,
                         ),
@@ -166,14 +166,14 @@ class AiDetectionPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFFE3F2FD), // Light blue background
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFF0D47A1).withOpacity(0.1)),
+                          border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1)),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(16),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF0D47A1),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.restaurant_rounded, color: Colors.white, size: 24),
@@ -183,9 +183,9 @@ class AiDetectionPage extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Detected\nCategory', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF0D47A1), height: 1.2)),
+                                  Text('Detected\nCategory', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary, height: 1.2)),
                                   const SizedBox(height: 4),
-                                  Text('Makanan', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
+                                  Text('Makanan', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
                                 ],
                               ),
                             ),
@@ -197,9 +197,9 @@ class AiDetectionPage extends StatelessWidget {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF0D47A1), size: 16),
+                                  Icon(Icons.check_circle_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
                                   const SizedBox(width: 4),
-                                  Text('99%\nMatch', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w700, height: 1.1)),
+                                  Text('99%\nMatch', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700, height: 1.1)),
                                 ],
                               ),
                             ),
@@ -217,7 +217,7 @@ class AiDetectionPage extends StatelessWidget {
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                  backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text('Confirm & Continue', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
@@ -229,7 +229,7 @@ class AiDetectionPage extends StatelessWidget {
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text('Edit Category manually', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                child: Text('Edit Category manually', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
               ),
               const SizedBox(height: AppSpacing.xl),
             ],

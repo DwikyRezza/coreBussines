@@ -108,7 +108,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final initial = (user?.name ?? 'U')[0].toUpperCase();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -126,13 +126,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 58,
-                    backgroundColor: AppColors.primaryContainer,
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                     backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
                     child: avatarUrl == null
                         ? Text(
                             initial,
                             style: AppTypography.textTheme.displaySmall?.copyWith(
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w800,
                             ),
                           )
@@ -142,7 +142,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Text(
                     'Foto profil mengikuti akun Google',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -176,12 +176,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.shield_outlined, color: AppColors.primary),
+                    Icon(Icons.shield_outlined, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
@@ -197,13 +197,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           Text(
                             'Kelola PIN, biometrik, dan proteksi transaksi.',
                             style: AppTypography.textTheme.bodySmall?.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+                    Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.primary),
                   ],
                 ),
               ),
@@ -219,7 +219,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             onPressed: _isSaving ? null : _saveProfile,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             child: _isSaving
@@ -265,7 +265,7 @@ class _FormField extends StatelessWidget {
         Text(
           label,
           style: AppTypography.textTheme.bodyMedium?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -274,23 +274,23 @@ class _FormField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           readOnly: readOnly,
-          style: AppTypography.textTheme.bodyLarge?.copyWith(color: AppColors.onBackground),
+          style: AppTypography.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: AppColors.outline),
+            prefixIcon: Icon(icon, color: Theme.of(context).colorScheme.outline),
             filled: true,
-            fillColor: readOnly ? AppColors.surfaceContainer : AppColors.surface,
+            fillColor: readOnly ? Theme.of(context).colorScheme.surfaceContainer : Theme.of(context).colorScheme.surface,
             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.outlineVariant),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.outlineVariant),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ),

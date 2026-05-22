@@ -15,7 +15,7 @@ class BusinessPortfolioPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         child: Column(
@@ -28,7 +28,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                 'Portofolio Bisnis',
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A202C),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -70,13 +70,13 @@ class BusinessPortfolioPage extends StatelessWidget {
                     'Ikhtisar CoreBusiness',
                     style: AppTypography.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1A202C),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     'Bulan Ini',
                     style: AppTypography.textTheme.labelMedium?.copyWith(
-                      color: const Color(0xFF718096),
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
                 ],
@@ -94,7 +94,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadow.withOpacity(0.03),
+                      color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -105,9 +105,9 @@ class BusinessPortfolioPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF4A5568), size: 18),
+                        Icon(Icons.account_balance_wallet_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
                         const SizedBox(width: 8),
-                        Text('Total Pendapatan', style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF4A5568))),
+                        Text('Total Pendapatan', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -115,7 +115,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                       'Rp 124.5M',
                       style: AppTypography.textTheme.displayMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1A202C),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -154,7 +154,7 @@ class BusinessPortfolioPage extends StatelessWidget {
                       icon: Icons.pie_chart_outline_rounded,
                       value: '94%',
                       trendText: 'Stabil',
-                      trendColor: const Color(0xFF718096),
+                      trendColor: Theme.of(context).colorScheme.outline,
                       trendIcon: Icons.remove_rounded,
                     ),
                   ),
@@ -190,10 +190,10 @@ class _PortfolioCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: isActive ? Border.all(color: const Color(0xFF0D47A1), width: 2) : Border.all(color: Colors.transparent, width: 2),
+        border: isActive ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2) : Border.all(color: Colors.transparent, width: 2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -209,10 +209,10 @@ class _PortfolioCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEDF2F7),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: const Color(0xFF0D47A1), size: 24),
+                child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
               ),
               if (isActive)
                 Container(
@@ -221,14 +221,14 @@ class _PortfolioCard extends StatelessWidget {
                     color: const Color(0xFFE3F2FD),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('Aktif', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF0D47A1))),
+                  child: Text('Aktif', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
                 ),
             ],
           ),
           const Spacer(),
-          Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+          Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 4),
-          Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+          Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ],
       ),
     );
@@ -261,7 +261,7 @@ class _MetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -272,9 +272,9 @@ class _MetricCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: const Color(0xFF4A5568), size: 18),
+              Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
               const SizedBox(width: 8),
-              Text(title, style: AppTypography.textTheme.titleSmall?.copyWith(color: const Color(0xFF4A5568))),
+              Text(title, style: AppTypography.textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
           const SizedBox(height: 24),
@@ -282,7 +282,7 @@ class _MetricCard extends StatelessWidget {
             value,
             style: AppTypography.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF1A202C),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),

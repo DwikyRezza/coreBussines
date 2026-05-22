@@ -9,122 +9,152 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/core_app_bar.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class AnalyticsOverviewPage extends StatelessWidget {
   const AnalyticsOverviewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.pagePadding(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Analytics Overview',
-              style: AppTypography.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+      body: ResponsiveHelper.constrainWidth(
+        context: context,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: padding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Analytics Overview',
+                style: AppTypography.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Review your financial performance for this month.',
-              style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Review your financial performance for this month.',
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.xl),
 
-            // Net Profit Card (Blue)
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D47A1), // Deep blue
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0D47A1).withOpacity(0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Net Profit',
-                        style: AppTypography.textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.9)),
-                      ),
-                      const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 24),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '\$12,450.00',
-                    style: AppTypography.textTheme.headlineLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
+              // Net Profit Card (Blue)
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary, // Deep blue
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(Icons.trending_up_rounded, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
                         Text(
-                          '+14.5% vs last month',
-                          style: AppTypography.textTheme.labelSmall?.copyWith(color: Colors.white),
+                          'Net Profit',
+                          style: AppTypography.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
                         ),
+                        const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 24),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Text(
+                      '\$12,450.00',
+                      style: AppTypography.textTheme.headlineLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.trending_up_rounded, color: Colors.white, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            '+14.5% vs last month',
+                            style: AppTypography.textTheme.labelSmall?.copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
 
-            // Total Income & Expense Cards
-            _SimpleStatCard(
-              title: 'Total Income',
-              amount: '\$18,200.00',
-              icon: Icons.arrow_downward_rounded,
-              iconColor: const Color(0xFF718096), // Grey
-              iconBg: const Color(0xFFEDF2F7),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SimpleStatCard(
-              title: 'Total Expense',
-              amount: '\$5,750.00',
-              icon: Icons.arrow_upward_rounded,
-              iconColor: const Color(0xFFC53030), // Red
-              iconBg: const Color(0xFFFED7D7),
-            ),
-            const SizedBox(height: AppSpacing.xl),
+              // Total Income & Expense Cards
+              if (ResponsiveHelper.isTabletOrLarger(context))
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SimpleStatCard(
+                        title: 'Total Income',
+                        amount: '\$18,200.00',
+                        icon: Icons.arrow_downward_rounded,
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        iconBg: Theme.of(context).colorScheme.primaryContainer,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: _SimpleStatCard(
+                        title: 'Total Expense',
+                        amount: '\$5,750.00',
+                        icon: Icons.arrow_upward_rounded,
+                        iconColor: Theme.of(context).colorScheme.error,
+                        iconBg: Theme.of(context).colorScheme.errorContainer,
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                _SimpleStatCard(
+                  title: 'Total Income',
+                  amount: '\$18,200.00',
+                  icon: Icons.arrow_downward_rounded,
+                  iconColor: Theme.of(context).colorScheme.primary,
+                  iconBg: Theme.of(context).colorScheme.primaryContainer,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _SimpleStatCard(
+                  title: 'Total Expense',
+                  amount: '\$5,750.00',
+                  icon: Icons.arrow_upward_rounded,
+                  iconColor: Theme.of(context).colorScheme.error,
+                  iconBg: Theme.of(context).colorScheme.errorContainer,
+                ),
+              ],
+              const SizedBox(height: AppSpacing.xl),
 
             // Financial Trend Chart
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.05),
+                    color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -147,16 +177,16 @@ class AnalyticsOverviewPage extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEDF2F7),
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Text('Weekly', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF4A5568))),
+                            child: Text('Weekly', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0D47A1),
+                              color: Theme.of(context).colorScheme.primary,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text('Monthly', style: AppTypography.textTheme.labelMedium?.copyWith(color: Colors.white)),
@@ -175,7 +205,7 @@ class AnalyticsOverviewPage extends StatelessWidget {
                           drawVerticalLine: false,
                           horizontalInterval: 5000,
                           getDrawingHorizontalLine: (value) {
-                            return FlLine(color: const Color(0xFFEDF2F7), strokeWidth: 1);
+                            return FlLine(color: Theme.of(context).colorScheme.surfaceContainerHighest, strokeWidth: 1);
                           },
                         ),
                         titlesData: FlTitlesData(
@@ -187,7 +217,7 @@ class AnalyticsOverviewPage extends StatelessWidget {
                               showTitles: true,
                               reservedSize: 22,
                               getTitlesWidget: (value, meta) {
-                                const style = TextStyle(color: Color(0xFF718096), fontSize: 10);
+                                final style = TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 10);
                                 String text;
                                 switch (value.toInt()) {
                                   case 0: text = 'Jan'; break;
@@ -207,8 +237,8 @@ class AnalyticsOverviewPage extends StatelessWidget {
                               showTitles: true,
                               reservedSize: 40,
                               getTitlesWidget: (value, meta) {
-                                const style = TextStyle(color: Color(0xFF718096), fontSize: 10);
-                                if (value == 0) return const Text('0', style: style);
+                                final style = TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 10);
+                                if (value == 0) return Text('0', style: style);
                                 return Text('\$${(value/1000).toInt()}k', style: style);
                               },
                             ),
@@ -230,7 +260,7 @@ class AnalyticsOverviewPage extends StatelessWidget {
                               FlSpot(5, 19000),
                             ],
                             isCurved: true,
-                            color: const Color(0xFF2962FF), // Bright Blue
+                            color: Theme.of(context).colorScheme.primary, // Bright Blue
                             barWidth: 4,
                             isStrokeCapRound: true,
                             dotData: FlDotData(
@@ -240,13 +270,13 @@ class AnalyticsOverviewPage extends StatelessWidget {
                                   radius: 4,
                                   color: Colors.white,
                                   strokeWidth: 3,
-                                  strokeColor: const Color(0xFF2962FF),
+                                  strokeColor: Theme.of(context).colorScheme.primary,
                                 );
                               },
                             ),
                             belowBarData: BarAreaData(
                               show: true,
-                              color: const Color(0xFF2962FF).withOpacity(0.1),
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                             ),
                           ),
                         ],
@@ -284,11 +314,11 @@ class _SimpleStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -300,7 +330,7 @@ class _SimpleStatCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+              Text(title, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const SizedBox(height: 8),
               Text(amount, style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
             ],

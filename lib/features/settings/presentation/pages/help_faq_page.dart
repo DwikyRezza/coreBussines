@@ -9,7 +9,7 @@ class HelpFaqPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Bantuan & FAQ')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -47,7 +47,7 @@ class _FaqItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: ExpansionTile(
@@ -63,7 +63,7 @@ class _FaqItem extends StatelessWidget {
             child: Text(
               answer,
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.45,
               ),
             ),

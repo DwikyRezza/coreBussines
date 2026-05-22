@@ -16,21 +16,21 @@ class EmptyStatesOverviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: AppSpacing.pagePadding,
         title: Row(
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: const Color(0xFF2962FF),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 18),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -38,7 +38,7 @@ class EmptyStatesOverviewPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -56,14 +56,14 @@ class EmptyStatesOverviewPage extends StatelessWidget {
               'Empty States Overview',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Consistent collection of empty states for various contexts across the application.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -141,7 +141,7 @@ class _EmptyStateCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         children: [
@@ -151,14 +151,14 @@ class _EmptyStateCard extends StatelessWidget {
               color: Color(0xFFF1F5F9), // Light greyish blue
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: const Color(0xFF718096), size: 32),
+            child: Icon(icon, color: Theme.of(context).colorScheme.outline, size: 32),
           ),
           const SizedBox(height: 24),
           Text(
             title,
             style: AppTypography.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A202C),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
@@ -166,7 +166,7 @@ class _EmptyStateCard extends StatelessWidget {
           Text(
             description,
             style: AppTypography.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF4A5568),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -176,7 +176,7 @@ class _EmptyStateCard extends StatelessWidget {
             ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isButtonSolid ? const Color(0xFF0D47A1) : const Color(0xFFE2E8F0),
+                backgroundColor: isButtonSolid ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -184,7 +184,7 @@ class _EmptyStateCard extends StatelessWidget {
               child: Text(
                 buttonText!,
                 style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: isButtonSolid ? Colors.white : const Color(0xFF0D47A1),
+                  color: isButtonSolid ? Colors.white : Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

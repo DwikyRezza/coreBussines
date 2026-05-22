@@ -12,6 +12,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -22,8 +23,10 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pengaturan')),
-      body: ListView(
-        children: [
+      body: ResponsiveHelper.constrainWidth(
+        context: context,
+        child: ListView(
+          children: [
           // User profile section
           _ProfileHeader(),
           const Divider(height: 1),
@@ -102,6 +105,7 @@ class SettingsPage extends StatelessWidget {
           ),
           const SizedBox(height: 80),
         ],
+      ),
       ),
     );
   }
@@ -190,7 +194,7 @@ class _SettingsSection extends StatelessWidget {
           ...items.map((item) => Column(children: [
             item,
             if (item != items.last)
-              Divider(height: 1, indent: 56, color: colors.outlineVariant.withOpacity(0.4)),
+              Divider(height: 1, indent: 56, color: colors.outlineVariant.withValues(alpha: 0.4)),
           ])),
         ]),
       ),

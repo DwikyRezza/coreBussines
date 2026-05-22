@@ -66,7 +66,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           }
         },
         child: Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: BlocBuilder<OnboardingBloc, OnboardingState>(
               builder: (context, state) {
@@ -84,9 +84,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           // Back Button
                           state.currentPage > 0
                               ? IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.arrow_back_rounded,
-                                    color: AppColors.primary,
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                                   onPressed: () {
                                     context
@@ -106,7 +106,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: Text(
                               'Lewati',
                               style: AppTypography.textTheme.labelLarge?.copyWith(
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -154,7 +154,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               state.slides[state.currentPage].title,
                               textAlign: TextAlign.center,
                               style: AppTypography.textTheme.headlineMedium?.copyWith(
-                                color: AppColors.onBackground,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w800,
                                 height: 1.2,
                               ),
@@ -164,7 +164,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               state.slides[state.currentPage].subtitle,
                               textAlign: TextAlign.center,
                               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 height: 1.5,
                               ),
                             ),
@@ -178,7 +178,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                       .add(const OnboardingNextPage());
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
                                   minimumSize: const Size.fromHeight(56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(AppSpacing.radiusXl),

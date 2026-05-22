@@ -157,7 +157,7 @@ class _QuickActionButton extends StatelessWidget {
     return Column(
       children: [
         Material(
-          color: AppColors.surfaceContainer,
+          color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           child: InkWell(
             onTap: () {
@@ -183,12 +183,12 @@ class _QuickActionButton extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 border: Border.all(
-                  color: AppColors.outlineVariant.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
                 ),
               ),
               child: Icon(
                 action.icon,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: 26,
               ),
             ),
@@ -199,7 +199,7 @@ class _QuickActionButton extends StatelessWidget {
           action.label,
           textAlign: TextAlign.center,
           style: AppTypography.textTheme.labelSmall?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             height: 1.3,
           ),
         ),
@@ -222,9 +222,9 @@ class HomeInsightCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,12 +233,12 @@ class HomeInsightCard extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.primaryContainer,
+              color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.bolt_rounded,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 20,
             ),
           ),
@@ -250,14 +250,14 @@ class HomeInsightCard extends StatelessWidget {
                 Text(
                   insight.title,
                   style: AppTypography.textTheme.titleSmall?.copyWith(
-                    color: AppColors.onBackground,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   insight.message,
                   style: AppTypography.textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -298,15 +298,15 @@ class TransactionTile extends StatelessWidget {
               height: 46,
               decoration: BoxDecoration(
                 color: transaction.isIncome
-                    ? AppColors.incomeLight
-                    : AppColors.surfaceContainer,
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
               child: Icon(
                 _categoryIcon(transaction.categoryIcon),
                 color: transaction.isIncome
-                    ? AppColors.income
-                    : AppColors.onSurfaceVariant,
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 22,
               ),
             ),
@@ -320,7 +320,7 @@ class TransactionTile extends StatelessWidget {
                   Text(
                     transaction.title,
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onBackground,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
@@ -330,7 +330,7 @@ class TransactionTile extends StatelessWidget {
                   Text(
                     '${AppFormatter.relativeDate(transaction.dateTime)}, ${AppFormatter.timeWib(transaction.dateTime).replaceAll(' WIB', '')}',
                     style: AppTypography.textTheme.bodySmall?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -344,7 +344,7 @@ class TransactionTile extends StatelessWidget {
                 showSign: true,
               ),
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: transaction.isIncome ? AppColors.income : AppColors.expense,
+                color: transaction.isIncome ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -399,7 +399,7 @@ class SectionHeader extends StatelessWidget {
           Text(
             title,
             style: AppTypography.textTheme.titleMedium?.copyWith(
-              color: AppColors.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -414,7 +414,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 actionLabel!,
                 style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -477,7 +477,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
             width: widget.width,
             height: widget.height,
             decoration: BoxDecoration(
-              color: AppColors.outlineVariant.withOpacity(0.4),
+              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.4),
               borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
           ),

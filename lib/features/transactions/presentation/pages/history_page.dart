@@ -15,6 +15,7 @@ import '../../../../core/widgets/core_app_bar.dart';
 import '../../../home/domain/entities/home_entities.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -160,70 +161,73 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.pagePadding(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
-      body: RefreshIndicator(
-        onRefresh: _loadTransactions,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppColors.outlineVariant),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.search_rounded,
-                                    color: AppColors.onSurfaceVariant, size: 22),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _searchController,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: 'Cari transaksi...',
-                                      hintStyle:
-                                          AppTypography.textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.onSurfaceVariant,
+      body: ResponsiveHelper.constrainWidth(
+        context: context,
+        child: RefreshIndicator(
+          onRefresh: _loadTransactions,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: padding),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.search_rounded,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant, size: 22),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Cari transaksi...',
+                                        hintStyle:
+                                            AppTypography.textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        SizedBox(
-                          height: 52,
-                          child: FilledButton.icon(
-                            onPressed: _showFilterSheet,
-                            icon: const Icon(Icons.filter_list_rounded),
-                            label: const Text('Filter'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: AppSpacing.sm),
+                          SizedBox(
+                            height: 52,
+                            child: FilledButton.icon(
+                              onPressed: _showFilterSheet,
+                              icon: const Icon(Icons.filter_list_rounded),
+                              label: const Text('Filter'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: AppSpacing.lg),
                     Row(
                       children: [
@@ -231,7 +235,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           child: _SummaryCard(
                             title: 'Total Pemasukan',
                             amount: _currency.format(_totalIncome),
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -239,7 +243,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           child: _SummaryCard(
                             title: 'Total Pengeluaran',
                             amount: _currency.format(_totalExpense),
-                            color: AppColors.expense,
+                            color: Theme.of(context).colorScheme.error,
                           ),
                         ),
                       ],
@@ -268,7 +272,7 @@ class _HistoryPageState extends State<HistoryPage> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                padding: EdgeInsets.symmetric(horizontal: padding),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -282,28 +286,71 @@ class _HistoryPageState extends State<HistoryPage> {
                             date: _dateFormat.format(entry.key),
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          for (final transaction in entry.value)
-                            _TransactionItem(
-                              icon: _iconFor(transaction),
-                              iconColor: transaction.isIncome
-                                  ? AppColors.primary
-                                  : AppColors.expense,
-                              iconBg: transaction.isIncome
-                                  ? AppColors.primaryContainer
-                                  : AppColors.expenseLight,
-                              title: transaction.title,
-                              category: transaction.category,
-                              amount:
-                                  '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
-                              time: DateFormat('HH:mm').format(transaction.dateTime),
-                              isIncome: transaction.isIncome,
-                              onTap: () => context.push(
-                                AppRoutes.transactionDetail.replaceAll(
-                                  ':id',
-                                  transaction.id,
+                          if (ResponsiveHelper.isTabletOrLarger(context))
+                            Builder(
+                              builder: (context) {
+                                final totalWidth = MediaQuery.sizeOf(context).width;
+                                final contentWidth = totalWidth > ResponsiveHelper.maxContentWidth(context)
+                                    ? ResponsiveHelper.maxContentWidth(context)
+                                    : totalWidth;
+                                final availableWidth = contentWidth - 2 * padding;
+                                final cardWidth = (availableWidth - 16) / 2;
+                                return Wrap(
+                                  spacing: 16,
+                                  runSpacing: 12,
+                                  children: [
+                                    for (final transaction in entry.value)
+                                      SizedBox(
+                                        width: cardWidth,
+                                        child: _TransactionItem(
+                                          icon: _iconFor(transaction),
+                                          iconColor: transaction.isIncome
+                                              ? Theme.of(context).colorScheme.primary
+                                              : Theme.of(context).colorScheme.error,
+                                          iconBg: transaction.isIncome
+                                              ? Theme.of(context).colorScheme.primaryContainer
+                                              : Theme.of(context).colorScheme.errorContainer,
+                                          title: transaction.title,
+                                          category: transaction.category,
+                                          amount:
+                                              '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
+                                          time: DateFormat('HH:mm').format(transaction.dateTime),
+                                          isIncome: transaction.isIncome,
+                                          onTap: () => context.push(
+                                            AppRoutes.transactionDetail.replaceAll(
+                                              ':id',
+                                              transaction.id,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              }
+                            )
+                          else
+                            for (final transaction in entry.value)
+                              _TransactionItem(
+                                icon: _iconFor(transaction),
+                                iconColor: transaction.isIncome
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.error,
+                                iconBg: transaction.isIncome
+                                    ? Theme.of(context).colorScheme.primaryContainer
+                                    : Theme.of(context).colorScheme.errorContainer,
+                                title: transaction.title,
+                                category: transaction.category,
+                                amount:
+                                    '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
+                                time: DateFormat('HH:mm').format(transaction.dateTime),
+                                isIncome: transaction.isIncome,
+                                onTap: () => context.push(
+                                  AppRoutes.transactionDetail.replaceAll(
+                                    ':id',
+                                    transaction.id,
+                                  ),
                                 ),
                               ),
-                            ),
                           const SizedBox(height: AppSpacing.lg),
                           if (index == entries.length - 1) const SizedBox(height: 82),
                         ],
@@ -315,6 +362,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -362,7 +410,7 @@ class _FilterTile extends StatelessWidget {
       title: Text(title),
       trailing: Icon(
         selected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-        color: selected ? AppColors.primary : AppColors.outline,
+        color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
       ),
     );
   }
@@ -384,11 +432,11 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -420,7 +468,7 @@ class _SummaryCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
@@ -455,7 +503,7 @@ class _DateHeader extends StatelessWidget {
         Text(
           label,
           style: AppTypography.textTheme.labelMedium?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             letterSpacing: 1.2,
             fontWeight: FontWeight.w700,
           ),
@@ -463,7 +511,7 @@ class _DateHeader extends StatelessWidget {
         Text(
           date,
           style: AppTypography.textTheme.labelMedium?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -503,7 +551,7 @@ class _TransactionItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -530,7 +578,7 @@ class _TransactionItem extends StatelessWidget {
                   Text(
                     category,
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -550,7 +598,7 @@ class _TransactionItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: isIncome ? AppColors.primary : AppColors.expense,
+                      color: isIncome ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
@@ -558,7 +606,7 @@ class _TransactionItem extends StatelessWidget {
                 Text(
                   time,
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -585,7 +633,7 @@ class _HistoryMessage extends StatelessWidget {
           message,
           textAlign: TextAlign.center,
           style: AppTypography.textTheme.bodyLarge?.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),

@@ -50,6 +50,10 @@ dependencies:
   image_picker: ^1.2.2
   google_generative_ai: ^0.4.7
 
+  # PDF Generation & Export
+  pdf: ^3.11.2
+  printing: ^5.13.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

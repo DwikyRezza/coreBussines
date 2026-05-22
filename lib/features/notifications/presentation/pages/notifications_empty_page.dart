@@ -16,7 +16,7 @@ class NotificationsEmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: AppSpacing.pagePadding,
         title: Row(
@@ -33,7 +33,7 @@ class NotificationsEmptyPage extends StatelessWidget {
             Text(
               'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -41,7 +41,7 @@ class NotificationsEmptyPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -63,7 +63,7 @@ class NotificationsEmptyPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0D47A1).withOpacity(0.05),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                       blurRadius: 40,
                       spreadRadius: 10,
                     ),
@@ -84,7 +84,7 @@ class NotificationsEmptyPage extends StatelessWidget {
                 'Belum ada notifikasi',
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A202C),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -92,7 +92,7 @@ class NotificationsEmptyPage extends StatelessWidget {
                 'Kami akan memberi tahu Anda jika ada\naktivitas penting di sini.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF4A5568),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -109,7 +109,7 @@ class NotificationsEmptyPage extends StatelessWidget {
                 child: Text(
                   'Muat Ulang',
                   style: AppTypography.textTheme.labelLarge?.copyWith(
-                    color: const Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

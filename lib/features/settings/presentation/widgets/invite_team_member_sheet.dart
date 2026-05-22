@@ -44,38 +44,38 @@ class _InviteTeamMemberSheetState extends State<InviteTeamMemberSheet> {
                     'Invite Team Member',
                     style: AppTypography.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1A202C),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Color(0xFF4A5568)),
+                    icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              const Divider(color: Color(0xFFE2E8F0)),
+              Divider(color: Theme.of(context).colorScheme.outlineVariant),
               const SizedBox(height: 24),
 
               // Form: Email
-              Text('Email Address', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF4A5568))),
+              Text('Email Address', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const SizedBox(height: 8),
               TextField(
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'name@company.com',
-                  hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFFA0AEC0)),
-                  prefixIcon: const Icon(Icons.mail_outline_rounded, color: Color(0xFFA0AEC0)),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                  hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
+                  prefixIcon: Icon(Icons.mail_outline_rounded, color: Theme.of(context).colorScheme.outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                 ),
               ),
               const SizedBox(height: 24),
 
               // Form: Assign Role
-              Text('Assign Role', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF4A5568))),
+              Text('Assign Role', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const SizedBox(height: 4),
-              Text('Select the appropriate access level for this user.', style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF718096))),
+              Text('Select the appropriate access level for this user.', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
               const SizedBox(height: 16),
 
               // Role Options
@@ -109,7 +109,7 @@ class _InviteTeamMemberSheetState extends State<InviteTeamMemberSheet> {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                  backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: Text('Send Invitation', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
@@ -144,30 +144,30 @@ class _RoleOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF0F4FF) : Colors.white,
+          color: isSelected ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF0D47A1) : const Color(0xFFE2E8F0),
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: isSelected ? const Color(0xFF0D47A1) : const Color(0xFF4A5568), size: 24),
+            Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant, size: 24),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
                   const SizedBox(height: 4),
-                  Text(description, style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF718096), height: 1.4)),
+                  Text(description, style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline, height: 1.4)),
                 ],
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle_rounded, color: Color(0xFF0D47A1), size: 24),
+              Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary, size: 24),
           ],
         ),
       ),

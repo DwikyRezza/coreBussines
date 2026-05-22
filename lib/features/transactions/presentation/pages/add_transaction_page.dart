@@ -18,6 +18,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import '../bloc/transaction_bloc.dart';
 
 // ─── Category model for the category picker ──────────────────
@@ -141,7 +142,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.income,
+                backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
             context.pop(); // Go back to home/history
@@ -149,7 +150,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.expense,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
           }
@@ -157,224 +158,227 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         builder: (context, state) {
           final isLoading = state is TransactionLoading;
           return Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               leading: IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.primary),
                 onPressed: () => context.pop(),
               ),
               title: Text(
                 'Tambah Transaksi',
                 style: AppTypography.textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               centerTitle: true,
-              backgroundColor: AppColors.background,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
             ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
+            body: ResponsiveHelper.constrainWidth(
+              context: context,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Type Selector ────────────────────────────
+                          _TypeSelector(
+                            selected: _transactionType,
+                            onChanged: (v) => setState(() {
+                              _transactionType = v;
+                              _selectedCategoryIndex = 0;
+                            }),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // ── Amount Input ─────────────────────────────
+                          _AmountCard(controller: _amountController),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // ── Title Input ──────────────────────────────
+                          Text(
+                            'Judul Transaksi',
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _TextInputCard(
+                            controller: _titleController,
+                            hint: 'Contoh: Makan Siang, Gaji Bulan Ini...',
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // ── Category ─────────────────────────────────
+                          Text(
+                            'Kategori',
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 10,
+                            children: List.generate(_categories.length, (i) {
+                              return _CategoryChip(
+                                icon: _categories[i].icon,
+                                label: _categories[i].label,
+                                isSelected: _selectedCategoryIndex == i,
+                                onTap: () =>
+                                    setState(() => _selectedCategoryIndex = i),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // ── Wallet ───────────────────────────────────
+                          Text(
+                            'Pilih Dompet',
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            children: List.generate(_wallets.length, (i) {
+                              final icons = [
+                                Icons.account_balance,
+                                Icons.payments,
+                                Icons.account_balance_wallet,
+                              ];
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      right: i < _wallets.length - 1 ? 12 : 0),
+                                  child: _WalletCard(
+                                    icon: icons[i],
+                                    label: _wallets[i],
+                                    isSelected: _selectedWalletIndex == i,
+                                    onTap: () => setState(
+                                        () => _selectedWalletIndex = i),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // ── Notes ────────────────────────────────────
+                          Text(
+                            'Catatan (Opsional)',
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _TextInputCard(
+                            controller: _notesController,
+                            hint: 'Tambahkan deskripsi transaksi di sini...',
+                            maxLines: 4,
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // ── Recurring Toggle ─────────────────────────
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primaryContainer,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.restore_rounded,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Transaksi Berulang',
+                                        style: AppTypography.textTheme.labelLarge
+                                            ?.copyWith(fontWeight: FontWeight.w700),
+                                      ),
+                                      Text(
+                                        'Setel sebagai pengeluaran bulanan',
+                                        style: AppTypography.textTheme.bodySmall
+                                            ?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch.adaptive(
+                                  value: _isRecurring,
+                                  onChanged: (val) =>
+                                      setState(() => _isRecurring = val),
+                                  activeColor: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xxl),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Submit Button ─────────────────────────────────────
+                  Container(
                     padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ── Type Selector ────────────────────────────
-                        _TypeSelector(
-                          selected: _transactionType,
-                          onChanged: (v) => setState(() {
-                            _transactionType = v;
-                            _selectedCategoryIndex = 0;
-                          }),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -4),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // ── Amount Input ─────────────────────────────
-                        _AmountCard(controller: _amountController),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // ── Title Input ──────────────────────────────
-                        Text(
-                          'Judul Transaksi',
-                          style: AppTypography.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        _TextInputCard(
-                          controller: _titleController,
-                          hint: 'Contoh: Makan Siang, Gaji Bulan Ini...',
-                          maxLines: 1,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-
-                        // ── Category ─────────────────────────────────
-                        Text(
-                          'Kategori',
-                          style: AppTypography.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 10,
-                          children: List.generate(_categories.length, (i) {
-                            return _CategoryChip(
-                              icon: _categories[i].icon,
-                              label: _categories[i].label,
-                              isSelected: _selectedCategoryIndex == i,
-                              onTap: () =>
-                                  setState(() => _selectedCategoryIndex = i),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-
-                        // ── Wallet ───────────────────────────────────
-                        Text(
-                          'Pilih Dompet',
-                          style: AppTypography.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Row(
-                          children: List.generate(_wallets.length, (i) {
-                            final icons = [
-                              Icons.account_balance,
-                              Icons.payments,
-                              Icons.account_balance_wallet,
-                            ];
-                            return Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    right: i < _wallets.length - 1 ? 12 : 0),
-                                child: _WalletCard(
-                                  icon: icons[i],
-                                  label: _wallets[i],
-                                  isSelected: _selectedWalletIndex == i,
-                                  onTap: () => setState(
-                                      () => _selectedWalletIndex = i),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-
-                        // ── Notes ────────────────────────────────────
-                        Text(
-                          'Catatan (Opsional)',
-                          style: AppTypography.textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        _TextInputCard(
-                          controller: _notesController,
-                          hint: 'Tambahkan deskripsi transaksi di sini...',
-                          maxLines: 4,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-
-                        // ── Recurring Toggle ─────────────────────────
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryContainer.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primaryContainer,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.restore_rounded,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Transaksi Berulang',
-                                      style: AppTypography.textTheme.labelLarge
-                                          ?.copyWith(fontWeight: FontWeight.w700),
-                                    ),
-                                    Text(
-                                      'Setel sebagai pengeluaran bulanan',
-                                      style: AppTypography.textTheme.bodySmall
-                                          ?.copyWith(
-                                              color: AppColors.onSurfaceVariant),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Switch.adaptive(
-                                value: _isRecurring,
-                                onChanged: (val) =>
-                                    setState(() => _isRecurring = val),
-                                activeColor: AppColors.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xxl),
                       ],
                     ),
-                  ),
-                ),
-
-                // ── Submit Button ─────────────────────────────────────
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.shadow.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : () => _onSave(context),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(56),
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SafeArea(
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : () => _onSave(context),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Simpan Transaksi',
+                                style:
+                                    AppTypography.textTheme.labelLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Simpan Transaksi',
-                              style:
-                                  AppTypography.textTheme.labelLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -395,7 +399,7 @@ class _TypeSelector extends StatelessWidget {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
@@ -407,7 +411,7 @@ class _TypeSelector extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isActive ? Colors.white : Colors.transparent,
+                  color: isActive ? Theme.of(context).colorScheme.surface : Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
@@ -415,8 +419,8 @@ class _TypeSelector extends StatelessWidget {
                   e.value,
                   style: AppTypography.textTheme.labelLarge?.copyWith(
                     color: isActive
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight:
                         isActive ? FontWeight.w600 : FontWeight.w400,
                   ),
@@ -440,11 +444,11 @@ class _AmountCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -455,7 +459,7 @@ class _AmountCard extends StatelessWidget {
           Text(
             'Jumlah Transaksi',
             style: AppTypography.textTheme.bodyMedium?.copyWith(
-              color: AppColors.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -466,7 +470,7 @@ class _AmountCard extends StatelessWidget {
               Text(
                 'Rp ',
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -481,13 +485,13 @@ class _AmountCard extends StatelessWidget {
                     ],
                     textAlign: TextAlign.center,
                     style: AppTypography.textTheme.displaySmall?.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w700,
                     ),
                     decoration: InputDecoration(
                       hintText: '0',
                       hintStyle: AppTypography.textTheme.displaySmall?.copyWith(
-                        color: AppColors.outlineVariant,
+                        color: Theme.of(context).colorScheme.outlineVariant,
                         fontWeight: FontWeight.w700,
                       ),
                       border: InputBorder.none,
@@ -517,9 +521,9 @@ class _TextInputCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineVariant),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: TextField(
         controller: controller,
@@ -527,7 +531,7 @@ class _TextInputCard extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: AppTypography.textTheme.bodyMedium
-              ?.copyWith(color: AppColors.onSurfaceVariant),
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),
@@ -557,10 +561,10 @@ class _CategoryChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryContainer : Colors.white,
+          color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.outlineVariant,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Row(
@@ -569,14 +573,14 @@ class _CategoryChip extends StatelessWidget {
             Icon(icon,
                 size: 16,
                 color: isSelected
-                    ? AppColors.primary
-                    : AppColors.onBackground),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface),
             const SizedBox(width: 8),
             Text(
               label,
               style: AppTypography.textTheme.labelMedium?.copyWith(
                 color:
-                    isSelected ? AppColors.primary : AppColors.onBackground,
+                    isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
                 fontWeight:
                     isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -609,16 +613,16 @@ class _WalletCard extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.outlineVariant,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )
@@ -629,14 +633,14 @@ class _WalletCard extends StatelessWidget {
           children: [
             Icon(icon,
                 color: isSelected
-                    ? AppColors.primary
-                    : AppColors.onBackground),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface),
             const SizedBox(height: 8),
             Text(
               label,
               style: AppTypography.textTheme.labelMedium?.copyWith(
                 color:
-                    isSelected ? AppColors.primary : AppColors.onBackground,
+                    isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
                 fontWeight:
                     isSelected ? FontWeight.w700 : FontWeight.w500,
               ),

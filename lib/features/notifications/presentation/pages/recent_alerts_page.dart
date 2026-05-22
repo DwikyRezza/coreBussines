@@ -15,7 +15,7 @@ class RecentAlertsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: AppSpacing.md),
@@ -24,7 +24,7 @@ class RecentAlertsPage extends StatelessWidget {
             'Recent Alerts',
             style: AppTypography.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF1A202C),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -32,7 +32,7 @@ class RecentAlertsPage extends StatelessWidget {
           // Today Group
           Text(
             'Today',
-            style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF4A5568)),
+            style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.md),
           _AlertCard(
@@ -49,7 +49,7 @@ class RecentAlertsPage extends StatelessWidget {
             time: '09:15 AM',
             description: 'Q3 Financial Report has been successfully exported and is ready to download.',
             icon: Icons.check_circle_outline_rounded,
-            iconColor: const Color(0xFF0D47A1), // Blue
+            iconColor: Theme.of(context).colorScheme.primary, // Blue
             iconBgColor: const Color(0xFFE3F2FD),
           ),
           const SizedBox(height: 12),
@@ -58,15 +58,15 @@ class RecentAlertsPage extends StatelessWidget {
             time: '08:00 AM',
             description: 'Upcoming weekly alignment meeting in 30 minutes. Please review the agenda.',
             icon: Icons.notifications_none_rounded,
-            iconColor: const Color(0xFF4A5568), // Grey
-            iconBgColor: const Color(0xFFEDF2F7),
+            iconColor: Theme.of(context).colorScheme.onSurfaceVariant, // Grey
+            iconBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
           const SizedBox(height: AppSpacing.xl),
 
           // Yesterday Group
           Text(
             'Yesterday',
-            style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF4A5568)),
+            style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.md),
           _AlertCard(
@@ -83,8 +83,8 @@ class RecentAlertsPage extends StatelessWidget {
             time: 'Yesterday',
             description: 'Scheduled maintenance for Treadmill Section A has been completed.',
             icon: Icons.notifications_none_rounded,
-            iconColor: const Color(0xFF4A5568),
-            iconBgColor: const Color(0xFFEDF2F7),
+            iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+            iconBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
           const SizedBox(height: 100), // Bottom padding
         ],
@@ -119,7 +119,7 @@ class _AlertCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -141,15 +141,15 @@ class _AlertCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
-                    Text(time, style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF718096))),
+                    Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                    Text(time, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   description,
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF4A5568),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),

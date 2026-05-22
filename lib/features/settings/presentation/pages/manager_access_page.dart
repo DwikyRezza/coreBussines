@@ -31,21 +31,21 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: AppSpacing.pagePadding,
         title: Row(
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: const Color(0xFF0D47A1), // Blue
+              backgroundColor: Theme.of(context).colorScheme.primary, // Blue
               child: Text('AM', style: AppTypography.textTheme.labelMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -53,7 +53,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -71,12 +71,12 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
             // Header
             Row(
               children: [
-                const Icon(Icons.shield_outlined, color: Color(0xFF4A5568), size: 16),
+                Icon(Icons.shield_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'ROLE MANAGEMENT',
                   style: AppTypography.textTheme.labelSmall?.copyWith(
-                    color: const Color(0xFF4A5568),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -87,14 +87,14 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
               'Manager Access',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Configure granular system permissions for users assigned to the Manager role. Changes take effect immediately upon toggling.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -107,7 +107,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 children: [
@@ -117,7 +117,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
                     value: _userManagement,
                     onChanged: (val) => setState(() => _userManagement = val),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'System Configuration',
                     subtitle: 'Grant access to global application settings, API keys, and integration webhooks.',
@@ -136,7 +136,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 children: [
@@ -146,14 +146,14 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
                     value: _viewTransactions,
                     onChanged: (val) => setState(() => _viewTransactions = val),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Approve Refunds',
                     subtitle: 'Authorization to process customer refunds up to the standard daily limit.',
                     value: _approveRefunds,
                     onChanged: (val) => setState(() => _approveRefunds = val),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Initiate Wire Transfers',
                     subtitle: 'Permission to create new outbound bulk payouts and wire transfers.',
@@ -172,7 +172,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 children: [
@@ -182,7 +182,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
                     value: _performanceDashboards,
                     onChanged: (val) => setState(() => _performanceDashboards = val),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Raw Data Export (CSV/API)',
                     subtitle: 'Ability to download unfiltered historical data tables and access reporting APIs.',
@@ -224,9 +224,9 @@ class _SettingsRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
+                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 8),
-                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -235,9 +235,9 @@ class _SettingsRow extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: Colors.white,
-            activeTrackColor: const Color(0xFF0D47A1), // Deep blue
+            activeTrackColor: Theme.of(context).colorScheme.primary, // Deep blue
             inactiveThumbColor: Colors.white,
-            inactiveTrackColor: const Color(0xFFCBD5E0),
+            inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
           ),
         ],
       ),

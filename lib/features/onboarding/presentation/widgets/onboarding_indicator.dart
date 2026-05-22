@@ -33,7 +33,7 @@ class OnboardingIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             color: currentPage == index
                 ? AppColors.primary
-                : AppColors.primaryContainer,
+                : Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
         );

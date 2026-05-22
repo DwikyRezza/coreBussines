@@ -41,28 +41,28 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primary),
+          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.primary),
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Ubah Transaksi',
           style: AppTypography.textTheme.titleLarge?.copyWith(
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded,
-                color: AppColors.expense),
+            icon: Icon(Icons.delete_outline_rounded,
+                color: Theme.of(context).colorScheme.error),
             onPressed: () {},
           ),
         ],
         centerTitle: true,
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: Column(
@@ -76,7 +76,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                   Text(
                     'Jumlah Pengeluaran',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -87,7 +87,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       Text(
                         'Rp',
                         style: AppTypography.textTheme.headlineMedium?.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -95,7 +95,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       Text(
                         '45.000',
                         style: AppTypography.textTheme.displayMedium?.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -115,7 +115,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       children: [
                         Text('Kategori',
                             style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.onSurfaceVariant)),
+                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -131,8 +131,8 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                                   color: Color(0xFFFDECEA),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.restaurant_rounded,
-                                    color: AppColors.expense, size: 20),
+                                child: Icon(Icons.restaurant_rounded,
+                                    color: Theme.of(context).colorScheme.error, size: 20),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -152,21 +152,21 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.keyboard_arrow_down_rounded,
-                                  color: AppColors.onSurfaceVariant),
+                              Icon(Icons.keyboard_arrow_down_rounded,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ],
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         Text('Judul Transaksi',
                             style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.onSurfaceVariant)),
+                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.outlineVariant),
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                           ),
                           child: TextField(
                             controller: _titleController,
@@ -198,13 +198,13 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Dompet',
                                   style: AppTypography.textTheme.bodyMedium
                                       ?.copyWith(
-                                          color: AppColors.onSurfaceVariant)),
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                       Icons.account_balance_wallet_outlined,
-                                      color: AppColors.primary,
+                                      color: Theme.of(context).colorScheme.primary,
                                       size: 18),
                                   const SizedBox(width: 8),
                                   Text('Wallet: Cash',
@@ -217,7 +217,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Saldo: Rp 1.200.000',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: AppColors.onSurfaceVariant)),
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
                             ],
                           ),
                         ),
@@ -236,12 +236,12 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Tanggal',
                                   style: AppTypography.textTheme.bodyMedium
                                       ?.copyWith(
-                                          color: AppColors.onSurfaceVariant)),
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today_outlined,
-                                      color: AppColors.primary, size: 18),
+                                  Icon(Icons.calendar_today_outlined,
+                                      color: Theme.of(context).colorScheme.primary, size: 18),
                                   const SizedBox(width: 8),
                                   Text('24 Mei 2024',
                                       style: AppTypography.textTheme.labelMedium
@@ -253,7 +253,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('12:45 WIB',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: AppColors.onSurfaceVariant)),
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
                             ],
                           ),
                         ),
@@ -274,13 +274,13 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       children: [
                         Text('Catatan (Opsional)',
                             style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.onSurfaceVariant)),
+                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.outlineVariant),
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                           ),
                           child: TextField(
                             controller: _notesController,
@@ -309,11 +309,11 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainer,
+                            color: Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.receipt_long,
-                              color: AppColors.outlineVariant), // Mock image
+                          child: Icon(Icons.receipt_long,
+                              color: Theme.of(context).colorScheme.outlineVariant), // Mock image
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -326,12 +326,12 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('receipt_lunch_2405.jpg',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: AppColors.onSurfaceVariant)),
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
                             ],
                           ),
                         ),
-                        const Icon(Icons.edit_rounded,
-                            color: AppColors.primary, size: 20),
+                        Icon(Icons.edit_rounded,
+                            color: Theme.of(context).colorScheme.primary, size: 20),
                       ],
                     ),
                   ),
@@ -349,7 +349,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
               onPressed: () => context.pop(),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(56),
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24)),
               ),

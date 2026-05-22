@@ -15,7 +15,7 @@ class SchedulePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         child: Column(
@@ -34,7 +34,7 @@ class SchedulePage extends StatelessWidget {
                       Text(
                         'TODAY',
                         style: AppTypography.textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFF718096),
+                          color: Theme.of(context).colorScheme.outline,
                           letterSpacing: 1.5,
                         ),
                       ),
@@ -43,18 +43,18 @@ class SchedulePage extends StatelessWidget {
                         'Schedule',
                         style: AppTypography.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1A202C),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEDF2F7),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.calendar_month_outlined, color: Color(0xFF0D47A1), size: 20),
+                    child: Icon(Icons.calendar_month_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
                   ),
                 ],
               ),
@@ -94,9 +94,9 @@ class SchedulePage extends StatelessWidget {
                     title: 'Morning Yoga',
                     subtitle: 'Studio 2 • Sarah Jenkins',
                     statusPillText: 'Completed',
-                    statusPillColor: const Color(0xFFE2E8F0),
-                    statusPillTextColor: const Color(0xFF718096),
-                    borderColor: const Color(0xFFE2E8F0),
+                    statusPillColor: Theme.of(context).colorScheme.outlineVariant,
+                    statusPillTextColor: Theme.of(context).colorScheme.outline,
+                    borderColor: Theme.of(context).colorScheme.outlineVariant,
                     isStrikethrough: true,
                   ),
                   const SizedBox(height: 16),
@@ -117,8 +117,8 @@ class SchedulePage extends StatelessWidget {
                     subtitle: 'Zone A • Elena R.',
                     statusPillText: 'Upcoming',
                     statusPillColor: const Color(0xFFE3F2FD),
-                    statusPillTextColor: const Color(0xFF0D47A1),
-                    borderColor: const Color(0xFF0D47A1),
+                    statusPillTextColor: Theme.of(context).colorScheme.primary,
+                    borderColor: Theme.of(context).colorScheme.primary,
                     hasAvatars: true,
                   ),
                   const SizedBox(height: 16),
@@ -128,7 +128,7 @@ class SchedulePage extends StatelessWidget {
                     subtitle: 'Studio 1 • Video Guided',
                     statusPillText: 'Upcoming',
                     statusPillColor: const Color(0xFFE3F2FD),
-                    statusPillTextColor: const Color(0xFF0D47A1),
+                    statusPillTextColor: Theme.of(context).colorScheme.primary,
                     borderColor: const Color(0xFF63B3ED), // Light blue
                   ),
                 ],
@@ -154,10 +154,10 @@ class _DateCard extends StatelessWidget {
     return Container(
       width: 60,
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF0D47A1) : const Color(0xFFF1F5F9), // Deep blue or gray
+        color: isSelected ? Theme.of(context).colorScheme.primary : const Color(0xFFF1F5F9), // Deep blue or gray
         borderRadius: BorderRadius.circular(16),
         boxShadow: isSelected
-            ? [BoxShadow(color: const Color(0xFF0D47A1).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))]
+            ? [BoxShadow(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))]
             : [],
       ),
       child: Column(
@@ -166,14 +166,14 @@ class _DateCard extends StatelessWidget {
           Text(
             day,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white.withOpacity(0.8) : const Color(0xFF718096),
+              color: isSelected ? Colors.white.withOpacity(0.8) : Theme.of(context).colorScheme.outline,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             date,
             style: AppTypography.textTheme.headlineSmall?.copyWith(
-              color: isSelected ? Colors.white : const Color(0xFF1A202C),
+              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -216,7 +216,7 @@ class _TimelineCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -243,13 +243,13 @@ class _TimelineCard extends StatelessWidget {
                 time,
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: const Color(0xFF4A5568),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.3,
                 ),
               ),
             ),
             // Divider
-            const VerticalDivider(color: Color(0xFFE2E8F0), width: 1, thickness: 1),
+            VerticalDivider(color: Theme.of(context).colorScheme.outlineVariant, width: 1, thickness: 1),
             // Content
             Expanded(
               child: Padding(
@@ -266,7 +266,7 @@ class _TimelineCard extends StatelessWidget {
                             title,
                             style: AppTypography.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: isStrikethrough ? const Color(0xFFA0AEC0) : const Color(0xFF1A202C),
+                              color: isStrikethrough ? Theme.of(context).colorScheme.outline : Theme.of(context).colorScheme.onSurface,
                               decoration: isStrikethrough ? TextDecoration.lineThrough : null,
                             ),
                           ),
@@ -291,7 +291,7 @@ class _TimelineCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: AppTypography.textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF718096),
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                     if (hasRescheduleButton) ...[
@@ -299,15 +299,15 @@ class _TimelineCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFCBD5E0)),
+                          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text('Reschedule', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                        child: Text('Reschedule', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                       ),
                     ],
                     if (hasAvatars) ...[
                       const SizedBox(height: 16),
-                      const Divider(color: Color(0xFFE2E8F0)),
+                      Divider(color: Theme.of(context).colorScheme.outlineVariant),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -316,20 +316,20 @@ class _TimelineCard extends StatelessWidget {
                             height: 30,
                             child: Stack(
                               children: [
-                                Positioned(left: 0, child: CircleAvatar(radius: 15, backgroundColor: const Color(0xFF0D47A1), child: Text('A', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
-                                Positioned(left: 20, child: CircleAvatar(radius: 15, backgroundColor: const Color(0xFF2962FF), child: Text('B', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
+                                Positioned(left: 0, child: CircleAvatar(radius: 15, backgroundColor: Theme.of(context).colorScheme.primary, child: Text('A', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
+                                Positioned(left: 20, child: CircleAvatar(radius: 15, backgroundColor: Theme.of(context).colorScheme.primary, child: Text('B', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)))),
                                 Positioned(
                                   left: 40,
                                   child: CircleAvatar(
                                     radius: 15,
-                                    backgroundColor: const Color(0xFFE2E8F0),
-                                    child: Text('+8', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF4A5568))),
+                                    backgroundColor: Theme.of(context).colorScheme.outlineVariant,
+                                    child: Text('+8', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Text('attending', style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF718096))),
+                          Text('attending', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                         ],
                       ),
                     ],

@@ -6,7 +6,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../router/app_router.dart';
 
@@ -67,13 +66,14 @@ class _AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.08),
+            color: colors.shadow.withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -139,6 +139,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -153,14 +154,14 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               isActive ? activeIcon : icon,
-              color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+              color: isActive ? colors.primary : colors.onSurfaceVariant,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: AppTypography.textTheme.labelSmall?.copyWith(
-                color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+                color: isActive ? colors.primary : colors.onSurfaceVariant,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -238,13 +239,14 @@ class _ExpandableFABState extends State<_ExpandableFAB>
               child: AnimatedBuilder(
                 animation: _controller,
                 builder: (context, child) {
+                  final bgColor = Theme.of(context).scaffoldBackgroundColor;
                   return BackdropFilter(
                     filter: ImageFilter.blur(
                       sigmaX: 4 * _controller.value,
                       sigmaY: 4 * _controller.value,
                     ),
                     child: Container(
-                      color: AppColors.background.withOpacity(0.8 * _controller.value),
+                      color: bgColor.withOpacity(0.8 * _controller.value),
                     ),
                   );
                 },
@@ -274,10 +276,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildActionItem(
+                                    context: context,
                                     icon: Icons.add_rounded,
                                     label: 'Tambah Pemasukan',
                                     width: actionWidth,
-                                    color: AppColors.primary,
+                                    color: Theme.of(context).colorScheme.primary,
                                     onTap: () {
                                       _toggle();
                                       context.push('${AppRoutes.addTransaction}?type=income');
@@ -285,10 +288,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                   ),
                                   const SizedBox(width: 14),
                                   _buildActionItem(
+                                    context: context,
                                     icon: Icons.remove_rounded,
                                     label: 'Tambah Pengeluaran',
                                     width: actionWidth,
-                                    color: AppColors.expense,
+                                    color: Theme.of(context).colorScheme.error,
                                     onTap: () {
                                       _toggle();
                                       context.push('${AppRoutes.addTransaction}?type=expense');
@@ -301,10 +305,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildActionItem(
+                                    context: context,
                                     icon: Icons.receipt_long_rounded,
                                     label: 'Scan Struk',
                                     width: actionWidth,
-                                    color: AppColors.onBackground,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     onTap: () {
                                       _toggle();
                                       context.push(AppRoutes.scanReceiptIntro);
@@ -312,10 +317,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                                   ),
                                   const SizedBox(width: 14),
                                   _buildActionItem(
+                                    context: context,
                                     icon: Icons.calendar_today_rounded,
                                     label: 'Tambah Jadwal',
                                     width: actionWidth,
-                                    color: AppColors.expense,
+                                    color: Theme.of(context).colorScheme.error,
                                     onTap: () {
                                       _toggle();
                                       context.push(AppRoutes.addSchedule);
@@ -339,12 +345,14 @@ class _ExpandableFABState extends State<_ExpandableFAB>
   }
 
   Widget _buildActionItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required double width,
     required Color color,
     required VoidCallback onTap,
   }) {
+    final cs = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -357,11 +365,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: cs.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.16),
+                    color: cs.shadow.withOpacity(0.16),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -375,11 +383,11 @@ class _ExpandableFABState extends State<_ExpandableFAB>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.94),
+                  color: cs.surface.withOpacity(0.94),
                   borderRadius: BorderRadius.circular(999),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadow.withOpacity(0.08),
+                      color: cs.shadow.withOpacity(0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -392,7 +400,7 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                   softWrap: false,
                   textAlign: TextAlign.center,
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: AppColors.onBackground,
+                    color: cs.onSurface,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0,
                   ),
@@ -407,11 +415,12 @@ class _ExpandableFABState extends State<_ExpandableFAB>
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return FloatingActionButton(
       onPressed: _toggle,
-      backgroundColor: AppColors.primary,
+      backgroundColor: colors.primary,
       elevation: 4,
-      child: const Icon(Icons.add, color: Colors.white),
+      child: Icon(Icons.add, color: colors.onPrimary),
     );
   }
 }

@@ -15,7 +15,7 @@ class BusinessScorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -27,7 +27,7 @@ class BusinessScorePage extends StatelessWidget {
               'Skor Bisnis Anda',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 32),
@@ -52,7 +52,7 @@ class BusinessScorePage extends StatelessWidget {
                     child: CircularProgressIndicator(
                       value: 0.82,
                       strokeWidth: 8,
-                      color: const Color(0xFF0D47A1), // Outer progress
+                      color: Theme.of(context).colorScheme.primary, // Outer progress
                       backgroundColor: Colors.transparent,
                     ),
                   ),
@@ -62,14 +62,14 @@ class BusinessScorePage extends StatelessWidget {
                       Text(
                         '82',
                         style: AppTypography.textTheme.displayMedium?.copyWith(
-                          color: const Color(0xFF0D47A1),
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
                         '/ 100',
                         style: AppTypography.textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFF4A5568),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -81,9 +81,9 @@ class BusinessScorePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.trending_up_rounded, color: Color(0xFF1A202C), size: 16),
+                Icon(Icons.trending_up_rounded, color: Theme.of(context).colorScheme.onSurface, size: 16),
                 const SizedBox(width: 8),
-                Text('Sehat & Bertumbuh', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C))),
+                Text('Sehat & Bertumbuh', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
               ],
             ),
             const SizedBox(height: 32),
@@ -96,7 +96,7 @@ class BusinessScorePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.03),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -107,15 +107,15 @@ class BusinessScorePage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.psychology_outlined, color: Color(0xFF0D47A1), size: 24),
+                      Icon(Icons.psychology_outlined, color: Theme.of(context).colorScheme.primary, size: 24),
                       const SizedBox(width: 8),
-                      Text('Evaluasi AI', style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+                      Text('Evaluasi AI', style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Kesehatan bisnis Anda dalam kondisi prima. Likuiditas terjaga dengan baik, memungkinkan ekspansi operasional. Disarankan untuk mulai mengalokasikan 15% dari surplus bulan ini ke instrumen investasi jangka pendek untuk memaksimalkan idle cash.',
-                    style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568), height: 1.5),
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
                   ),
                 ],
               ),
@@ -133,7 +133,7 @@ class BusinessScorePage extends StatelessWidget {
               children: [
                 _MetricCard(
                   icon: Icons.water_drop_outlined,
-                  iconColor: const Color(0xFF0D47A1),
+                  iconColor: Theme.of(context).colorScheme.primary,
                   iconBg: const Color(0xFFE3F2FD),
                   score: '90/100',
                   title: 'Likuiditas',
@@ -141,7 +141,7 @@ class BusinessScorePage extends StatelessWidget {
                 ),
                 _MetricCard(
                   icon: Icons.savings_outlined,
-                  iconColor: const Color(0xFF0D47A1),
+                  iconColor: Theme.of(context).colorScheme.primary,
                   iconBg: const Color(0xFFE3F2FD),
                   score: '75/100',
                   title: 'Tabungan',
@@ -149,7 +149,7 @@ class BusinessScorePage extends StatelessWidget {
                 ),
                 _MetricCard(
                   icon: Icons.account_balance_wallet_outlined,
-                  iconColor: const Color(0xFF0D47A1),
+                  iconColor: Theme.of(context).colorScheme.primary,
                   iconBg: const Color(0xFFE3F2FD),
                   score: '85/100',
                   title: 'Rasio Hutang',
@@ -157,7 +157,7 @@ class BusinessScorePage extends StatelessWidget {
                 ),
                 _MetricCard(
                   icon: Icons.trending_up_rounded,
-                  iconColor: const Color(0xFF0D47A1),
+                  iconColor: Theme.of(context).colorScheme.primary,
                   iconBg: const Color(0xFFE3F2FD),
                   score: '80/100',
                   title: 'Pertumbuhan',
@@ -179,7 +179,7 @@ class BusinessScorePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.03),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -193,14 +193,14 @@ class BusinessScorePage extends StatelessWidget {
                     trend: '12%',
                     isPositiveTrend: true,
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _KpiRow(
                     title: 'Biaya Operasional',
                     amount: 'Rp 18.500.000',
                     trend: '3%',
                     isPositiveTrend: false,
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   _KpiRow(
                     title: 'Arus Kas Masuk',
                     amount: 'Rp 60.200.000',
@@ -244,7 +244,7 @@ class _MetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -267,14 +267,14 @@ class _MetricCard extends StatelessWidget {
                   color: const Color(0xFFE3F2FD),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(score, style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                child: Text(score, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
           const Spacer(),
-          Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF4A5568))),
+          Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text(value, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+          Text(value, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
         ],
       ),
     );
@@ -304,9 +304,9 @@ class _KpiRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: FontWeight.w600)),
+              Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(amount, style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF4A5568))),
+              Text(amount, style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
           Container(

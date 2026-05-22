@@ -15,7 +15,7 @@ class InventoryOverviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -27,14 +27,14 @@ class InventoryOverviewPage extends StatelessWidget {
               'Inventory Overview',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Manage your stock levels and monitor recent changes.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -48,20 +48,20 @@ class InventoryOverviewPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                      boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.inventory_2_outlined, color: Color(0xFF4A5568), size: 18),
+                            Icon(Icons.inventory_2_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
                             const SizedBox(width: 8),
-                            Expanded(child: Text('Total Active SKUs', style: AppTypography.textTheme.titleSmall?.copyWith(color: const Color(0xFF4A5568)))),
+                            Expanded(child: Text('Total Active SKUs', style: AppTypography.textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text('1,248', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
+                        Text('1,248', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
                       ],
                     ),
                   ),
@@ -73,7 +73,7 @@ class InventoryOverviewPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFFED7D7), // Light Red
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                      boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,12 +99,12 @@ class InventoryOverviewPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Current Stock', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
+                Text('Current Stock', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
                 Row(
                   children: [
-                    const Icon(Icons.filter_list_rounded, color: Color(0xFF2962FF), size: 18),
+                    Icon(Icons.filter_list_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
                     const SizedBox(width: 4),
-                    Text('Filter', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF2962FF), fontWeight: FontWeight.w600)),
+                    Text('Filter', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -132,12 +132,12 @@ class InventoryOverviewPage extends StatelessWidget {
               sku: 'AC-YM-GR-01',
               icon: Icons.accessibility_new_rounded,
               statusText: 'Restocked 2 weeks ago',
-              statusColor: const Color(0xFF718096),
+              statusColor: Theme.of(context).colorScheme.outline,
               statusIcon: Icons.refresh_rounded,
               unitsLeft: '142',
               pillText: 'In Stock',
-              pillColor: const Color(0xFF4A5568),
-              pillBg: const Color(0xFFEDF2F7),
+              pillColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              pillBg: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             const SizedBox(height: 16),
             _StockItemCard(
@@ -160,10 +160,10 @@ class InventoryOverviewPage extends StatelessWidget {
               onPressed: () {},
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(56),
-                side: const BorderSide(color: Color(0xFFCBD5E0)),
+                side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('View All Inventory', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+              child: Text('View All Inventory', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 100), // Bottom padding
           ],
@@ -211,7 +211,7 @@ class _StockItemCard extends StatelessWidget {
         border: Border.all(color: isCritical ? const Color(0xFFC53030) : Colors.transparent, width: isCritical ? 1 : 0),
         boxShadow: [
           if (!isCritical)
-            BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: IntrinsicHeight(
@@ -238,19 +238,19 @@ class _StockItemCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEDF2F7),
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(icon, color: const Color(0xFF4A5568), size: 24),
+                          child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 24),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
+                              Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
                               const SizedBox(height: 4),
-                              Text('SKU: $sku', style: AppTypography.textTheme.bodySmall?.copyWith(color: const Color(0xFF718096))),
+                              Text('SKU: $sku', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
@@ -265,7 +265,7 @@ class _StockItemCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE2E8F0)),
+                    Divider(color: Theme.of(context).colorScheme.outlineVariant),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,8 +274,8 @@ class _StockItemCard extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(unitsLeft, style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
-                            Text('Units Left', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF718096))),
+                            Text(unitsLeft, style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
+                            Text('Units Left', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                           ],
                         ),
                         Container(

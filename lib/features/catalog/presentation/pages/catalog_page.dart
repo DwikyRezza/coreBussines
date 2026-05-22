@@ -15,7 +15,7 @@ class CatalogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         child: Column(
@@ -28,7 +28,7 @@ class CatalogPage extends StatelessWidget {
                 'Catalog',
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1A202C),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -38,7 +38,7 @@ class CatalogPage extends StatelessWidget {
               child: Text(
                 'Manage your products, services, and memberships.',
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF4A5568),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -53,14 +53,14 @@ class CatalogPage extends StatelessWidget {
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      side: const BorderSide(color: Color(0xFFCBD5E0)),
+                      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.filter_list_rounded, color: Color(0xFF0D47A1), size: 18),
+                        Icon(Icons.filter_list_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
                         const SizedBox(width: 8),
-                        Text('Filter', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                        Text('Filter', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -69,7 +69,7 @@ class CatalogPage extends StatelessWidget {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      backgroundColor: const Color(0xFF0D47A1),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: Row(
@@ -93,20 +93,20 @@ class CatalogPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('TOTAL ACTIVE', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF4A5568), letterSpacing: 1.2)),
+                    Text('TOTAL ACTIVE', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, letterSpacing: 1.2)),
                     const SizedBox(height: 8),
-                    Text('142', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
+                    Text('142', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.trending_up_rounded, color: Color(0xFF2962FF), size: 16),
+                        Icon(Icons.trending_up_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
                         const SizedBox(width: 4),
-                        Text('+12 this month', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF2962FF))),
+                        Text('+12 this month', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
                       ],
                     ),
                   ],
@@ -155,14 +155,14 @@ class CatalogPage extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFFED7D7)), // Light red border
-                  boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('NEEDS ATTENTION', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFFC53030), letterSpacing: 1.2)),
                     const SizedBox(height: 8),
-                    Text('4', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF1A202C))),
+                    Text('4', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -277,12 +277,12 @@ class _FilterChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: isSelected ? const Color(0xFFE3F2FD) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isSelected ? Colors.transparent : const Color(0xFFE2E8F0)),
+        border: Border.all(color: isSelected ? Colors.transparent : Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Text(
         label,
         style: AppTypography.textTheme.labelMedium?.copyWith(
-          color: isSelected ? const Color(0xFF0D47A1) : const Color(0xFF4A5568),
+          color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
@@ -319,14 +319,14 @@ class _CatalogItemCard extends StatelessWidget {
     Color pillBg;
     
     if (statusPill == 'Active' || statusPill == 'In Stock') {
-      pillColor = const Color(0xFF0D47A1);
+      pillColor = Theme.of(context).colorScheme.primary;
       pillBg = const Color(0xFFE3F2FD);
     } else if (isLowStock) {
       pillColor = const Color(0xFFC53030);
       pillBg = const Color(0xFFFED7D7);
     } else {
-      pillColor = const Color(0xFF4A5568);
-      pillBg = const Color(0xFFEDF2F7);
+      pillColor = Theme.of(context).colorScheme.onSurfaceVariant;
+      pillBg = Theme.of(context).colorScheme.surfaceContainerHighest;
     }
 
     return Container(
@@ -334,7 +334,7 @@ class _CatalogItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         children: [
@@ -351,26 +351,26 @@ class _CatalogItemCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEDF2F7),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: const Color(0xFF4A5568)),
+                  child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
+                    Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+                    Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(color: Color(0xFFE2E8F0)),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -379,9 +379,9 @@ class _CatalogItemCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(price, style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+                  Text(price, style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 2),
-                  Text(stockInfo ?? 'per month', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF718096))),
+                  Text(stockInfo ?? 'per month', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
                 ],
               ),
               Row(
@@ -395,7 +395,7 @@ class _CatalogItemCard extends StatelessWidget {
                     child: Text(statusPill, style: AppTypography.textTheme.labelSmall?.copyWith(color: pillColor, fontWeight: FontWeight.w600)),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.more_vert_rounded, color: Color(0xFF718096)),
+                  Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.outline),
                 ],
               ),
             ],

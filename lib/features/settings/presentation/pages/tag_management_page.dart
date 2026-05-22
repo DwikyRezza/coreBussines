@@ -74,7 +74,7 @@ class TagManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -86,14 +86,14 @@ class TagManagementPage extends StatelessWidget {
               'Tag Management',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Organize and categorize your system entities.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -117,12 +117,12 @@ class TagManagementPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF0D47A1)),
+                    Icon(Icons.add_circle_outline_rounded, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       'Create New Tag',
                       style: AppTypography.textTheme.labelLarge?.copyWith(
-                        color: const Color(0xFF0D47A1),
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -147,7 +147,7 @@ class TagManagementPage extends StatelessWidget {
               title: 'Marketing',
               count: '156 associated items',
               icon: Icons.campaign_rounded,
-              iconColor: const Color(0xFF2962FF),
+              iconColor: Theme.of(context).colorScheme.primary,
               iconBgColor: const Color(0xFFE3F2FD),
               onEdit: () => _showTagDialog(context, initialValue: 'Marketing'),
               onDelete: () => _confirmDelete(context, 'Marketing'),
@@ -157,8 +157,8 @@ class TagManagementPage extends StatelessWidget {
               title: 'Operasional',
               count: '89 associated items',
               icon: Icons.settings_rounded,
-              iconColor: const Color(0xFF4A5568),
-              iconBgColor: const Color(0xFFEDF2F7),
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              iconBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               onEdit: () => _showTagDialog(context, initialValue: 'Operasional'),
               onDelete: () => _confirmDelete(context, 'Operasional'),
             ),
@@ -197,7 +197,7 @@ class _TagCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Row(
@@ -212,14 +212,14 @@ class _TagCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
-                Text(count, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+                Text(count, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Color(0xFF718096)),
+            icon: Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.outline),
             onPressed: onEdit,
           ),
           IconButton(

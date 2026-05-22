@@ -17,11 +17,11 @@ class TransactionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CoreAppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () {},
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -40,7 +40,7 @@ class TransactionDetailPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.05),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -55,16 +55,16 @@ class TransactionDetailPage extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryContainer,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.fitness_center_rounded, color: AppColors.primary),
+                        child: Icon(Icons.fitness_center_rounded, color: Theme.of(context).colorScheme.primary),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer,
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -72,13 +72,13 @@ class TransactionDetailPage extends StatelessWidget {
                             Container(
                               width: 6,
                               height: 6,
-                              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'Active',
                               style: AppTypography.textTheme.labelMedium?.copyWith(
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -102,26 +102,26 @@ class TransactionDetailPage extends StatelessWidget {
                   Text(
                     'Focus on upper body strength and core stability. Remember to bring a water bottle and towel.',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF4A5568),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.5,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const Divider(color: AppColors.outlineVariant),
+                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
                   const SizedBox(height: AppSpacing.lg),
 
                   // Details
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.access_time_rounded, color: AppColors.onSurfaceVariant, size: 20),
+                      Icon(Icons.access_time_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Tomorrow, 07:00 AM', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('60 minutes duration', style: AppTypography.textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
+                            Text('60 minutes duration', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -131,14 +131,14 @@ class TransactionDetailPage extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on_outlined, color: AppColors.onSurfaceVariant, size: 20),
+                      Icon(Icons.location_on_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Downtown CoreBusiness Studio', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Studio B, Level 2', style: AppTypography.textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
+                            Text('Studio B, Level 2', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -153,7 +153,7 @@ class TransactionDetailPage extends StatelessWidget {
             Text(
               'Related Transaction',
               style: AppTypography.textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -165,7 +165,7 @@ class TransactionDetailPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.05),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -175,11 +175,11 @@ class TransactionDetailPage extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(
-                      color: AppColors.surfaceContainer,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.receipt_long_rounded, color: AppColors.onSurfaceVariant, size: 20),
+                    child: Icon(Icons.receipt_long_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -187,7 +187,7 @@ class TransactionDetailPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Session Booking', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                        Text('Oct 24, 2023', style: AppTypography.textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
+                        Text('Oct 24, 2023', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
@@ -210,7 +210,7 @@ class TransactionDetailPage extends StatelessWidget {
           color: AppColors.background,
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadow.withOpacity(0.05),
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, -4),
             ),
@@ -224,7 +224,7 @@ class TransactionDetailPage extends StatelessWidget {
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                  backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Row(
@@ -248,9 +248,9 @@ class TransactionDetailPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.edit_outlined, color: Color(0xFF0D47A1), size: 20),
+                    Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
                     const SizedBox(width: 12),
-                    Text('Edit Details', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                    Text('Edit Details', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),

@@ -15,7 +15,7 @@ class FinancialGoalsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -27,14 +27,14 @@ class FinancialGoalsPage extends StatelessWidget {
               'Financial Goals',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Track your monthly targets and limits.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -45,18 +45,18 @@ class FinancialGoalsPage extends StatelessWidget {
               subtitle: 'November 2023',
               icon: Icons.trending_up_rounded,
               iconBgColor: const Color(0xFFE3F2FD),
-              iconColor: const Color(0xFF0D47A1),
+              iconColor: Theme.of(context).colorScheme.primary,
               currentAmount: 'Rp 42.500.000',
               targetAmount: 'Rp 50.000.000',
               progress: 0.85,
-              progressColor: const Color(0xFF0D47A1),
-              progressBgColor: const Color(0xFFEDF2F7),
+              progressColor: Theme.of(context).colorScheme.primary,
+              progressBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               statusPill: 'On Track',
               statusIcon: Icons.check_circle_outline_rounded,
-              statusColor: const Color(0xFF0D47A1),
+              statusColor: Theme.of(context).colorScheme.primary,
               statusBgColor: const Color(0xFFE3F2FD),
               leftFooter: '85% Achieved',
-              leftFooterColor: const Color(0xFF0D47A1),
+              leftFooterColor: Theme.of(context).colorScheme.primary,
               rightFooter: 'Rp 7.5M to go',
             ),
             const SizedBox(height: 16),
@@ -67,12 +67,12 @@ class FinancialGoalsPage extends StatelessWidget {
               subtitle: 'Emergency Fund',
               icon: Icons.savings_outlined,
               iconBgColor: const Color(0xFFE3F2FD),
-              iconColor: const Color(0xFF0D47A1),
+              iconColor: Theme.of(context).colorScheme.primary,
               currentAmount: 'Rp 8.000.000',
               targetAmount: '10M',
               progress: 0.80,
-              progressColor: const Color(0xFF0D47A1),
-              progressBgColor: const Color(0xFFEDF2F7),
+              progressColor: Theme.of(context).colorScheme.primary,
+              progressBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               rightFooter: '80% of target',
             ),
             const SizedBox(height: 16),
@@ -160,7 +160,7 @@ class _GoalCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: hasBorder ? Border.all(color: borderColor ?? Colors.transparent) : null,
-        boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,9 +180,9 @@ class _GoalCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
+                      Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(height: 4),
-                      Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF718096))),
+                      Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
                     ],
                   ),
                 ],
@@ -214,7 +214,7 @@ class _GoalCard extends StatelessWidget {
                 currentAmount,
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: currentAmountColor ?? const Color(0xFF1A202C),
+                  color: currentAmountColor ?? Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
@@ -224,7 +224,7 @@ class _GoalCard extends StatelessWidget {
                   hasBorder ? '/ $targetAmount' : 'Rp $targetAmount', // Logic for formatting based on screenshot difference
                   style: AppTypography.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A202C),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -245,11 +245,11 @@ class _GoalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (leftFooter != null)
-                Text(leftFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: leftFooterColor ?? const Color(0xFF718096)))
+                Text(leftFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: leftFooterColor ?? Theme.of(context).colorScheme.outline))
               else
                 const SizedBox(),
               if (rightFooter != null)
-                Text(rightFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF718096)))
+                Text(rightFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline))
               else
                 const SizedBox(),
             ],

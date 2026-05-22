@@ -15,16 +15,16 @@ class ScanReceiptResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Very light gray/blue matching screenshot
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Very light gray/blue matching screenshot
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: Color(0xFF1A202C)),
+          icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Detail Transaksi',
           style: AppTypography.textTheme.titleLarge?.copyWith(
-            color: const Color(0xFF1A202C),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -43,11 +43,11 @@ class ScanReceiptResultPage extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E0),
+                color: Theme.of(context).colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -62,12 +62,12 @@ class ScanReceiptResultPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF0D47A1), size: 16),
+                Icon(Icons.check_circle_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   'Data berhasil diekstrak',
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: const Color(0xFF4A5568),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -79,7 +79,7 @@ class ScanReceiptResultPage extends StatelessWidget {
               label: 'Total Tagihan',
               value: 'Rp 55.000',
               valueStyle: AppTypography.textTheme.headlineMedium?.copyWith(
-                color: const Color(0xFF0D47A1),
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -89,8 +89,8 @@ class ScanReceiptResultPage extends StatelessWidget {
               label: 'Merchant',
               value: 'Starbucks',
               icon: Icons.storefront_rounded,
-              iconBg: const Color(0xFFE2E8F0),
-              iconColor: const Color(0xFF0D47A1),
+              iconBg: Theme.of(context).colorScheme.outlineVariant,
+              iconColor: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: AppSpacing.sm),
 
@@ -101,8 +101,8 @@ class ScanReceiptResultPage extends StatelessWidget {
                     label: 'Kategori',
                     value: 'Makanan & Minuman',
                     icon: Icons.restaurant_rounded,
-                    iconBg: const Color(0xFFE2E8F0),
-                    iconColor: const Color(0xFF4A5568),
+                    iconBg: Theme.of(context).colorScheme.outlineVariant,
+                    iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -111,8 +111,8 @@ class ScanReceiptResultPage extends StatelessWidget {
                     label: 'Tanggal',
                     value: '24 Mei 2024',
                     icon: Icons.calendar_today_rounded,
-                    iconBg: const Color(0xFFE2E8F0),
-                    iconColor: const Color(0xFF4A5568),
+                    iconBg: Theme.of(context).colorScheme.outlineVariant,
+                    iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -127,7 +127,7 @@ class ScanReceiptResultPage extends StatelessWidget {
           onPressed: () {},
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(56),
-            backgroundColor: const Color(0xFF0D47A1),
+            backgroundColor: Theme.of(context).colorScheme.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Row(
@@ -171,7 +171,7 @@ class _EditableField extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.02),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -198,7 +198,7 @@ class _EditableField extends StatelessWidget {
                 Text(
                   label,
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: const Color(0xFF4A5568),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -206,13 +206,13 @@ class _EditableField extends StatelessWidget {
                   value,
                   style: valueStyle ?? AppTypography.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A202C),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.edit_outlined, color: Color(0xFF718096), size: 20),
+          Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.outline, size: 20),
         ],
       ),
     );

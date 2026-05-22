@@ -22,7 +22,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -34,14 +34,14 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
               'Buat Jadwal Baru',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Rencanakan aktivitas kebugaran Anda hari ini.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -54,7 +54,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.03),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -64,24 +64,24 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Aktivitas Field
-                  Text('Aktivitas', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: FontWeight.w600)),
+                  Text('Aktivitas', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'Misal: Lari Pagi, Yoga',
-                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFFA0AEC0)),
-                      prefixIcon: const Icon(Icons.directions_run_rounded, color: Color(0xFFA0AEC0)),
+                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
+                      prefixIcon: Icon(Icons.directions_run_rounded, color: Theme.of(context).colorScheme.outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF0D47A1)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -89,27 +89,27 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   const SizedBox(height: 24),
 
                   // Waktu Mulai Field
-                  Text('Waktu Mulai', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: FontWeight.w600)),
+                  Text('Waktu Mulai', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   TextField(
                     decoration: InputDecoration(
                       hintText: '06:30 AM',
-                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF1A202C)), // Mock active state
-                      prefixIcon: const Icon(Icons.access_time_rounded, color: Color(0xFFA0AEC0)),
+                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface), // Mock active state
+                      prefixIcon: Icon(Icons.access_time_rounded, color: Theme.of(context).colorScheme.outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   // Pengingat Sebelum Aktivitas
-                  Text('Pengingat Sebelum Aktivitas', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: FontWeight.w600)),
+                  Text('Pengingat Sebelum Aktivitas', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -141,20 +141,20 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   const SizedBox(height: 24),
 
                   // Catatan Tambahan Field
-                  Text('Catatan Tambahan', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF1A202C), fontWeight: FontWeight.w600)),
+                  Text('Catatan Tambahan', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   TextField(
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'Target kalori, rute lari, atau fokus latihan...',
-                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFFA0AEC0)),
+                      hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                     ),
                   ),
@@ -165,7 +165,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
-                      backgroundColor: const Color(0xFF0D47A1), // Deep Blue
+                      backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                     ),
                     child: Row(
@@ -206,15 +206,15 @@ class _ReminderToggle extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2962FF) : Colors.white, // Bright blue if active
-          border: Border.all(color: isSelected ? const Color(0xFF2962FF) : const Color(0xFFE2E8F0)),
+          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white, // Bright blue if active
+          border: Border.all(color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             label,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white : const Color(0xFF4A5568),
+              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),

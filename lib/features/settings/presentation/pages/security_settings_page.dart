@@ -77,7 +77,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -89,14 +89,14 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               'Security Settings',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Manage your authentication methods to keep your account secure.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -104,7 +104,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             // PIN Option
             _SecurityOptionCard(
               icon: Icons.lock_outline_rounded,
-              iconColor: const Color(0xFF0D47A1),
+              iconColor: Theme.of(context).colorScheme.primary,
               iconBgColor: const Color(0xFFE3F2FD),
               title: '4-Digit PIN',
               subtitle: 'Required for transactions',
@@ -113,7 +113,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 child: Text(
                   'Ubah',
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: const Color(0xFF0D47A1),
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -124,7 +124,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             // Fingerprint Toggle
             _SecurityOptionCard(
               icon: Icons.fingerprint_rounded,
-              iconColor: const Color(0xFF2962FF),
+              iconColor: Theme.of(context).colorScheme.primary,
               iconBgColor: const Color(0xFFE3F2FD),
               title: 'Fingerprint Unlock',
               subtitle: 'Fast and secure access using biometrics',
@@ -132,9 +132,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 value: _fingerprint,
                 onChanged: (val) => setState(() => _fingerprint = val),
                 activeColor: Colors.white,
-                activeTrackColor: const Color(0xFF0D47A1),
+                activeTrackColor: Theme.of(context).colorScheme.primary,
                 inactiveThumbColor: Colors.white,
-                inactiveTrackColor: const Color(0xFFCBD5E0),
+                inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             const SizedBox(height: 16),
@@ -142,17 +142,17 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             // Face Unlock Toggle
             _SecurityOptionCard(
               icon: Icons.face_rounded,
-              iconColor: const Color(0xFF4A5568),
-              iconBgColor: const Color(0xFFEDF2F7),
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              iconBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               title: 'Face Unlock',
               subtitle: 'Unlock by looking at your device',
               actionWidget: Switch(
                 value: _faceUnlock,
                 onChanged: (val) => setState(() => _faceUnlock = val),
                 activeColor: Colors.white,
-                activeTrackColor: const Color(0xFF0D47A1),
+                activeTrackColor: Theme.of(context).colorScheme.primary,
                 inactiveThumbColor: Colors.white,
-                inactiveTrackColor: const Color(0xFFCBD5E0),
+                inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -161,7 +161,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             Text(
               'ADVANCED',
               style: AppTypography.textTheme.labelMedium?.copyWith(
-                color: const Color(0xFF4A5568),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 letterSpacing: 1.5,
               ),
             ),
@@ -170,7 +170,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Column(
                 children: [
@@ -179,19 +179,19 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Require authentication for purchases', style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF1A202C))),
+                        Text('Require authentication for purchases', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
                         Switch(
                           value: _requireAuth,
                           onChanged: (val) => setState(() => _requireAuth = val),
                           activeColor: Colors.white,
-                          activeTrackColor: const Color(0xFF0D47A1),
+                          activeTrackColor: Theme.of(context).colorScheme.primary,
                           inactiveThumbColor: Colors.white,
-                          inactiveTrackColor: const Color(0xFFCBD5E0),
+                          inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
                         ),
                       ],
                     ),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                   InkWell(
                     onTap: _showDeactivateDialog,
                     child: Padding(
@@ -200,7 +200,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Deactivate Account', style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFFC53030))),
-                          const Icon(Icons.chevron_right_rounded, color: Color(0xFF4A5568)),
+                          Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ],
                       ),
                     ),
@@ -240,7 +240,7 @@ class _SecurityOptionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
@@ -254,9 +254,9 @@ class _SecurityOptionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF1A202C))),
+                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF718096))),
+                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
               ],
             ),
           ),

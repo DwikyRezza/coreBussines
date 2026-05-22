@@ -33,21 +33,21 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         titleSpacing: AppSpacing.pagePadding,
         title: Row(
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: const Color(0xFFE2E8F0),
-              child: const Icon(Icons.person_outline_rounded, color: Color(0xFF4A5568), size: 18),
+              backgroundColor: Theme.of(context).colorScheme.outlineVariant,
+              child: Icon(Icons.person_outline_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'CoreBusiness',
               style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -55,7 +55,7 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
+            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () {},
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -74,19 +74,19 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2962FF)), // Active search border
+                border: Border.all(color: Theme.of(context).colorScheme.primary), // Active search border
               ),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D47A1)),
+                  prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
                       color: Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close_rounded, color: Color(0xFF4A5568), size: 16),
+                    child: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -119,12 +119,12 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                   Container(
                     width: 100,
                     height: 100,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF8FAFC),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Color(0xFFE2E8F0),
+                          color: Theme.of(context).colorScheme.outlineVariant,
                           blurRadius: 40,
                           spreadRadius: 10,
                         ),
@@ -153,7 +153,7 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                     'Tidak ada transaksi ditemukan',
                     style: AppTypography.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1A202C),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -161,7 +161,7 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                   Text(
                     'Kami tidak dapat menemukan transaksi\nyang cocok dengan kata kunci\n"Pembayaran Netflix".',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF4A5568),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -172,15 +172,15 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                   TextButton.icon(
                     onPressed: () {},
                     style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFE2E8F0),
+                      backgroundColor: Theme.of(context).colorScheme.outlineVariant,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    icon: const Icon(Icons.filter_list_off_rounded, color: Color(0xFF0D47A1)),
+                    icon: Icon(Icons.filter_list_off_rounded, color: Theme.of(context).colorScheme.primary),
                     label: Text(
                       'Hapus Filter',
                       style: AppTypography.textTheme.labelLarge?.copyWith(
-                        color: const Color(0xFF0D47A1),
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -212,9 +212,9 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF0D47A1))),
+          Text(label, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
           const SizedBox(width: 4),
-          const Icon(Icons.close_rounded, size: 14, color: Color(0xFF0D47A1)),
+          Icon(Icons.close_rounded, size: 14, color: Theme.of(context).colorScheme.primary),
         ],
       ),
     );

@@ -103,13 +103,13 @@ class _WalletsPageState extends State<WalletsPage> {
   Color _colorForType(String type) {
     switch (type.toLowerCase()) {
       case 'bank':
-        return const Color(0xFF2962FF);
+        return Theme.of(context).colorScheme.primary;
       case 'ewallet':
       case 'e-wallet':
-        return const Color(0xFF1A202C);
+        return Theme.of(context).colorScheme.onSurface;
       case 'cash':
       default:
-        return const Color(0xFF1A202C);
+        return Theme.of(context).colorScheme.onSurface;
     }
   }
 
@@ -119,17 +119,17 @@ class _WalletsPageState extends State<WalletsPage> {
         return const Color(0xFFE3F2FD);
       case 'ewallet':
       case 'e-wallet':
-        return const Color(0xFFEDF2F7);
+        return Theme.of(context).colorScheme.surfaceContainerHighest;
       case 'cash':
       default:
-        return const Color(0xFFEDF2F7);
+        return Theme.of(context).colorScheme.surfaceContainerHighest;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -146,7 +146,7 @@ class _WalletsPageState extends State<WalletsPage> {
                     Text(
                       'TOTAL NET WORTH',
                       style: AppTypography.textTheme.labelMedium?.copyWith(
-                        color: const Color(0xFF4A5568),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         letterSpacing: 1.5,
                       ),
                     ),
@@ -154,7 +154,7 @@ class _WalletsPageState extends State<WalletsPage> {
                     Text(
                       _fmt.format(_totalNetWorth),
                       style: AppTypography.textTheme.displaySmall?.copyWith(
-                        color: const Color(0xFF1A202C),
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -168,7 +168,7 @@ class _WalletsPageState extends State<WalletsPage> {
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            backgroundColor: const Color(0xFF0D47A1),
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
                           child: Row(
@@ -190,9 +190,9 @@ class _WalletsPageState extends State<WalletsPage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.swap_horiz_rounded, color: Color(0xFF0D47A1), size: 18),
+                              Icon(Icons.swap_horiz_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
                               const SizedBox(width: 8),
-                              Text('Transfer', style: AppTypography.textTheme.labelLarge?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
+                              Text('Transfer', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -208,13 +208,13 @@ class _WalletsPageState extends State<WalletsPage> {
                           'Dompet Anda',
                           style: AppTypography.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1A202C),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         Text(
                           'Kelola',
                           style: AppTypography.textTheme.labelMedium?.copyWith(
-                            color: const Color(0xFF2962FF),
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -232,11 +232,11 @@ class _WalletsPageState extends State<WalletsPage> {
                         child: Column(
                           children: [
                             Icon(Icons.account_balance_wallet_outlined,
-                                size: 48, color: AppColors.onSurfaceVariant.withOpacity(0.4)),
+                                size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4)),
                             const SizedBox(height: 12),
                             Text('Belum ada dompet',
                                 style: AppTypography.textTheme.bodyMedium
-                                    ?.copyWith(color: AppColors.onSurfaceVariant)),
+                                    ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       )
@@ -294,7 +294,7 @@ class _WalletCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -314,10 +314,10 @@ class _WalletCard extends StatelessWidget {
                     child: Icon(icon, color: iconColor, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFF4A5568))),
+                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
-              const Icon(Icons.more_horiz_rounded, color: Color(0xFF718096)),
+              Icon(Icons.more_horiz_rounded, color: Theme.of(context).colorScheme.outline),
             ],
           ),
           const SizedBox(height: 24),
@@ -325,7 +325,7 @@ class _WalletCard extends StatelessWidget {
             amount,
             style: AppTypography.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF1A202C),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -333,7 +333,7 @@ class _WalletCard extends StatelessWidget {
             children: [
               Container(width: 8, height: 8, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle)),
               const SizedBox(width: 8),
-              Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF718096))),
+              Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
             ],
           ),
         ],

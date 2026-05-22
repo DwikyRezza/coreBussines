@@ -15,7 +15,7 @@ class SearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
@@ -29,10 +29,10 @@ class SearchPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF2962FF)), // Active blue border
+                border: Border.all(color: Theme.of(context).colorScheme.primary), // Active blue border
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2962FF).withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -41,15 +41,15 @@ class SearchPage extends StatelessWidget {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search CoreBusiness...',
-                  hintStyle: AppTypography.textTheme.bodyLarge?.copyWith(color: const Color(0xFFA0AEC0)),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D47A1)),
+                  hintStyle: AppTypography.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
+                  prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
                       color: Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.mic_none_rounded, color: Color(0xFF4A5568), size: 20),
+                    child: Icon(Icons.mic_none_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -81,13 +81,13 @@ class SearchPage extends StatelessWidget {
                   'Recent Searches',
                   style: AppTypography.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1A202C),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   'Clear',
                   style: AppTypography.textTheme.labelMedium?.copyWith(
-                    color: const Color(0xFF2962FF),
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -112,7 +112,7 @@ class SearchPage extends StatelessWidget {
               'Suggested Businesses',
               style: AppTypography.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF1A202C),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 16),
@@ -125,7 +125,7 @@ class SearchPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.03),
+                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -154,7 +154,7 @@ class SearchPage extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 'Apex Performance Center',
-                                style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C)),
+                                style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -169,7 +169,7 @@ class SearchPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('Premium training facility', style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+                        Text('Premium training facility', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -194,7 +194,7 @@ class SearchPage extends StatelessWidget {
                     title: 'Zenith Yoga',
                     subtitle: 'Studio',
                     icon: Icons.self_improvement_rounded,
-                    iconBg: const Color(0xFF2962FF),
+                    iconBg: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -228,18 +228,18 @@ class _FilterChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF2962FF) : const Color(0xFFF1F5F9),
+        color: isSelected ? Theme.of(context).colorScheme.primary : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: isSelected ? Colors.white : const Color(0xFF4A5568)),
+          Icon(icon, size: 16, color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Text(
             label,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white : const Color(0xFF4A5568),
+              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
@@ -261,17 +261,17 @@ class _RecentSearchChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9), // Light grey background
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.history_rounded, size: 16, color: Color(0xFF718096)),
+          Icon(Icons.history_rounded, size: 16, color: Theme.of(context).colorScheme.outline),
           const SizedBox(width: 8),
           Text(
             label,
             style: AppTypography.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF4A5568),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -290,12 +290,12 @@ class _Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F0),
+        color: Theme.of(context).colorScheme.outlineVariant,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label,
-        style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFF4A5568)),
+        style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }
@@ -323,7 +323,7 @@ class _SmallBusinessCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.03),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -341,9 +341,9 @@ class _SmallBusinessCard extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(height: 16),
-          Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF1A202C))),
+          Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 4),
-          Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: const Color(0xFF4A5568))),
+          Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ],
       ),
     );

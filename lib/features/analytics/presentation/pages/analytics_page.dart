@@ -14,6 +14,8 @@ import '../../../../core/widgets/core_app_bar.dart';
 import '../../../home/domain/entities/home_entities.dart';
 import '../../../transactions/domain/entities/transaction_entities.dart';
 import '../../../transactions/domain/repositories/transaction_repository.dart';
+import '../../../../core/services/pdf_report_service.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -107,119 +109,168 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     final monthLabel = DateFormat('MMMM yyyy', 'id_ID').format(_selectedMonth);
+    final padding = ResponsiveHelper.pagePadding(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
-      body: RefreshIndicator(
-        onRefresh: _loadTransactions,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Ringkasan\nBulanan',
-                      style: AppTypography.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
+      body: ResponsiveHelper.constrainWidth(
+        context: context,
+        child: RefreshIndicator(
+          onRefresh: _loadTransactions,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: padding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Ringkasan\nBulanan',
+                        style: AppTypography.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
                       ),
                     ),
-                  ),
-                  InkWell(
-                    onTap: _pickMonth,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryContainer,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 112),
-                            child: Text(
-                              monthLabel,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.textTheme.labelMedium?.copyWith(
-                                color: AppColors.primary,
-                                height: 1.15,
-                                fontWeight: FontWeight.w700,
+                    InkWell(
+                      onTap: _pickMonth,
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 112),
+                              child: Text(
+                                monthLabel,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.textTheme.labelMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.keyboard_arrow_down_rounded,
-                              color: AppColors.primary, size: 20),
-                        ],
+                            const SizedBox(width: 8),
+                            Icon(Icons.keyboard_arrow_down_rounded,
+                                color: Theme.of(context).colorScheme.primary, size: 20),
+                          ],
+                        ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 48),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_error != null)
+                  _MessageCard(message: _error!)
+                else ...[
+                  if (ResponsiveHelper.isTabletOrLarger(context))
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SummaryCard(
+                            title: 'Omzet Bulan Ini',
+                            amount: _currency.format(_totalIncome),
+                            trend: _totalIncome > 0 ? 'Aktif' : '-',
+                            isPositiveTrend: _totalIncome > 0,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: _SummaryCard(
+                            title: 'Total Pengeluaran',
+                            amount: _currency.format(_totalExpense),
+                            trend: _totalExpense > 0 ? 'Tercatat' : '-',
+                            isPositiveTrend: false,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    )
+                  else ...[
+                    _SummaryCard(
+                      title: 'Omzet Bulan Ini',
+                      amount: _currency.format(_totalIncome),
+                      trend: _totalIncome > 0 ? 'Aktif' : '-',
+                      isPositiveTrend: _totalIncome > 0,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _SummaryCard(
+                      title: 'Total Pengeluaran',
+                      amount: _currency.format(_totalExpense),
+                      trend: _totalExpense > 0 ? 'Tercatat' : '-',
+                      isPositiveTrend: false,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    'Kategori Pengeluaran Terbesar',
+                    style: AppTypography.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              if (_isLoading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 48),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_error != null)
-                _MessageCard(message: _error!)
-              else ...[
-                _SummaryCard(
-                  title: 'Omzet Bulan Ini',
-                  amount: _currency.format(_totalIncome),
-                  trend: _totalIncome > 0 ? 'Aktif' : '-',
-                  isPositiveTrend: _totalIncome > 0,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _SummaryCard(
-                  title: 'Total Pengeluaran',
-                  amount: _currency.format(_totalExpense),
-                  trend: _totalExpense > 0 ? 'Tercatat' : '-',
-                  isPositiveTrend: false,
-                  color: const Color(0xFF993300),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'Kategori Pengeluaran Terbesar',
-                  style: AppTypography.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                  const SizedBox(height: AppSpacing.md),
+                  _CategoryBreakdown(
+                    categories: _expenseByCategory,
+                    totalExpense: _totalExpense,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _CategoryBreakdown(
-                  categories: _expenseByCategory,
-                  totalExpense: _totalExpense,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                _InsightCard(
-                  monthLabel: DateFormat('MMMM', 'id_ID').format(_selectedMonth),
-                  income: _totalIncome,
-                  expense: _totalExpense,
-                  topCategory:
-                      _expenseByCategory.isEmpty ? null : _expenseByCategory.keys.first,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Laporan PDF sedang disiapkan')),
-                    );
+                  const SizedBox(height: AppSpacing.xl),
+                  _InsightCard(
+                    monthLabel: DateFormat('MMMM', 'id_ID').format(_selectedMonth),
+                    income: _totalIncome,
+                    expense: _totalExpense,
+                    topCategory:
+                        _expenseByCategory.isEmpty ? null : _expenseByCategory.keys.first,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  ElevatedButton(
+                    onPressed: () async {
+                    try {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Laporan PDF sedang disiapkan...'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      
+                      await PdfReportService.generateMonthlyReport(
+                        transactions: _transactions,
+                        month: _selectedMonth,
+                      );
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Gagal membuat laporan PDF. Silakan periksa izin penyimpanan atau coba lagi nanti.',
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(56),
-                    backgroundColor: const Color(0xFF0D47A1),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Row(
@@ -252,48 +303,51 @@ class _CategoryBreakdown extends StatelessWidget {
   final Map<String, double> categories;
   final double totalExpense;
 
-  const _CategoryBreakdown({
+  _CategoryBreakdown({
     required this.categories,
     required this.totalExpense,
   });
 
-  static const _colors = [
-    Color(0xFF0D47A1),
-    Color(0xFF993300),
-    Color(0xFF757575),
-    Color(0xFF2E7D32),
-    Color(0xFF6A1B9A),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final colors = [
+      Theme.of(context).colorScheme.primary,
+      Theme.of(context).colorScheme.error,
+      Theme.of(context).colorScheme.secondary,
+      Theme.of(context).colorScheme.tertiary,
+      Theme.of(context).colorScheme.outline,
+    ];
+
     if (categories.isEmpty || totalExpense <= 0) {
       return const _MessageCard(message: 'Belum ada pengeluaran di bulan ini.');
     }
 
     final entries = categories.entries.take(5).toList();
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+    final chartSize = isTablet ? 160.0 : 120.0;
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isTablet ? 32 : 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 120,
-            height: 120,
+            width: chartSize,
+            height: chartSize,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 PieChart(
                   PieChartData(
                     sectionsSpace: 0,
-                    centerSpaceRadius: 40,
+                    centerSpaceRadius: isTablet ? 56 : 40,
                     sections: [
                       for (var i = 0; i < entries.length; i++)
                         PieChartSectionData(
-                          color: _colors[i % _colors.length],
+                          color: colors[i % colors.length],
                           value: entries[i].value,
                           radius: 20,
                           showTitle: false,
@@ -306,7 +360,7 @@ class _CategoryBreakdown extends StatelessWidget {
                   children: [
                     Text('Total',
                         style: AppTypography.textTheme.labelSmall
-                            ?.copyWith(color: AppColors.onSurfaceVariant)),
+                            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     Text('100%',
                         style: AppTypography.textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800)),
@@ -315,18 +369,18 @@ class _CategoryBreakdown extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 24),
+          SizedBox(width: isTablet ? 32 : 24),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (var i = 0; i < entries.length; i++) ...[
                   _LegendItem(
-                    color: _colors[i % _colors.length],
+                    color: colors[i % colors.length],
                     label: entries[i].key,
                     value: '${((entries[i].value / totalExpense) * 100).round()}%',
                   ),
-                  if (i != entries.length - 1) const SizedBox(height: 12),
+                  if (i != entries.length - 1) SizedBox(height: isTablet ? 16 : 12),
                 ],
               ],
             ),
@@ -364,7 +418,7 @@ class _InsightCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.auto_awesome, color: Color(0xFF1A237E), size: 24),
+            Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary, size: 24),
             const SizedBox(width: 8),
             Text(
               'AI Insight',
@@ -378,14 +432,14 @@ class _InsightCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.primaryContainer.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primaryContainer),
+            border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
           ),
           child: Text(
             message,
             style: AppTypography.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF37474F),
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
               height: 1.5,
             ),
           ),
@@ -406,14 +460,14 @@ class _MessageCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         message,
         textAlign: TextAlign.center,
         style: AppTypography.textTheme.bodyMedium?.copyWith(
-          color: AppColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -440,11 +494,11 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -474,7 +528,7 @@ class _SummaryCard extends StatelessWidget {
               Text(
                 title,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -496,14 +550,14 @@ class _SummaryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Icon(
                     Icons.trending_up_rounded,
-                    color: isPositiveTrend ? const Color(0xFF4CAF50) : AppColors.expense,
+                    color: isPositiveTrend ? const Color(0xFF4CAF50) : Theme.of(context).colorScheme.error,
                     size: 16,
                   ),
                   Text(
                     trend,
                     style: AppTypography.textTheme.labelMedium?.copyWith(
                       color:
-                          isPositiveTrend ? const Color(0xFF4CAF50) : AppColors.expense,
+                          isPositiveTrend ? const Color(0xFF4CAF50) : Theme.of(context).colorScheme.error,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -544,13 +598,13 @@ class _LegendItem extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.textTheme.bodyMedium
-                ?.copyWith(color: AppColors.onBackground),
+                ?.copyWith(color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         Text(
           value,
           style: AppTypography.textTheme.bodyMedium
-              ?.copyWith(color: AppColors.onSurfaceVariant),
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );

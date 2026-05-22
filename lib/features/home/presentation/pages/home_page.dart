@@ -12,6 +12,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -33,7 +34,7 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
           if (state is HomeLoading) {
@@ -62,78 +63,139 @@ class _HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = ResponsiveHelper.pagePadding(context);
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surface,
+      color: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       onRefresh: () async {
         final bloc = context.read<HomeBloc>();
         bloc.add(const HomeRefreshRequested());
-        // Tunggu hingga state berubah menjadi Loaded atau Error
         await bloc.stream.firstWhere(
             (state) => state is HomeLoaded || state is HomeError);
       },
-      child: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // AppBar
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            backgroundColor: AppColors.background,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            titleSpacing: AppSpacing.pagePadding,
-            title: _HomeAppBar(state: state),
-          ),
+      child: ResponsiveHelper.constrainWidth(
+        context: context,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // AppBar
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              titleSpacing: padding,
+              title: _HomeAppBar(state: state),
+            ),
 
-          SliverList(
-            delegate: SliverChildListDelegate([
-              const SizedBox(height: AppSpacing.base),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: AppSpacing.base),
 
-              // Balance Card
-              BalanceCard(summary: state.summary),
-              const SizedBox(height: AppSpacing.xl),
+                  if (isTablet)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left column
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BalanceCard(summary: state.summary),
+                              const SizedBox(height: AppSpacing.xl),
+                              const QuickActionsGrid(),
+                              const SizedBox(height: AppSpacing.xl),
+                              HomeInsightCard(insight: state.insight),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        // Right column
+                        Expanded(
+                          flex: 6,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FinanceChartSection(transactions: state.allTransactions),
+                              const SizedBox(height: AppSpacing.xl),
+                              SectionHeader(
+                                title: 'Transaksi Terakhir',
+                                actionLabel: 'Semua',
+                                onAction: () => context.go(AppRoutes.history),
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              ...state.recentTransactions.map(
+                                (txn) => Column(
+                                  children: [
+                                    TransactionTile(transaction: txn),
+                                    if (txn != state.recentTransactions.last)
+                                      Divider(
+                                        height: 1,
+                                        indent: AppSpacing.pagePadding,
+                                        endIndent: AppSpacing.pagePadding,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outlineVariant
+                                            .withOpacity(0.4),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BalanceCard(summary: state.summary),
+                        const SizedBox(height: AppSpacing.xl),
+                        const QuickActionsGrid(),
+                        const SizedBox(height: AppSpacing.xl),
+                        HomeInsightCard(insight: state.insight),
+                        const SizedBox(height: AppSpacing.xl),
+                        _FinanceChartSection(transactions: state.allTransactions),
+                        const SizedBox(height: AppSpacing.xl),
+                        SectionHeader(
+                          title: 'Transaksi Terakhir',
+                          actionLabel: 'Semua',
+                          onAction: () => context.go(AppRoutes.history),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        ...state.recentTransactions.map(
+                          (txn) => Column(
+                            children: [
+                              TransactionTile(transaction: txn),
+                              if (txn != state.recentTransactions.last)
+                                Divider(
+                                  height: 1,
+                                  indent: AppSpacing.pagePadding,
+                                  endIndent: AppSpacing.pagePadding,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant
+                                      .withOpacity(0.4),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
 
-              // Quick Actions
-              const QuickActionsGrid(),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Insight Card
-              HomeInsightCard(insight: state.insight),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Weekly Chart Placeholder
-              _FinanceChartSection(transactions: state.allTransactions),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Recent Transactions
-              SectionHeader(
-                title: 'Transaksi Terakhir',
-                actionLabel: 'Semua',
-                onAction: () => context.go(AppRoutes.history),
+                  const SizedBox(height: 100), // Bottom nav clearance
+                ]),
               ),
-              const SizedBox(height: AppSpacing.md),
-
-              // Transaction List
-              ...state.recentTransactions.map(
-                (txn) => Column(
-                  children: [
-                    TransactionTile(transaction: txn),
-                    if (txn != state.recentTransactions.last)
-                      Divider(
-                        height: 1,
-                        indent: AppSpacing.pagePadding,
-                        endIndent: AppSpacing.pagePadding,
-                        color: AppColors.outlineVariant.withOpacity(0.4),
-                      ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 100), // Bottom nav clearance
-            ]),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -155,7 +217,7 @@ class _HomeAppBar extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: AppColors.primaryContainer,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               backgroundImage: state.summary.userPhotoUrl != null
                   ? NetworkImage(state.summary.userPhotoUrl!)
                   : null,
@@ -163,7 +225,7 @@ class _HomeAppBar extends StatelessWidget {
                   ? Text(
                       state.summary.userName[0].toUpperCase(),
                       style: AppTypography.textTheme.titleSmall?.copyWith(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     )
@@ -177,13 +239,13 @@ class _HomeAppBar extends StatelessWidget {
                 Text(
                   'Halo,',
                   style: AppTypography.textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   state.summary.userName,
                   style: AppTypography.textTheme.titleMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                   ),
@@ -197,10 +259,10 @@ class _HomeAppBar extends StatelessWidget {
         IconButton(
           icon: Badge(
             smallSize: 8,
-            backgroundColor: AppColors.expense,
+            backgroundColor: Theme.of(context).colorScheme.error,
             child: const Icon(Icons.notifications_outlined),
           ),
-          color: AppColors.onBackground,
+          color: Theme.of(context).colorScheme.onSurface,
           onPressed: () {},
         ),
       ],
@@ -232,9 +294,9 @@ class _WeeklyChartSection extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
           ),
           child: Column(
             children: [
@@ -257,7 +319,7 @@ class _WeeklyChartSection extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isActive
                                 ? AppColors.primary
-                                : AppColors.primaryContainer,
+                                : Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
@@ -277,7 +339,7 @@ class _WeeklyChartSection extends StatelessWidget {
                     style: AppTypography.textTheme.labelSmall?.copyWith(
                       color: isActive
                           ? AppColors.primary
-                          : AppColors.onSurfaceVariant,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight:
                           isActive ? FontWeight.w700 : FontWeight.w400,
                     ),
@@ -352,9 +414,9 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
           margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.outlineVariant.withOpacity(0.3)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
           ),
           child: Column(
             children: [
@@ -413,13 +475,13 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                             _FinanceBar(
                               value: bucket.income,
                               maxValue: maxValue,
-                              color: AppColors.income,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             const SizedBox(width: 4),
                             _FinanceBar(
                               value: bucket.expense,
                               maxValue: maxValue,
-                              color: AppColors.expense,
+                              color: Theme.of(context).colorScheme.error,
                             ),
                           ],
                         ),
@@ -432,7 +494,7 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.textTheme.labelSmall?.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -443,12 +505,12 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _LegendDot(color: AppColors.income, label: 'Pemasukan'),
+                  _LegendDot(color: Theme.of(context).colorScheme.primary, label: 'Pemasukan'),
                   SizedBox(width: 16),
-                  _LegendDot(color: AppColors.expense, label: 'Pengeluaran'),
+                  _LegendDot(color: Theme.of(context).colorScheme.error, label: 'Pengeluaran'),
                 ],
               ),
             ],
@@ -636,7 +698,7 @@ class _PeriodChip extends StatelessWidget {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surfaceContainer,
+          color: selected ? AppColors.primary : Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
@@ -644,7 +706,7 @@ class _PeriodChip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.textTheme.labelSmall?.copyWith(
-            color: selected ? Colors.white : AppColors.onSurfaceVariant,
+            color: selected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -731,13 +793,13 @@ class _HomeErrorView extends StatelessWidget {
             Icon(
               Icons.cloud_off_rounded,
               size: 64,
-              color: AppColors.onSurfaceVariant.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
             ),
             const SizedBox(height: AppSpacing.base),
             Text(
               'Gagal Memuat Data',
               style: AppTypography.textTheme.titleMedium?.copyWith(
-                color: AppColors.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -745,7 +807,7 @@ class _HomeErrorView extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
