@@ -11,7 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../auth/presentation/bloc/auth_event.dart'; // Added this
+import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -40,7 +40,7 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.color_lens_outlined,
               title: 'Tema Aplikasi',
               subtitle: 'Terang / Gelap / Sistem',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.themeSettings),
             ),
           ]),
 
@@ -49,19 +49,19 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.notifications_outlined,
               title: 'Notifikasi',
               subtitle: 'Kelola pengingat transaksi',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.alerts),
             ),
             _SettingsTile(
               icon: Icons.lock_outline_rounded,
               title: 'Keamanan',
               subtitle: 'PIN, biometrik',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.securitySettings),
             ),
             _SettingsTile(
               icon: Icons.backup_outlined,
               title: 'Backup Data',
               subtitle: 'Sinkronisasi ke cloud',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.syncSettings),
             ),
           ]),
 
@@ -69,13 +69,13 @@ class SettingsPage extends StatelessWidget {
             _SettingsTile(
               icon: Icons.help_outline_rounded,
               title: 'Bantuan & FAQ',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.helpFaq),
             ),
             _SettingsTile(
               icon: Icons.info_outline_rounded,
               title: 'Tentang Aplikasi',
               subtitle: 'CoreBusiness v1.0.0',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.about),
             ),
           ]),
 
@@ -147,7 +147,7 @@ class _ProfileHeader extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
-              onPressed: () {},
+              onPressed: () => context.push(AppRoutes.editProfile),
             ),
           ]),
         );

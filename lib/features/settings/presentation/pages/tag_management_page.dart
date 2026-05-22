@@ -12,6 +12,65 @@ import '../../../../core/widgets/core_app_bar.dart';
 class TagManagementPage extends StatelessWidget {
   const TagManagementPage({super.key});
 
+  void _showTagDialog(BuildContext context, {String? initialValue}) {
+    final controller = TextEditingController(text: initialValue ?? '');
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(initialValue == null ? 'Buat Tag Baru' : 'Edit Tag'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Nama tag'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    initialValue == null ? 'Tag dibuat' : 'Tag diperbarui',
+                  ),
+                ),
+              );
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String title) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Tag?'),
+        content: Text('Tag "$title" akan dihapus dari daftar.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Tag "$title" dihapus')),
+              );
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +100,7 @@ class TagManagementPage extends StatelessWidget {
 
             // Create New Tag Button (Dashed)
             InkWell(
-              onTap: () {},
+              onTap: () => _showTagDialog(context),
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 width: double.infinity,
@@ -80,6 +139,8 @@ class TagManagementPage extends StatelessWidget {
               icon: Icons.priority_high_rounded,
               iconColor: const Color(0xFFC53030),
               iconBgColor: const Color(0xFFFED7D7),
+              onEdit: () => _showTagDialog(context, initialValue: 'Urgent'),
+              onDelete: () => _confirmDelete(context, 'Urgent'),
             ),
             const SizedBox(height: 16),
             _TagCard(
@@ -88,6 +149,8 @@ class TagManagementPage extends StatelessWidget {
               icon: Icons.campaign_rounded,
               iconColor: const Color(0xFF2962FF),
               iconBgColor: const Color(0xFFE3F2FD),
+              onEdit: () => _showTagDialog(context, initialValue: 'Marketing'),
+              onDelete: () => _confirmDelete(context, 'Marketing'),
             ),
             const SizedBox(height: 16),
             _TagCard(
@@ -96,6 +159,8 @@ class TagManagementPage extends StatelessWidget {
               icon: Icons.settings_rounded,
               iconColor: const Color(0xFF4A5568),
               iconBgColor: const Color(0xFFEDF2F7),
+              onEdit: () => _showTagDialog(context, initialValue: 'Operasional'),
+              onDelete: () => _confirmDelete(context, 'Operasional'),
             ),
             const SizedBox(height: 100), // Bottom shell padding
           ],
@@ -111,6 +176,8 @@ class _TagCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final Color iconBgColor;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _TagCard({
     required this.title,
@@ -118,6 +185,8 @@ class _TagCard extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.iconBgColor,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -151,11 +220,11 @@ class _TagCard extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: Color(0xFF718096)),
-            onPressed: () {},
+            onPressed: onEdit,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFC53030)),
-            onPressed: () {},
+            onPressed: onDelete,
           ),
         ],
       ),

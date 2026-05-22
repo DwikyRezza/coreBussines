@@ -83,7 +83,11 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Data terbaru sudah tersinkron ke cloud')),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color(0xFFE3F2FD),

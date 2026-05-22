@@ -35,74 +35,21 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
 
   List<TransactionModel> _readAll() {
     final raw = prefs.getString(_kTransactionsKey);
-    if (raw == null || raw.isEmpty) return _seedData();
+    if (raw == null || raw.isEmpty) return [];
     try {
       final list = jsonDecode(raw) as List<dynamic>;
       return list
           .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
+          .where((transaction) => !transaction.id.startsWith('txn_seed_'))
           .toList();
     } catch (_) {
-      return _seedData();
+      return [];
     }
   }
 
   Future<void> _writeAll(List<TransactionModel> transactions) async {
     final encoded = jsonEncode(transactions.map((t) => t.toJson()).toList());
     await prefs.setString(_kTransactionsKey, encoded);
-  }
-
-  /// Provide initial seed data for a fresh install so the UI is not empty.
-  List<TransactionModel> _seedData() {
-    final seeds = [
-      TransactionModel(
-        id: 'txn_seed_001',
-        title: 'Makan Siang',
-        category: 'Makanan',
-        categoryIcon: 'food',
-        amount: 45000,
-        isIncome: false,
-        dateTime: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      TransactionModel(
-        id: 'txn_seed_002',
-        title: 'Gaji Bulanan',
-        category: 'Pendapatan',
-        categoryIcon: 'income',
-        amount: 15000000,
-        isIncome: true,
-        dateTime: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      TransactionModel(
-        id: 'txn_seed_003',
-        title: 'Belanja Mingguan',
-        category: 'Belanja',
-        categoryIcon: 'shopping',
-        amount: 850000,
-        isIncome: false,
-        dateTime: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      TransactionModel(
-        id: 'txn_seed_004',
-        title: 'Freelance Design',
-        category: 'Pendapatan',
-        categoryIcon: 'income',
-        amount: 3500000,
-        isIncome: true,
-        dateTime: DateTime.now().subtract(const Duration(days: 7)),
-      ),
-      TransactionModel(
-        id: 'txn_seed_005',
-        title: 'Token Listrik',
-        category: 'Tagihan',
-        categoryIcon: 'bill',
-        amount: 200000,
-        isIncome: false,
-        dateTime: DateTime.now().subtract(const Duration(days: 10)),
-      ),
-    ];
-    // Persist seeds so next read doesn't regenerate them.
-    _writeAll(seeds);
-    return seeds;
   }
 
   // ── Public API ────────────────────────────────────────────

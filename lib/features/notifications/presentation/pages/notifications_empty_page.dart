@@ -4,6 +4,8 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -40,7 +42,7 @@ class NotificationsEmptyPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
+            onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
@@ -96,7 +98,11 @@ class NotificationsEmptyPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notifikasi sudah diperbarui')),
+                  );
+                },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),

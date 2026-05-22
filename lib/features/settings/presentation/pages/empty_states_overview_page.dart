@@ -4,6 +4,8 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -37,7 +39,7 @@ class EmptyStatesOverviewPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
-            onPressed: () {},
+            onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
@@ -73,6 +75,7 @@ class EmptyStatesOverviewPage extends StatelessWidget {
               description: 'Riwayat transaksi Anda akan muncul di sini. Mulai aktivitas baru untuk melihatnya.',
               buttonText: 'Buat Transaksi Baru',
               isButtonSolid: true,
+              onPressed: () => context.push(AppRoutes.addTransaction),
             ),
             const SizedBox(height: 16),
 
@@ -92,6 +95,7 @@ class EmptyStatesOverviewPage extends StatelessWidget {
               description: 'Tidak ada jadwal aktif saat ini. Rencanakan sesi Anda berikutnya.',
               buttonText: 'Tambah Jadwal',
               isButtonSolid: true,
+              onPressed: () => context.push(AppRoutes.addSchedule),
             ),
             const SizedBox(height: 16),
 
@@ -102,6 +106,7 @@ class EmptyStatesOverviewPage extends StatelessWidget {
               description: 'Daftarkan bisnis atau cabang baru untuk mulai mengelolanya dari sini.',
               buttonText: 'Daftar Bisnis',
               isButtonSolid: false,
+              onPressed: () => context.push(AppRoutes.businessPortfolio),
             ),
             const SizedBox(height: 100), // Bottom shell padding
           ],
@@ -117,6 +122,7 @@ class _EmptyStateCard extends StatelessWidget {
   final String description;
   final String? buttonText;
   final bool isButtonSolid;
+  final VoidCallback? onPressed;
 
   const _EmptyStateCard({
     required this.icon,
@@ -124,6 +130,7 @@ class _EmptyStateCard extends StatelessWidget {
     required this.description,
     this.buttonText,
     this.isButtonSolid = true,
+    this.onPressed,
   });
 
   @override
@@ -167,7 +174,7 @@ class _EmptyStateCard extends StatelessWidget {
           if (buttonText != null) ...[
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: isButtonSolid ? const Color(0xFF0D47A1) : const Color(0xFFE2E8F0),
                 elevation: 0,

@@ -21,6 +21,59 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   bool _faceUnlock = false;
   bool _requireAuth = true;
 
+  void _showPinDialog() {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ubah PIN'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          maxLength: 4,
+          obscureText: true,
+          decoration: const InputDecoration(
+            labelText: 'PIN baru',
+            counterText: '',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('PIN berhasil diperbarui')),
+              );
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeactivateDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Nonaktifkan Akun?'),
+        content: const Text(
+          'Fitur ini belum dijalankan otomatis untuk menjaga data Anda tetap aman. Hubungi dukungan untuk penonaktifan permanen.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Mengerti'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,13 +108,15 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               iconBgColor: const Color(0xFFE3F2FD),
               title: '4-Digit PIN',
               subtitle: 'Required for transactions',
-              actionWidget: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(8),
+              actionWidget: TextButton(
+                onPressed: _showPinDialog,
+                child: Text(
+                  'Ubah',
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                    color: const Color(0xFF0D47A1),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                child: Text('Change', style: AppTypography.textTheme.labelMedium?.copyWith(color: const Color(0xFF0D47A1), fontWeight: FontWeight.w600)),
               ),
             ),
             const SizedBox(height: 16),
@@ -137,14 +192,17 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                     ),
                   ),
                   const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Deactivate Account', style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFFC53030))),
-                        const Icon(Icons.chevron_right_rounded, color: Color(0xFF4A5568)),
-                      ],
+                  InkWell(
+                    onTap: _showDeactivateDialog,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Deactivate Account', style: AppTypography.textTheme.titleMedium?.copyWith(color: const Color(0xFFC53030))),
+                          const Icon(Icons.chevron_right_rounded, color: Color(0xFF4A5568)),
+                        ],
+                      ),
                     ),
                   ),
                 ],

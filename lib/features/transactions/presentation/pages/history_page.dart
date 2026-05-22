@@ -1,209 +1,368 @@
 // ============================================================
-// FEATURE: Transactions — History Page
+// FEATURE: Transactions - History Page
 // lib/features/transactions/presentation/pages/history_page.dart
 // ============================================================
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/core_app_bar.dart';
+import '../../../home/domain/entities/home_entities.dart';
+import '../../domain/entities/transaction_entities.dart';
+import '../../domain/repositories/transaction_repository.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
+
+  @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  final _repository = sl<TransactionRepository>();
+  final _searchController = TextEditingController();
+  final _currency =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final _dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
+  bool _isLoading = true;
+  String? _error;
+  String _query = '';
+  TransactionType? _typeFilter;
+  List<Transaction> _transactions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+    _loadTransactions();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadTransactions() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final result = await _repository.getFilteredTransactions(
+      const TransactionFilter(dateRange: DateRangeFilter.custom),
+    );
+
+    if (!mounted) return;
+    result.fold(
+      (failure) => setState(() {
+        _error = failure.message;
+        _isLoading = false;
+      }),
+      (transactions) => setState(() {
+        _transactions = transactions.toList()
+          ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
+        _isLoading = false;
+      }),
+    );
+  }
+
+  List<Transaction> get _visibleTransactions {
+    return _transactions.where((transaction) {
+      final matchesType = _typeFilter == null ||
+          (_typeFilter == TransactionType.income && transaction.isIncome) ||
+          (_typeFilter == TransactionType.expense && !transaction.isIncome);
+      final matchesQuery = _query.isEmpty ||
+          transaction.title.toLowerCase().contains(_query) ||
+          transaction.category.toLowerCase().contains(_query);
+      return matchesType && matchesQuery;
+    }).toList();
+  }
+
+  double get _totalIncome => _visibleTransactions
+      .where((transaction) => transaction.isIncome)
+      .fold(0.0, (sum, transaction) => sum + transaction.amount);
+
+  double get _totalExpense => _visibleTransactions
+      .where((transaction) => !transaction.isIncome)
+      .fold(0.0, (sum, transaction) => sum + transaction.amount);
+
+  Map<DateTime, List<Transaction>> get _groupedTransactions {
+    final grouped = <DateTime, List<Transaction>>{};
+    for (final transaction in _visibleTransactions) {
+      final date = DateTime(
+        transaction.dateTime.year,
+        transaction.dateTime.month,
+        transaction.dateTime.day,
+      );
+      grouped.putIfAbsent(date, () => []).add(transaction);
+    }
+    return Map.fromEntries(
+      grouped.entries.toList()..sort((a, b) => b.key.compareTo(a.key)),
+    );
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Filter Riwayat',
+                style: AppTypography.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _FilterTile(
+                title: 'Semua Transaksi',
+                selected: _typeFilter == null,
+                onTap: () {
+                  setState(() => _typeFilter = null);
+                  Navigator.pop(context);
+                },
+              ),
+              _FilterTile(
+                title: 'Pemasukan',
+                selected: _typeFilter == TransactionType.income,
+                onTap: () {
+                  setState(() => _typeFilter = TransactionType.income);
+                  Navigator.pop(context);
+                },
+              ),
+              _FilterTile(
+                title: 'Pengeluaran',
+                selected: _typeFilter == TransactionType.expense,
+                onTap: () {
+                  setState(() => _typeFilter = TransactionType.expense);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CoreAppBar(),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-              child: Column(
-                children: [
-                  const SizedBox(height: AppSpacing.md),
-                  // Search & Filter
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.outlineVariant),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.search_rounded, color: AppColors.onSurfaceVariant, size: 20),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Cari transaksi...',
-                                    hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.onSurfaceVariant,
+      body: RefreshIndicator(
+        onRefresh: _loadTransactions,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.outlineVariant),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.search_rounded,
+                                    color: AppColors.onSurfaceVariant, size: 22),
+                                const SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _searchController,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'Cari transaksi...',
+                                      hintStyle:
+                                          AppTypography.textTheme.bodyMedium?.copyWith(
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.filter_list_rounded, color: Colors.white, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Filter',
-                                    style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white),
-                                  ),
-                                ],
+                        const SizedBox(width: AppSpacing.sm),
+                        SizedBox(
+                          height: 52,
+                          child: FilledButton.icon(
+                            onPressed: _showFilterSheet,
+                            icon: const Icon(Icons.filter_list_rounded),
+                            label: const Text('Filter'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  
-                  // Summary Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _SummaryCard(
-                          title: 'Total Pemasukan',
-                          amount: 'Rp 4.250.000',
-                          color: AppColors.primary,
-                          isIncome: true,
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SummaryCard(
+                            title: 'Total Pemasukan',
+                            amount: _currency.format(_totalIncome),
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: _SummaryCard(
-                          title: 'Total Pengeluaran',
-                          amount: 'Rp 1.820.000',
-                          color: AppColors.expense,
-                          isIncome: false,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: _SummaryCard(
+                            title: 'Total Pengeluaran',
+                            amount: _currency.format(_totalExpense),
+                            color: AppColors.expense,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
               ),
             ),
-          ),
-          
-          // TODAY Group
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _DateHeader(label: 'TODAY', date: '24 May 2024'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _TransactionItem(
-                    icon: Icons.payments_rounded,
-                    iconColor: AppColors.primary,
-                    iconBg: AppColors.primaryContainer,
-                    title: 'Freelance Project',
-                    category: 'Work & Professional',
-                    amount: '+ Rp 2.500.000',
-                    time: '09:41',
-                    isIncome: true,
-                    onTap: () => context.push(AppRoutes.editTransaction.replaceAll(':id', '1')),
+            if (_isLoading)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_error != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _HistoryMessage(message: _error!),
+              )
+            else if (_visibleTransactions.isEmpty)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: _HistoryMessage(
+                  message: 'Belum ada transaksi real yang cocok.',
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final entries = _groupedTransactions.entries.toList();
+                      final entry = entries[index];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _DateHeader(
+                            label: _dateLabel(entry.key),
+                            date: _dateFormat.format(entry.key),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          for (final transaction in entry.value)
+                            _TransactionItem(
+                              icon: _iconFor(transaction),
+                              iconColor: transaction.isIncome
+                                  ? AppColors.primary
+                                  : AppColors.expense,
+                              iconBg: transaction.isIncome
+                                  ? AppColors.primaryContainer
+                                  : AppColors.expenseLight,
+                              title: transaction.title,
+                              category: transaction.category,
+                              amount:
+                                  '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
+                              time: DateFormat('HH:mm').format(transaction.dateTime),
+                              isIncome: transaction.isIncome,
+                              onTap: () => context.push(
+                                AppRoutes.transactionDetail.replaceAll(
+                                  ':id',
+                                  transaction.id,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: AppSpacing.lg),
+                          if (index == entries.length - 1) const SizedBox(height: 82),
+                        ],
+                      );
+                    },
+                    childCount: _groupedTransactions.length,
                   ),
-                  _TransactionItem(
-                    icon: Icons.restaurant_rounded,
-                    iconColor: AppColors.expense,
-                    iconBg: const Color(0xFFFDECEA),
-                    title: 'Gacoan Fried Noodles',
-                    category: 'Food & Dining',
-                    amount: '- Rp 45.000',
-                    time: '12:45',
-                    isIncome: false,
-                    isSwiped: true, // Show swipe action mock
-                    onTap: () => context.push(AppRoutes.editTransaction.replaceAll(':id', '2')),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
+                ),
               ),
-            ),
-          ),
-          
-          // YESTERDAY Group
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _DateHeader(label: 'YESTERDAY', date: '23 May 2024'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _TransactionItem(
-                    icon: Icons.fitness_center_rounded,
-                    iconColor: AppColors.onSurfaceVariant,
-                    iconBg: AppColors.surfaceContainer,
-                    title: 'Gym Membership',
-                    category: 'Health & Fitness',
-                    amount: '- Rp 350.000',
-                    time: '18:15',
-                    isIncome: false,
-                    onTap: () {},
-                  ),
-                  _TransactionItem(
-                    icon: Icons.bolt_rounded,
-                    iconColor: AppColors.onSurfaceVariant,
-                    iconBg: AppColors.surfaceContainer,
-                    title: 'PLN Electricity',
-                    category: 'Utilities',
-                    amount: '- Rp 1.200.000',
-                    time: '10:00',
-                    isIncome: false,
-                    onTap: () {},
-                  ),
-                  _TransactionItem(
-                    icon: Icons.savings_rounded,
-                    iconColor: AppColors.primary,
-                    iconBg: AppColors.primaryContainer,
-                    title: 'Cashback Promo',
-                    category: 'Rewards',
-                    amount: '+ Rp 25.000',
-                    time: '08:20',
-                    isIncome: true,
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 100), // Bottom padding for FAB
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _dateLabel(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (date == today) return 'HARI INI';
+    if (date == yesterday) return 'KEMARIN';
+    return DateFormat('EEEE', 'id_ID').format(date).toUpperCase();
+  }
+
+  IconData _iconFor(Transaction transaction) {
+    final text = '${transaction.category} ${transaction.categoryIcon}'.toLowerCase();
+    if (transaction.isIncome) return Icons.payments_rounded;
+    if (text.contains('makan') || text.contains('food')) return Icons.restaurant_rounded;
+    if (text.contains('transport')) return Icons.directions_car_rounded;
+    if (text.contains('tagihan') || text.contains('bill') || text.contains('listrik')) {
+      return Icons.receipt_long_rounded;
+    }
+    if (text.contains('kesehatan') || text.contains('health')) {
+      return Icons.health_and_safety_rounded;
+    }
+    return Icons.shopping_bag_rounded;
+  }
+}
+
+class _FilterTile extends StatelessWidget {
+  final String title;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterTile({
+    required this.title,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+      title: Text(title),
+      trailing: Icon(
+        selected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+        color: selected ? AppColors.primary : AppColors.outline,
       ),
     );
   }
@@ -213,13 +372,11 @@ class _SummaryCard extends StatelessWidget {
   final String title;
   final String amount;
   final Color color;
-  final bool isIncome;
 
   const _SummaryCard({
     required this.title,
     required this.amount,
     required this.color,
-    required this.isIncome,
   });
 
   @override
@@ -240,7 +397,6 @@ class _SummaryCard extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Left Border Indicator
           Positioned(
             left: -16,
             top: -16,
@@ -261,6 +417,8 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Text(
                 title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
                   color: AppColors.onSurfaceVariant,
                 ),
@@ -268,9 +426,11 @@ class _SummaryCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 amount,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.textTheme.titleMedium?.copyWith(
                   color: color,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -297,12 +457,14 @@ class _DateHeader extends StatelessWidget {
           style: AppTypography.textTheme.labelMedium?.copyWith(
             color: AppColors.onSurfaceVariant,
             letterSpacing: 1.2,
+            fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           date,
           style: AppTypography.textTheme.labelMedium?.copyWith(
             color: AppColors.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -319,7 +481,6 @@ class _TransactionItem extends StatelessWidget {
   final String amount;
   final String time;
   final bool isIncome;
-  final bool isSwiped;
   final VoidCallback onTap;
 
   const _TransactionItem({
@@ -331,109 +492,103 @@ class _TransactionItem extends StatelessWidget {
     required this.amount,
     required this.time,
     required this.isIncome,
-    this.isSwiped = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: iconBg,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: iconColor),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  category,
-                  style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: AppTypography.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isIncome ? AppColors.primary : AppColors.expense,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                time,
-                style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    if (isSwiped) {
-      return Stack(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: AppColors.expense,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: const Icon(Icons.archive_outlined, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          Transform.translate(
-            offset: const Offset(64, 0),
-            child: GestureDetector(
-              onTap: onTap,
-              child: content,
-            ),
-          ),
-        ],
-      );
-    }
-
     return GestureDetector(
       onTap: onTap,
-      child: content,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    category,
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 132),
+                  child: Text(
+                    amount,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isIncome ? AppColors.primary : AppColors.expense,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryMessage extends StatelessWidget {
+  final String message;
+
+  const _HistoryMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTypography.textTheme.bodyLarge?.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
+        ),
+      ),
     );
   }
 }

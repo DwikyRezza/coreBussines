@@ -57,6 +57,9 @@ import '../../features/settings/presentation/pages/sync_settings_page.dart';
 import '../../features/settings/presentation/pages/edit_profile_page.dart';
 import '../../features/settings/presentation/pages/security_settings_page.dart';
 import '../../features/settings/presentation/pages/empty_states_overview_page.dart';
+import '../../features/settings/presentation/pages/theme_settings_page.dart';
+import '../../features/settings/presentation/pages/help_faq_page.dart';
+import '../../features/settings/presentation/pages/about_page.dart';
 
 // Additional Features
 import '../../features/search/presentation/pages/search_page.dart';
@@ -109,6 +112,9 @@ abstract class AppRoutes {
   static const String syncSettings = '/settings/sync';
   static const String securitySettings = '/settings/security';
   static const String emptyStatesOverview = '/settings/empty-states';
+  static const String themeSettings = '/settings/theme';
+  static const String helpFaq = '/settings/help';
+  static const String about = '/settings/about';
   
   // Profile (Non-shell)
   static const String editProfile = '/profile/edit';
@@ -295,6 +301,21 @@ GoRouter _buildRouter() {
           path: AppRoutes.securitySettings,
           name: 'securitySettings',
           builder: (context, state) => const SecuritySettingsPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.themeSettings,
+          name: 'themeSettings',
+          builder: (context, state) => const ThemeSettingsPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.helpFaq,
+          name: 'helpFaq',
+          builder: (context, state) => const HelpFaqPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.about,
+          name: 'about',
+          builder: (context, state) => const AboutPage(),
         ),
         GoRoute(
           path: AppRoutes.emptyStatesOverview,
