@@ -5,6 +5,7 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/error/error_mapper.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
@@ -180,7 +181,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         (_) => emit(TransactionScanSuccess(scannedTxn)),
       );
     } catch (e) {
-      emit(TransactionError('Gagal memproses struk: $e'));
+      emit(TransactionError('Gagal memproses struk: ${ErrorMapper.mapToFailure(e).message}'));
     }
   }
 

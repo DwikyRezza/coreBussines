@@ -109,7 +109,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e, stack) {
       print('DEBUG_AUTH_ERROR: $e');
       print('DEBUG_AUTH_STACK: $stack');
-      throw AuthException(message: 'Detail Error: $e');
+      rethrow;
     }
   }
 
@@ -120,7 +120,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await _auth.signOut();
       await _prefs.remove(_activeBusinessIdKey);
     } catch (e) {
-      throw AuthException(message: 'Gagal keluar: $e');
+      rethrow;
     }
   }
 

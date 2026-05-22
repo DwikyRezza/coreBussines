@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/error/error_mapper.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../domain/entities/home_entities.dart';
 import '../../domain/repositories/home_repository.dart';
@@ -35,7 +36,7 @@ class HomeRepositoryImpl implements HomeRepository {
           return Right(BalanceSummaryModel.fromJson(jsonDecode(cached)));
         } catch (_) {}
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 
@@ -57,7 +58,7 @@ class HomeRepositoryImpl implements HomeRepository {
           return Right(models);
         } catch (_) {}
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 
@@ -74,7 +75,7 @@ class HomeRepositoryImpl implements HomeRepository {
           return Right(InsightCardModel.fromJson(jsonDecode(cached)));
         } catch (_) {}
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 }

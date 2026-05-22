@@ -8,6 +8,7 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/error/error_mapper.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -57,10 +58,8 @@ class AuthRepositoryImpl implements AuthRepository {
       _cachedUser = user;
       _authController.add(user); // ← notify router & BLoC
       return Right(user);
-    } on AuthException catch (e) {
-      return Left(AuthFailure(message: e.message));
     } catch (e) {
-      return Left(UnexpectedFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 
@@ -71,10 +70,8 @@ class AuthRepositoryImpl implements AuthRepository {
       _cachedUser = null;
       _authController.add(null); // ← notify router & BLoC
       return const Right(null);
-    } on AuthException catch (e) {
-      return Left(AuthFailure(message: e.message));
     } catch (e) {
-      return Left(UnexpectedFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 
@@ -85,10 +82,8 @@ class AuthRepositoryImpl implements AuthRepository {
       _cachedUser = user;
       _authController.add(user);
       return Right(user);
-    } on AuthException catch (e) {
-      return Left(AuthFailure(message: e.message));
     } catch (e) {
-      return Left(UnexpectedFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 

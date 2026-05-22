@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/error/error_mapper.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
@@ -31,7 +32,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         final localModel = await localDataSource.getTransactionDetail(id);
         return Right(localModel);
       } catch (_) {
-        return Left(ServerFailure(message: e.toString()));
+        return Left(ErrorMapper.mapToFailure(e));
       }
     }
   }
@@ -49,7 +50,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         final localModels = await localDataSource.getFilteredTransactions(filter);
         return Right(localModels);
       } catch (_) {
-        return Left(ServerFailure(message: e.toString()));
+        return Left(ErrorMapper.mapToFailure(e));
       }
     }
   }
@@ -61,7 +62,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       await localDataSource.deleteTransaction(id);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 
