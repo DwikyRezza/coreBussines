@@ -181,7 +181,10 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         (_) => emit(TransactionScanSuccess(scannedTxn)),
       );
     } catch (e) {
-      emit(TransactionError('Gagal memproses struk: ${ErrorMapper.mapToFailure(e).message}'));
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : 'Terjadi kesalahan yang tidak terduga. Silakan coba beberapa saat lagi.';
+      emit(TransactionError('Gagal memproses struk: $message'));
     }
   }
 
