@@ -118,9 +118,10 @@ class TransactionScanSuccess extends TransactionState {
 
 class TransactionError extends TransactionState {
   final String message;
-  const TransactionError(this.message);
+  final String? photoPath;
+  const TransactionError(this.message, {this.photoPath});
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, photoPath];
 }
 
 // ─── BLoC ─────────────────────────────────────────────────────
@@ -160,11 +161,30 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     try {
       final result = await _scanner.scanReceipt(event.photo);
       
+      // Highly resilient amount parsing to completely guard against TypeErrors
+      double amount = 0.0;
+      final rawAmount = result['amount'];
+      if (rawAmount is num) {
+        amount = rawAmount.toDouble();
+      } else if (rawAmount is String) {
+        final cleanedStr = rawAmount.replaceAll(RegExp(r'[^\d.]'), '');
+        amount = double.tryParse(cleanedStr) ?? 0.0;
+      }
+
+      // Highly resilient isIncome parsing
+      bool isIncome = false;
+      final rawIsIncome = result['isIncome'];
+      if (rawIsIncome is bool) {
+        isIncome = rawIsIncome;
+      } else if (rawIsIncome is String) {
+        isIncome = rawIsIncome.toLowerCase() == 'true';
+      }
+
       final scannedTxn = Transaction(
         id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
         title: result['title'] ?? 'Scan Struk Baru',
-        amount: (result['amount'] as num?)?.toDouble() ?? 0.0,
-        isIncome: result['isIncome'] ?? false,
+        amount: amount,
+        isIncome: isIncome,
         category: result['category'] ?? 'Lainnya',
         categoryIcon: 'bill', // Default icon
         dateTime: DateTime.now(),
@@ -177,14 +197,17 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           : await _repository.addTransaction(scannedTxn);
 
       saveResult.fold(
-        (f) => emit(TransactionError(f.message)),
+        (f) => emit(TransactionError(f.message, photoPath: event.photo.path)),
         (_) => emit(TransactionScanSuccess(scannedTxn)),
       );
     } catch (e) {
-      final message = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : 'Terjadi kesalahan yang tidak terduga. Silakan coba beberapa saat lagi.';
-      emit(TransactionError('Gagal memproses struk: $message'));
+      final String message;
+      if (e is Exception) {
+        message = e.toString().replaceFirst('Exception: ', '');
+      } else {
+        message = e.toString();
+      }
+      emit(TransactionError('Gagal memproses struk: $message', photoPath: event.photo.path));
     }
   }
 
