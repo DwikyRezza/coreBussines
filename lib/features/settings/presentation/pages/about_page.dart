@@ -29,7 +29,7 @@ class AboutPage extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.fitness_center_rounded, color: Theme.of(context).colorScheme.primary, size: 34),
+                  child: Icon(Icons.bar_chart_rounded, color: Theme.of(context).colorScheme.primary, size: 34),
                 ),
                 const SizedBox(height: 16),
                 Text(

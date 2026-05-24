@@ -19,6 +19,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/responsive_helper.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../../notifications/data/models/notification_model.dart';
+import '../../../notifications/data/datasources/notification_local_datasource.dart';
+import '../../../notifications/data/services/notification_service.dart';
 import '../bloc/transaction_bloc.dart';
 
 // ─── Category model for the category picker ──────────────────
@@ -145,6 +149,28 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
+            
+            // Pemicu Notifikasi HP Native & Riwayat Lokal
+            final notifTitle = 'Transaksi Berhasil Dicatat';
+            final category = _categories[_selectedCategoryIndex];
+            final amountText = _amountController.text.replaceAll('.', '').trim();
+            final amount = double.tryParse(amountText) ?? 0.0;
+            final isIncome = _transactionType == 1;
+            final notifBody = 'Mencatat ${isIncome ? "pemasukan" : "pengeluaran"} "${_titleController.text.trim()}" sebesar ${AppFormatter.currency(amount)} ke dompet ${_wallets[_selectedWalletIndex]}.';
+
+            sl<NotificationLocalDataSource>().saveNotification(
+              NotificationModel(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                title: notifTitle,
+                body: notifBody,
+                timestamp: DateTime.now(),
+                type: 'success',
+                isRead: false,
+              ),
+            );
+
+            sl<NotificationService>().showInstantNotification(notifTitle, notifBody);
+
             context.pop(); // Go back to home/history
           } else if (state is TransactionError) {
             ScaffoldMessenger.of(context).showSnackBar(

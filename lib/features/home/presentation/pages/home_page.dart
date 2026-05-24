@@ -13,6 +13,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/responsive_helper.dart';
+import '../../../notifications/data/datasources/notification_local_datasource.dart';
+import '../../../notifications/data/models/notification_model.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -91,13 +93,12 @@ class _HomeContent extends StatelessWidget {
               title: _HomeAppBar(state: state),
             ),
 
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: padding),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: AppSpacing.base),
-
-                  if (isTablet)
+            if (isTablet)
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: AppSpacing.base),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -151,49 +152,50 @@ class _HomeContent extends StatelessWidget {
                           ),
                         ),
                       ],
-                    )
-                  else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    const SizedBox(height: 100), // Bottom nav clearance
+                  ]),
+                ),
+              )
+            else ...[
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: AppSpacing.base),
+                  BalanceCard(summary: state.summary),
+                  const SizedBox(height: AppSpacing.xl),
+                  const QuickActionsGrid(),
+                  const SizedBox(height: AppSpacing.xl),
+                  HomeInsightCard(insight: state.insight),
+                  const SizedBox(height: AppSpacing.xl),
+                  _FinanceChartSection(transactions: state.allTransactions),
+                  const SizedBox(height: AppSpacing.xl),
+                  SectionHeader(
+                    title: 'Transaksi Terakhir',
+                    actionLabel: 'Semua',
+                    onAction: () => context.go(AppRoutes.history),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ...state.recentTransactions.map(
+                    (txn) => Column(
                       children: [
-                        BalanceCard(summary: state.summary),
-                        const SizedBox(height: AppSpacing.xl),
-                        const QuickActionsGrid(),
-                        const SizedBox(height: AppSpacing.xl),
-                        HomeInsightCard(insight: state.insight),
-                        const SizedBox(height: AppSpacing.xl),
-                        _FinanceChartSection(transactions: state.allTransactions),
-                        const SizedBox(height: AppSpacing.xl),
-                        SectionHeader(
-                          title: 'Transaksi Terakhir',
-                          actionLabel: 'Semua',
-                          onAction: () => context.go(AppRoutes.history),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        ...state.recentTransactions.map(
-                          (txn) => Column(
-                            children: [
-                              TransactionTile(transaction: txn),
-                              if (txn != state.recentTransactions.last)
-                                Divider(
-                                  height: 1,
-                                  indent: AppSpacing.pagePadding,
-                                  endIndent: AppSpacing.pagePadding,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outlineVariant
-                                      .withOpacity(0.4),
-                                ),
-                            ],
+                        TransactionTile(transaction: txn),
+                        if (txn != state.recentTransactions.last)
+                          Divider(
+                            height: 1,
+                            indent: AppSpacing.pagePadding,
+                            endIndent: AppSpacing.pagePadding,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outlineVariant
+                                .withOpacity(0.4),
                           ),
-                        ),
                       ],
                     ),
-
+                  ),
                   const SizedBox(height: 100), // Bottom nav clearance
                 ]),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -201,11 +203,16 @@ class _HomeContent extends StatelessWidget {
   }
 }
 
-class _HomeAppBar extends StatelessWidget {
+class _HomeAppBar extends StatefulWidget {
   final HomeLoaded state;
 
   const _HomeAppBar({required this.state});
 
+  @override
+  State<_HomeAppBar> createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends State<_HomeAppBar> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -218,12 +225,12 @@ class _HomeAppBar extends StatelessWidget {
             CircleAvatar(
               radius: 20,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: state.summary.userPhotoUrl != null
-                  ? NetworkImage(state.summary.userPhotoUrl!)
+              backgroundImage: widget.state.summary.userPhotoUrl != null
+                  ? NetworkImage(widget.state.summary.userPhotoUrl!)
                   : null,
-              child: state.summary.userPhotoUrl == null
+              child: widget.state.summary.userPhotoUrl == null
                   ? Text(
-                      state.summary.userName[0].toUpperCase(),
+                      widget.state.summary.userName[0].toUpperCase(),
                       style: AppTypography.textTheme.titleSmall?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
@@ -243,7 +250,7 @@ class _HomeAppBar extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  state.summary.userName,
+                  widget.state.summary.userName,
                   style: AppTypography.textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
@@ -255,15 +262,33 @@ class _HomeAppBar extends StatelessWidget {
           ],
         ),
 
-        // Notification Bell
-        IconButton(
-          icon: Badge(
-            smallSize: 8,
-            backgroundColor: Theme.of(context).colorScheme.error,
-            child: const Icon(Icons.notifications_outlined),
-          ),
-          color: Theme.of(context).colorScheme.onSurface,
-          onPressed: () {},
+        // Notification Bell with dynamic badge count
+        FutureBuilder<List<NotificationModel>>(
+          future: sl<NotificationLocalDataSource>().getNotifications(),
+          builder: (context, snapshot) {
+            final unreadCount = snapshot.hasData
+                ? snapshot.data!.where((n) => !n.isRead).length
+                : 0;
+            return IconButton(
+              icon: unreadCount > 0
+                  ? Badge(
+                      label: Text(
+                        '$unreadCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      child: const Icon(Icons.notifications_outlined),
+                    )
+                  : const Icon(Icons.notifications_outlined),
+              color: Theme.of(context).colorScheme.onSurface,
+              onPressed: () {
+                context.push(AppRoutes.alerts).then((_) {
+                  // Re-fetch notifications & update badge when coming back
+                  setState(() {});
+                });
+              },
+            );
+          },
         ),
       ],
     );

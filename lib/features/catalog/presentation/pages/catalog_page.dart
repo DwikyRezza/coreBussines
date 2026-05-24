@@ -36,7 +36,7 @@ class CatalogPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
               child: Text(
-                'Manage your products, services, and memberships.',
+                'Manage your products, services, and digital assets.',
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -123,7 +123,7 @@ class CatalogPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   image: const DecorationImage(
-                    image: NetworkImage('https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800&q=80'), // Mock gym supplements
+                    image: NetworkImage('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=800&q=80'), // Mock office workspace
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
                   ),
@@ -136,7 +136,7 @@ class CatalogPage extends StatelessWidget {
                     children: [
                       Text('TOP CATEGORY', style: AppTypography.textTheme.labelSmall?.copyWith(color: Colors.white70, letterSpacing: 1.2)),
                       const SizedBox(height: 4),
-                      Text('Supplements', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
+                      Text('Office Supplies', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: Colors.white)),
                       const SizedBox(height: 4),
                       Text('45 items in catalog', style: AppTypography.textTheme.bodySmall?.copyWith(color: Colors.white70)),
                     ],
@@ -185,9 +185,9 @@ class CatalogPage extends StatelessWidget {
                 children: [
                   _FilterChip(label: 'All Items', isSelected: true),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Membership', isSelected: false),
+                  _FilterChip(label: 'Services', isSelected: false),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Food & Beverage', isSelected: false),
+                  _FilterChip(label: 'Physical Products', isSelected: false),
                 ],
               ),
             ),
@@ -196,15 +196,15 @@ class CatalogPage extends StatelessWidget {
             // Membership Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-              child: Text('Membership', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+              child: Text('Services & Consultation', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
               child: _CatalogItemCard(
-                title: 'Membership Pro',
-                subtitle: 'Full access + 2 PT Sessions',
-                icon: Icons.card_membership_rounded,
+                title: 'Sesi Konsultasi Bisnis Premium',
+                subtitle: 'Sesi konsultasi strategi bisnis 2 jam',
+                icon: Icons.business_center_rounded,
                 price: '\$89.99',
                 statusPill: 'Active',
                 isImage: false,
@@ -214,9 +214,9 @@ class CatalogPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
               child: _CatalogItemCard(
-                title: 'Basic Tier',
-                subtitle: 'Standard gym floor access',
-                icon: Icons.badge_outlined,
+                title: 'Dukungan Operasional Bulanan',
+                subtitle: 'Dukungan admin standar',
+                icon: Icons.support_agent_rounded,
                 price: '\$29.99',
                 statusPill: 'Active',
                 isImage: false,
@@ -227,29 +227,29 @@ class CatalogPage extends StatelessWidget {
             // Food & Beverage Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-              child: Text('Food & Beverage', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+              child: Text('Physical Products', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
               child: _CatalogItemCard(
-                title: 'Whey Protein Isolate',
-                subtitle: 'Vanilla / 2lbs',
-                imageUrl: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=150&q=80',
+                title: 'Kursi Kantor Ergonomis',
+                subtitle: 'Mesh Back, Adjustable Armrest',
+                icon: Icons.chair_rounded,
                 price: '\$45.00',
                 stockInfo: 'Stock: 3',
                 statusPill: 'Low Stock',
                 isLowStock: true,
-                isImage: true,
+                isImage: false,
               ),
             ),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
               child: _CatalogItemCard(
-                title: 'Pre-Workout Energy',
-                subtitle: 'Fruit Punch / Can',
-                icon: Icons.local_drink_rounded,
+                title: 'Paket Mouse & Keyboard Nirkabel',
+                subtitle: 'Silent clicks, rechargeable',
+                icon: Icons.keyboard_rounded,
                 price: '\$3.50',
                 stockInfo: 'Stock: 124',
                 statusPill: 'In Stock',

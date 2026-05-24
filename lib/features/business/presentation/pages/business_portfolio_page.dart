@@ -42,16 +42,16 @@ class BusinessPortfolioPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
                 children: [
                   _PortfolioCard(
-                    title: 'CoreBusiness Pusat',
-                    subtitle: 'Pusat Kebugaran',
-                    icon: Icons.fitness_center_rounded,
+                    title: 'CoreBusiness Retail',
+                    subtitle: 'Toko Ritel & Grosir',
+                    icon: Icons.storefront_rounded,
                     isActive: true,
                   ),
                   const SizedBox(width: 16),
                   _PortfolioCard(
-                    title: 'Zen Yoga Studio',
-                    subtitle: 'Studio Yoga',
-                    icon: Icons.self_improvement_rounded,
+                    title: 'Zen Cafe & Bakery',
+                    subtitle: 'F&B dan Kuliner',
+                    icon: Icons.local_cafe_rounded,
                     isActive: false,
                   ),
                 ],
@@ -139,10 +139,10 @@ class BusinessPortfolioPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _MetricCard(
-                      title: 'Anggota Aktif',
-                      icon: Icons.people_outline_rounded,
+                      title: 'Total Penjualan',
+                      icon: Icons.shopping_bag_outlined,
                       value: '1,240',
-                      trendText: '+42 baru',
+                      trendText: '+42 transaksi',
                       trendColor: const Color(0xFF38A169),
                       trendIcon: Icons.arrow_upward_rounded,
                     ),
@@ -150,8 +150,8 @@ class BusinessPortfolioPage extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _MetricCard(
-                      title: 'Retensi',
-                      icon: Icons.pie_chart_outline_rounded,
+                      title: 'Margin Keuntungan',
+                      icon: Icons.analytics_outlined,
                       value: '94%',
                       trendText: 'Stabil',
                       trendColor: Theme.of(context).colorScheme.outline,

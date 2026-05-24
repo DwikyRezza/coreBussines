@@ -43,6 +43,14 @@ import '../../features/transactions/domain/usecases/add_transaction.dart';
 import '../../features/transactions/domain/usecases/delete_transaction.dart';
 import '../../features/transactions/presentation/bloc/transaction_bloc.dart';
 
+// Schedule
+import '../../features/schedule/data/datasources/schedule_local_datasource.dart';
+
+// Notifications
+import '../../features/notifications/data/datasources/notification_local_datasource.dart';
+import '../../features/notifications/data/services/notification_service.dart';
+
+
 /// Global service locator instance.
 final sl = GetIt.instance;
 
@@ -104,6 +112,21 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<TransactionLocalDataSource>(
     () => TransactionLocalDataSourceImpl(prefs: sl()),
   );
+
+  // ─── Schedule Feature ─────────────────────────────────────
+  sl.registerLazySingleton<ScheduleLocalDataSource>(
+    () => ScheduleLocalDataSourceImpl(prefs: sl()),
+  );
+
+  // ─── Notifications Feature ───────────────────────────────
+  sl.registerLazySingleton<NotificationLocalDataSource>(
+    () => NotificationLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  sl.registerLazySingleton<NotificationService>(() => notificationService);
+
 
   sl.registerLazySingleton<TransactionRemoteDataSource>(
     () => TransactionRemoteDataSourceImpl(

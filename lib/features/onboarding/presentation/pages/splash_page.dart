@@ -135,7 +135,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
             
             // Subtitle
             Text(
-              'Precision health & wealth\ntracking.',
+              'Manage your business, finance,\nand inventory in one place.',
               textAlign: TextAlign.center,
               style: AppTypography.textTheme.bodyLarge?.copyWith(
                 color: Colors.white.withOpacity(0.9),

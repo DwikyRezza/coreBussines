@@ -290,6 +290,7 @@ class AnalyticsOverviewPage extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }

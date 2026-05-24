@@ -11,45 +11,86 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/responsive_helper.dart';
 
 // ─────────────────────────────────────────────────────────────
 // BALANCE CARD
 // ─────────────────────────────────────────────────────────────
-class BalanceCard extends StatelessWidget {
+
+class BalanceCard extends StatefulWidget {
   final BalanceSummary summary;
 
   const BalanceCard({super.key, required this.summary});
 
   @override
+  State<BalanceCard> createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<BalanceCard> {
+  bool _isObscured = false;
+
+  @override
   Widget build(BuildContext context) {
-    final isPositive = summary.monthlyChange >= 0;
+    final isPositive = widget.summary.monthlyChange >= 0;
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(
+        horizontal: isTablet ? 0.0 : AppSpacing.pagePadding,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pagePadding,
+        vertical: AppSpacing.xl,
+      ),
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXxl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.35),
-            blurRadius: 24,
-            spreadRadius: 0,
-            offset: const Offset(0, 10),
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Total Saldo',
-            style: AppTypography.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.8),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Saldo',
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isObscured = !_isObscured;
+                  });
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    _isObscured
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            AppFormatter.currency(summary.totalBalance),
+            _isObscured
+                ? 'Rp ••••••'
+                : AppFormatter.currency(widget.summary.totalBalance),
             style: AppTypography.textTheme.headlineMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w800,
@@ -63,7 +104,7 @@ class BalanceCard extends StatelessWidget {
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Row(
@@ -78,7 +119,9 @@ class BalanceCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
-                  '${isPositive ? '+' : ''}${AppFormatter.currency(summary.monthlyChange)} bulan ini',
+                  _isObscured
+                      ? '${isPositive ? '+' : '-'}Rp •••••• bulan ini'
+                      : '${isPositive ? '+' : ''}${AppFormatter.currency(widget.summary.monthlyChange)} bulan ini',
                   style: AppTypography.textTheme.bodySmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -363,7 +406,7 @@ class TransactionTile extends StatelessWidget {
       case 'shopping':
         return Icons.shopping_bag_rounded;
       case 'health':
-        return Icons.fitness_center_rounded;
+        return Icons.health_and_safety_rounded;
       case 'transport':
         return Icons.directions_car_rounded;
       case 'entertainment':

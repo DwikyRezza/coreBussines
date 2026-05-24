@@ -27,7 +27,7 @@ class SearchPage extends StatelessWidget {
             // Search Input
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Theme.of(context).colorScheme.primary), // Active blue border
                 boxShadow: [
@@ -45,8 +45,8 @@ class SearchPage extends StatelessWidget {
                   prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF1F5F9),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.mic_none_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
@@ -100,9 +100,9 @@ class SearchPage extends StatelessWidget {
               spacing: 8,
               runSpacing: 12,
               children: [
-                _RecentSearchChip(label: 'Yoga mats'),
-                _RecentSearchChip(label: 'Downtown Studio'),
-                _RecentSearchChip(label: 'Membership renewal'),
+                _RecentSearchChip(label: 'Laporan Invoice'),
+                _RecentSearchChip(label: 'Stok Barang Pusat'),
+                _RecentSearchChip(label: 'Biaya Operasional'),
               ],
             ),
             const SizedBox(height: 32),
@@ -121,7 +121,7 @@ class SearchPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -137,7 +137,7 @@ class SearchPage extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=150&h=150&fit=crop', // Gym image
+                      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=150&h=150&fit=crop', // Business consulting image
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
@@ -153,7 +153,7 @@ class SearchPage extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                'Apex Performance Center',
+                                'Artha Mandiri Finansial',
                                 style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -169,11 +169,11 @@ class SearchPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('Premium training facility', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        Text('Layanan konsultasi manajemen & keuangan', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _Tag(label: 'Gym'),
+                            _Tag(label: 'Finansial'),
                             const SizedBox(width: 8),
                             _Tag(label: '1.2km'),
                           ],
@@ -191,18 +191,18 @@ class SearchPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SmallBusinessCard(
-                    title: 'Zenith Yoga',
-                    subtitle: 'Studio',
-                    icon: Icons.self_improvement_rounded,
+                    title: 'Kencana Retail',
+                    subtitle: 'Toko & Grosir',
+                    icon: Icons.storefront_rounded,
                     iconBg: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _SmallBusinessCard(
-                    title: 'City Aquatics',
-                    subtitle: 'Facility',
-                    icon: Icons.pool_rounded,
+                    title: 'Wira Logistic',
+                    subtitle: 'Gudang Utama',
+                    icon: Icons.local_shipping_rounded,
                     iconBg: const Color(0xFFDD6B20), // Orange
                   ),
                 ),
@@ -228,7 +228,7 @@ class _FilterChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? Theme.of(context).colorScheme.primary : const Color(0xFFF1F5F9),
+        color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -259,7 +259,7 @@ class _RecentSearchChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9), // Light grey background
+        color: Theme.of(context).colorScheme.surfaceContainerHighest, // Light grey background
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
@@ -319,7 +319,7 @@ class _SmallBusinessCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

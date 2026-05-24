@@ -113,9 +113,9 @@ class InventoryOverviewPage extends StatelessWidget {
 
             // Stock Items
             _StockItemCard(
-              title: 'Pro Dumbbell Set - 25kg',
-              sku: 'EQ-DB-25-PRO',
-              icon: Icons.fitness_center_rounded,
+              title: 'Kursi Kantor Ergonomis',
+              sku: 'OF-CH-ER-01',
+              icon: Icons.chair_rounded,
               statusText: '-15 units in last 48h',
               statusColor: const Color(0xFFC53030),
               statusIcon: Icons.trending_down_rounded,
@@ -128,9 +128,9 @@ class InventoryOverviewPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _StockItemCard(
-              title: 'Yoga Mat - Premium Grip',
-              sku: 'AC-YM-GR-01',
-              icon: Icons.accessibility_new_rounded,
+              title: 'Laptop Kerja Pro 14"',
+              sku: 'OF-LP-14-PRO',
+              icon: Icons.laptop_mac_rounded,
               statusText: 'Restocked 2 weeks ago',
               statusColor: Theme.of(context).colorScheme.outline,
               statusIcon: Icons.refresh_rounded,
@@ -141,9 +141,9 @@ class InventoryOverviewPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _StockItemCard(
-              title: 'Hydration Flask 1L',
-              sku: 'AC-FL-1L-BK',
-              icon: Icons.local_drink_rounded,
+              title: 'Cangkir Kopi Stainless 500ml',
+              sku: 'OF-MG-500-BK',
+              icon: Icons.local_cafe_rounded,
               statusText: 'Steady decline this month',
               statusColor: const Color(0xFF9C4221), // Orange
               statusIcon: Icons.trending_down_rounded,

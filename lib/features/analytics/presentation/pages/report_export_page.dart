@@ -4,6 +4,7 @@
 // ============================================================
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/pdf_report_service.dart';
@@ -12,6 +13,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../home/domain/entities/home_entities.dart';
 import '../../../transactions/domain/entities/transaction_entities.dart';
 import '../../../transactions/domain/repositories/transaction_repository.dart';
+import '../../../notifications/data/models/notification_model.dart';
+import '../../../notifications/data/datasources/notification_local_datasource.dart';
+import '../../../notifications/data/services/notification_service.dart';
 
 class ReportExportPage extends StatefulWidget {
   const ReportExportPage({super.key});
@@ -27,6 +31,13 @@ class _ReportExportPageState extends State<ReportExportPage> {
   bool _isLoading = true;
   String? _error;
   late DateTime _selectedMonth;
+
+  String _getMonthRangeLabel(DateTime date) {
+    final lastDay = DateTime(date.year, date.month + 1, 0).day;
+    final monthName = DateFormat('MMMM', 'id_ID').format(date);
+    final year = date.year;
+    return '1 $monthName - $lastDay $monthName $year';
+  }
 
   @override
   void initState() {
@@ -54,6 +65,11 @@ class _ReportExportPageState extends State<ReportExportPage> {
       (transactions) => setState(() {
         _transactions = transactions;
         _isLoading = false;
+        if (transactions.isNotEmpty) {
+          _selectedMonth = transactions.first.dateTime;
+        } else {
+          _selectedMonth = DateTime.now();
+        }
       }),
     );
   }
@@ -87,7 +103,7 @@ class _ReportExportPageState extends State<ReportExportPage> {
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Atur parameter di bawah ini untuk mengunduh rekap aktivitas latihan dan metrik kesehatan Anda.',
+              'Atur parameter di bawah ini untuk mengunduh rekap transaksi dan metrik keuangan bisnis Anda.',
               style: AppTypography.textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
@@ -98,25 +114,44 @@ class _ReportExportPageState extends State<ReportExportPage> {
             // Rentang Waktu
             Text('Rentang Waktu', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_month_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '1 Mei - 31 Mei 2024',
-                      style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedMonth,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2030),
+                  helpText: 'PILIH BULAN LAPORAN',
+                );
+                if (picked != null) {
+                  setState(() {
+                    _selectedMonth = DateTime(picked.year, picked.month);
+                  });
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_month_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _getMonthRangeLabel(_selectedMonth),
+                        style: AppTypography.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                  Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ],
+                    Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -132,7 +167,7 @@ class _ReportExportPageState extends State<ReportExportPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _selectedFormat == 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
@@ -167,7 +202,7 @@ class _ReportExportPageState extends State<ReportExportPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _selectedFormat == 1 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
@@ -315,12 +350,41 @@ class _ReportExportPageState extends State<ReportExportPage> {
                 transactions: _transactions,
                 month: _selectedMonth,
               );
-            } catch (e) {
+
+              // Trigger Native and Local Notifications
+              final monthName = DateFormat('MMMM yyyy', 'id_ID').format(_selectedMonth);
+              final notifTitle = 'Ekspor Laporan Selesai';
+              final notifBody = 'Laporan Keuangan Bulanan periode $monthName berhasil diekspor ke format PDF.';
+
+              await sl<NotificationLocalDataSource>().saveNotification(
+                NotificationModel(
+                  id: 'pdf_${DateTime.now().millisecondsSinceEpoch}',
+                  title: notifTitle,
+                  body: notifBody,
+                  timestamp: DateTime.now(),
+                  type: 'success',
+                  isRead: false,
+                ),
+              );
+
+              await sl<NotificationService>().showInstantNotification(notifTitle, notifBody);
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Laporan PDF berhasil diunduh!'),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            } catch (e, stack) {
+              debugPrint('Error generating PDF: $e\n$stack');
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                    'Gagal membuat laporan PDF. Silakan periksa izin penyimpanan atau coba lagi nanti.',
+                    'Gagal membuat laporan PDF: $e',
                   ),
                   backgroundColor: Colors.redAccent,
                 ),

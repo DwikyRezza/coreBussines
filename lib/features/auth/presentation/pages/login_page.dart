@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: AppSpacing.xxl),
               
-              // Top Image / Illustration (Mock of the stretching girl on phone)
+              // Top Image / Illustration (Mock of the business analytics on phone)
               Container(
                 height: 260,
                 width: 240,
@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.accessibility_new_rounded,
+                          Icons.analytics_rounded,
                           size: 64,
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.fitness_center_rounded,
+                    Icons.bar_chart_rounded,
                     color: Theme.of(context).colorScheme.primary,
                     size: 28,
                   ),
@@ -122,8 +122,8 @@ class _LoginPageState extends State<LoginPage> {
               // Subtitle Text
               Text(
                 _isRegisterMode
-                    ? 'Daftar sekarang untuk memulai perjalanan\nkebugaran dan keuangan Anda.'
-                    : 'Mulai perjalanan sehatmu dan capai\ntarget kebugaran dengan presisi.',
+                    ? 'Daftar sekarang untuk mengelola bisnis,\nkeuangan, dan inventaris Anda di satu tempat.'
+                    : 'Mulai kelola keuangan bisnismu dan capai\ntarget profit dengan presisi.',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

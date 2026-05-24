@@ -59,7 +59,7 @@ class TransactionDetailPage extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primaryContainer,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.fitness_center_rounded, color: Theme.of(context).colorScheme.primary),
+                        child: Icon(Icons.business_center_rounded, color: Theme.of(context).colorScheme.primary),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -91,7 +91,7 @@ class TransactionDetailPage extends StatelessWidget {
 
                   // Title
                   Text(
-                    'Personal Training Session',
+                    'Rapat Koordinasi Bisnis',
                     style: AppTypography.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -100,7 +100,7 @@ class TransactionDetailPage extends StatelessWidget {
 
                   // Description
                   Text(
-                    'Focus on upper body strength and core stability. Remember to bring a water bottle and towel.',
+                    'Membahas target penjualan kuartal ini, evaluasi inventaris stok barang, dan laporan keuangan cabang baru.',
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.5,
@@ -120,8 +120,8 @@ class TransactionDetailPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Tomorrow, 07:00 AM', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('60 minutes duration', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('Besok, 09:00 AM', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text('Durasi 120 menit', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -137,8 +137,8 @@ class TransactionDetailPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Downtown CoreBusiness Studio', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Studio B, Level 2', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('Kantor Pusat CoreBusiness', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                            Text('Ruang Rapat Utama, Lantai 3', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -186,7 +186,7 @@ class TransactionDetailPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Session Booking', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Text('Konsumsi Rapat', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
                         Text('Oct 24, 2023', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),

@@ -42,6 +42,8 @@ import '../../features/analytics/presentation/pages/financial_goals_page.dart';
 // Schedule
 import '../../features/schedule/presentation/pages/schedule_page.dart';
 import '../../features/schedule/presentation/pages/add_schedule_page.dart';
+import '../../features/schedule/data/models/schedule_model.dart';
+
 
 // Notifications
 import '../../features/notifications/presentation/pages/recent_alerts_page.dart';
@@ -208,8 +210,12 @@ GoRouter _buildRouter() {
     GoRoute(
       path: AppRoutes.addSchedule,
       name: 'addSchedule',
-      builder: (context, state) => const AddSchedulePage(),
+      builder: (context, state) {
+        final existing = state.extra as ScheduleModel?;
+        return AddSchedulePage(existingSchedule: existing);
+      },
     ),
+
     GoRoute(
       path: AppRoutes.alerts,
       name: 'alerts',
