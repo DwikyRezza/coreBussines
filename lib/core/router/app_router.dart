@@ -179,7 +179,20 @@ GoRouter _buildRouter() {
       name: 'addTransaction',
       builder: (context, state) {
         final type = state.uri.queryParameters['type'];
-        return AddTransactionPage(initialType: type == 'income' ? 1 : 0);
+        final amount = state.uri.queryParameters['amount'];
+        final title = state.uri.queryParameters['title'];
+        final category = state.uri.queryParameters['category'];
+        final notes = state.uri.queryParameters['notes'];
+        final imagePath = state.uri.queryParameters['imagePath'];
+
+        return AddTransactionPage(
+          initialType: type == 'income' ? 1 : 0,
+          initialAmount: amount,
+          initialTitle: title,
+          initialCategory: category,
+          initialNotes: notes,
+          receiptImagePath: imagePath,
+        );
       },
     ),
     GoRoute(

@@ -10,6 +10,7 @@
 // - Auto-refresh Home on success
 // ============================================================
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,10 +61,20 @@ const _wallets = ['Bank', 'Tunai', 'E-Wallet'];
 
 class AddTransactionPage extends StatefulWidget {
   final int initialType;
+  final String? initialAmount;
+  final String? initialTitle;
+  final String? initialCategory;
+  final String? initialNotes;
+  final String? receiptImagePath;
 
   const AddTransactionPage({
     super.key,
     this.initialType = 0,
+    this.initialAmount,
+    this.initialTitle,
+    this.initialCategory,
+    this.initialNotes,
+    this.receiptImagePath,
   });
 
   @override
@@ -76,6 +87,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   int _selectedCategoryIndex = 0;
   int _selectedWalletIndex = 0;
   bool _isRecurring = false;
+  String? _receiptImagePath;
 
   // Controllers
   final _amountController = TextEditingController();
@@ -94,6 +106,41 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   void initState() {
     super.initState();
     _transactionType = widget.initialType;
+    _receiptImagePath = widget.receiptImagePath;
+
+    if (widget.initialTitle != null) {
+      _titleController.text = widget.initialTitle!;
+    }
+    if (widget.initialAmount != null) {
+      final doubleAmount = double.tryParse(widget.initialAmount!);
+      if (doubleAmount != null) {
+        final intAmount = doubleAmount.toInt();
+        _amountController.text = _formatThousands(intAmount);
+      } else {
+        _amountController.text = widget.initialAmount!;
+      }
+    }
+    if (widget.initialNotes != null) {
+      _notesController.text = widget.initialNotes!;
+    }
+    if (widget.initialCategory != null) {
+      final index = _categories.indexWhere(
+        (c) => c.label.toLowerCase() == widget.initialCategory!.toLowerCase(),
+      );
+      if (index != -1) {
+        _selectedCategoryIndex = index;
+      }
+    }
+  }
+
+  String _formatThousands(int number) {
+    final str = number.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(str[i]);
+    }
+    return buffer.toString();
   }
 
   List<_Category> get _categories =>
@@ -121,6 +168,16 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     final category = _categories[_selectedCategoryIndex];
     final amount = double.parse(amountText);
 
+    final receiptFileName = _receiptImagePath != null ? _receiptImagePath!.split(RegExp(r'[/\\]')).last : '';
+    final String? note;
+    if (_notesController.text.trim().isNotEmpty) {
+      note = _receiptImagePath != null
+          ? '${_notesController.text.trim()}\n\n[Struk: $receiptFileName]'
+          : _notesController.text.trim();
+    } else {
+      note = _receiptImagePath != null ? '[Struk: $receiptFileName]' : null;
+    }
+
     context.read<TransactionBloc>().add(
           TransactionSubmitRequested(
             title: title,
@@ -129,9 +186,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             category: category.label,
             categoryIcon: category.iconKey,
             walletName: _wallets[_selectedWalletIndex],
-            note: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
+            note: note,
           ),
         );
   }
@@ -305,6 +360,73 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             maxLines: 4,
                           ),
                           const SizedBox(height: AppSpacing.xl),
+
+                          // ── Attachment Card ─────────────────────────
+                          if (_receiptImagePath != null) ...[
+                            Text(
+                              'Struk Terlampir',
+                              style: AppTypography.textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                              ),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(_receiptImagePath!),
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          width: 48,
+                                          height: 48,
+                                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                          child: Icon(Icons.receipt_long, color: Theme.of(context).colorScheme.outlineVariant),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _receiptImagePath!.split(RegExp(r'[/\\]')).last,
+                                          style: AppTypography.textTheme.labelMedium
+                                              ?.copyWith(fontWeight: FontWeight.w700),
+                                        ),
+                                        Text(
+                                          'Struk berhasil dilampirkan',
+                                          style: AppTypography.textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete_outline_rounded, color: Theme.of(context).colorScheme.error),
+                                    onPressed: () {
+                                      setState(() {
+                                        _receiptImagePath = null;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                          ],
 
                           // ── Recurring Toggle ─────────────────────────
                           Container(

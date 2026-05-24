@@ -12,6 +12,7 @@ import '../../../../core/services/scan_usage_limiter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/router/app_router.dart';
 import '../bloc/transaction_bloc.dart';
 
 class ScanReceiptIntroPage extends StatelessWidget {
@@ -37,12 +38,13 @@ class _ScanReceiptView extends StatelessWidget {
       return;
     }
 
+    final bloc = context.read<TransactionBloc>();
     final picker = ImagePicker();
     final photo = await picker.pickImage(source: source);
     
-    if (photo != null && context.mounted) {
+    if (photo != null) {
       await limiter.recordScan();
-      context.read<TransactionBloc>().add(TransactionScanRequested(photo));
+      bloc.add(TransactionScanRequested(photo));
     }
   }
 
@@ -146,10 +148,21 @@ class _ScanReceiptView extends StatelessWidget {
           );
           context.pop(); // Kembali ke home/sebelumnya
         } else if (state is TransactionError) {
+          final photoPath = state.photoPath;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
               backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 8),
+              action: photoPath != null
+                  ? SnackBarAction(
+                      label: 'Input Manual',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        context.push('${AppRoutes.addTransaction}?imagePath=${Uri.encodeComponent(photoPath)}');
+                      },
+                    )
+                  : null,
             ),
           );
         }
@@ -277,6 +290,22 @@ class _ScanReceiptView extends StatelessWidget {
                             const SizedBox(width: 12),
                             Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                context.push(AppRoutes.addTransaction);
+                              },
+                        child: Text(
+                          'Input Struk Manual',
+                          style: AppTypography.textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
