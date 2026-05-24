@@ -26,10 +26,18 @@ class _TabItem {
   });
 }
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  BusinessContext? _cachedContext;
+  bool _isLoadingContext = true;
 
   List<_TabItem> _getTabsForRole(String role) {
     final cleanRole = role.toLowerCase();
@@ -82,42 +90,60 @@ class AppShell extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadContext();
+  }
+
+  Future<void> _loadContext() async {
+    if (!mounted) return;
+    try {
+      final ctx = await sl<BusinessContextService>().getCurrentContext();
+      if (mounted) {
+        setState(() {
+          _cachedContext = ctx;
+          _isLoadingContext = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingContext = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
 
-    return FutureBuilder<BusinessContext>(
-      future: sl<BusinessContextService>().getCurrentContext(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Scaffold(body: child);
-        }
+    if (_isLoadingContext || _cachedContext == null) {
+      return Scaffold(body: widget.child);
+    }
 
-        final businessContext = snapshot.data!;
-        final role = businessContext.role;
-        final cleanRole = role.toLowerCase();
-        final tabs = _getTabsForRole(role);
-        final currentIndex = _locationToIndex(location, tabs);
+    final businessContext = _cachedContext!;
+    final role = businessContext.role;
+    final cleanRole = role.toLowerCase();
+    final tabs = _getTabsForRole(role);
+    final currentIndex = _locationToIndex(location, tabs);
 
-        // Jangan tampilkan FAB untuk Viewer dan Auditor (Read-only)
-        final showFab = cleanRole != 'viewer' && cleanRole != 'auditor';
+    // Jangan tampilkan FAB untuk Viewer dan Auditor (Read-only)
+    final showFab = cleanRole != 'viewer' && cleanRole != 'auditor';
 
-        return Scaffold(
-          body: child,
-          bottomNavigationBar: _AppBottomNavBar(
-            currentIndex: currentIndex,
-            tabs: tabs,
-            onTap: (index) {
-              context.go(tabs[index].route);
-            },
-          ),
-          floatingActionButton: showFab
-              ? _ExpandableFAB(role: role)
-              : null,
-          floatingActionButtonLocation: showFab
-              ? FloatingActionButtonLocation.centerDocked
-              : null,
-        );
-      },
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: _AppBottomNavBar(
+        currentIndex: currentIndex,
+        tabs: tabs,
+        onTap: (index) {
+          context.go(tabs[index].route);
+        },
+      ),
+      floatingActionButton: showFab
+          ? _ExpandableFAB(role: role)
+          : null,
+      floatingActionButtonLocation: showFab
+          ? FloatingActionButtonLocation.centerDocked
+          : null,
     );
   }
 }

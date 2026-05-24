@@ -1,27 +1,33 @@
 # CoreBusiness
 
-CoreBusiness adalah aplikasi Flutter untuk operasional bisnis: transaksi, wallet, katalog, inventory, analytics, dan kolaborasi tim.
+CoreBusiness adalah aplikasi Flutter untuk operasional bisnis UMKM: manajemen transaksi keuangan, pengelolaan kas/dompet, katalog produk, stok inventory, analitik, dan kolaborasi tim multi-user.
 
 ## Quick Start
 
-```powershell
-flutter pub get
-flutter run `
-  --dart-define=SUPABASE_URL=<project-url> `
-  --dart-define=SUPABASE_ANON_KEY=<publishable-key>
-```
-
-`SUPABASE_ANON_KEY` harus publishable key client. Jangan memakai service role key di Flutter.
+1. Pastikan Anda telah menaruh file konfigurasi Firebase:
+   - Android: `android/app/google-services.json`
+   - iOS: `ios/Runner/GoogleService-Info.plist`
+2. Konfigurasikan file `.env` di root project Anda dengan menyertakan Google Client ID & Gemini API Key:
+   ```env
+   GOOGLE_WEB_CLIENT_ID=your-google-web-client-id
+   GOOGLE_ANDROID_CLIENT_ID=your-google-android-client-id
+   GEMINI_API_KEY=your-gemini-api-key
+   ```
+3. Jalankan aplikasi:
+   ```powershell
+   flutter pub get
+   flutter run
+   ```
 
 ## Project Documents
 
-- `requirements.md` - requirement fungsional dan non-fungsional.
-- `design.md` - arah desain produk dan UX rules.
-- `architecture.md` - struktur layer, dependency rule, dan modularity.
-- `database.md` - tabel, RLS, RPC, dan migration notes.
-- `api.md` - kontrak Supabase Auth/RPC.
-- `rules.md` - aturan engineering untuk manusia dan AI.
-- `tasks.md` - backlog prioritas teknis.
+- `requirements.md` - Requirement fungsional, non-fungsional, dan reliabilitas sistem.
+- `design.md` - Arah desain produk dan panduan visual/UX.
+- `architecture.md` - Struktur layer, dependency rule, dan batasan runtime.
+- `database.md` - Struktur skema Cloud Firestore dan Security Rules.
+- `api.md` - Kontrak database writes, onboarding transaction, dan alur autentikasi.
+- `rules.md` - Aturan engineering untuk kolaborasi manusia dan AI.
+- `tasks.md` - Backlog prioritas teknis dan status progres pengerjaan.
 
 ## Architecture
 
@@ -30,67 +36,33 @@ Project memakai feature-first layered architecture:
 ```text
 lib/
   core/
+    config/      - Konfigurasi aplikasi & env
+    di/          - Dependency Injection (GetIt)
+    error/       - Model & handler error/failure
+    router/      - Routing GoRouter & Route guards
+    shell/       - Layout utama (AppShell) dengan caching context
+    theme/       - Konfigurasi warna & visual theme
+    utils/       - Helper & Logger aktivitas
   features/
-    auth/
-    home/
-    transactions/
-    wallets/
-    business/
-    catalog/
-    inventory/
-    analytics/
-    settings/
+    auth/        - Autentikasi Google & Firebase Auth
+    onboarding/  - Setup awal bisnis (Smart Business Setup)
+    home/        - Dashboard utama & skor kelengkapan bisnis
+    transactions/ - Catat transaksi & scan struk belanja AI (Gemini)
+    wallets/     - Pengelolaan kas & dompet bisnis
+    settings/    - Pengaturan profil & manajemen tim (karyawan)
 ```
 
-Dependency utama:
-
+Dependency utama mengalir ke dalam:
 ```text
-presentation -> domain -> data
+presentation -> domain -> data contract
 ```
+Business logic tidak boleh bergantung pada UI. Firebase SDK hanya boleh diakses melalui Remote Data Sources di data layer.
 
-Business logic tidak boleh bergantung pada UI. Supabase hanya boleh dipanggil dari data layer.
+## Firestore Security Rules
 
-## Supabase
+Aturan keamanan Firestore diatur dalam file `firestore.rules` di root project. Aturan ini memastikan:
+1. Keamanan berbasis penyewa (Tenant) - pengguna hanya bisa melihat data dari bisnis di mana mereka terdaftar sebagai member.
+2. Akses bertingkat - fitur owner-only seperti menghapus bisnis atau mengelola tim terlindungi dengan aman.
+3. Ketahanan inisialisasi - transaksi setup bisnis baru tetap aman tanpa risiko crash evaluasi aturan saat database dalam kondisi kosong.
 
-Migration utama:
-
-```text
-supabase/migrations/20260514_business_platform_schema_upgrade.sql
-```
-
-Schema mencakup:
-
-- `profiles`
-- `businesses`
-- `business_members`
-- `wallets`
-- `categories`
-- `goals`
-- `products`
-- `inventory_items`
-- `transactions`
-- `transaction_items`
-
-RPC utama:
-
-- `ensure_current_user_workspace`
-- `get_dashboard_summary`
-- `get_monthly_cashflow`
-
-## Current Status
-
-Sudah diperbaiki:
-
-- Hard-coded Supabase key dipindah ke `--dart-define`.
-- Kontrak user diselaraskan dengan schema `profiles`.
-- `LoginPage` sekarang mendapat `AuthBloc`.
-- DI auth/home diperbaiki.
-- HomeBloc typed folding diperbaiki.
-- Template widget test diganti.
-- Workspace bootstrap RPC diberi guard `auth.uid()`.
-
-Masih perlu diselesaikan:
-
-- Jalankan `flutter analyze` dan `flutter test` setelah toolchain Dart lokal tidak timeout.
-- Hubungkan halaman wallet/catalog/inventory/team ke Supabase data source.
-- Ganti seluruh branding lama `CoreBusiness` menjadi `CoreBusiness`.
+Untuk melakukan deploy rules secara manual, salin isi file `firestore.rules` lalu publish di tab Rules menu Firestore pada Firebase Console.

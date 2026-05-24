@@ -136,8 +136,11 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
 
-  // Factory: fresh AuthBloc instance per page mount.
-  sl.registerFactory(
+  // LazySingleton: shared AuthBloc instance.
+  // SmartSetupBloc needs to call add(AuthCheckCurrentUserRequested) on the SAME
+  // instance that the app's BlocProvider uses — a Factory would create a new
+  // isolated instance and the event would be silently ignored.
+  sl.registerLazySingleton(
     () => AuthBloc(
       signInWithGoogle: sl(),
       authRepository: sl(),

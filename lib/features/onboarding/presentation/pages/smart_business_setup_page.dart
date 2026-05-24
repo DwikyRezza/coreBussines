@@ -3,16 +3,21 @@
 // lib/features/onboarding/presentation/pages/smart_business_setup_page.dart
 // ============================================================
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide_animated/flutter_lucide_animated.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/utils/responsive_helper.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/responsive_helper.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../settings/domain/repositories/app_lock_repository.dart';
 import '../bloc/smart_setup_bloc.dart';
 
 class SmartBusinessSetupPage extends StatelessWidget {
@@ -21,7 +26,13 @@ class SmartBusinessSetupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SmartSetupBloc(),
+      create: (_) => SmartSetupBloc(
+        firestore: sl<FirebaseFirestore>(),
+        auth: sl<firebase_auth.FirebaseAuth>(),
+        prefs: sl<SharedPreferences>(),
+        appLockRepository: sl<AppLockRepository>(),
+        authBloc: sl<AuthBloc>(),
+      ),
       child: const _SmartSetupView(),
     );
   }

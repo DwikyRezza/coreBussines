@@ -3,7 +3,7 @@
 ## Architecture Rules
 
 - UI tidak boleh menyimpan business logic inti.
-- Domain tidak boleh import Flutter, Supabase, atau package UI.
+- Domain tidak boleh import Flutter, Firebase SDK, atau package UI.
 - Data source tidak boleh dipanggil langsung dari widget.
 - Repository adalah boundary antara domain dan data implementation.
 - Dependency injection wajib lewat `core/di/service_locator.dart`.
@@ -16,25 +16,24 @@
 - Form submit harus punya loading state dan double-submit guard.
 - Hindari heavy computation di `build()`.
 
-## Supabase Rules
+## Firebase & Firestore Rules
 
-- RLS wajib untuk semua tabel public.
-- Authorization berbasis `business_members`, bukan metadata client.
-- Service role key tidak boleh masuk Flutter app.
-- `app_private` schema tidak boleh diexpose di Supabase Data API.
-- RPC privileged wajib guard `auth.uid()`.
+- Firestore Security Rules wajib diaktifkan untuk mengamankan seluruh koleksi.
+- Otorisasi akses data berbasis subkoleksi `members` di bawah `/businesses/{businessId}/members/{userId}`, bukan dari metadata client.
+- Rules harus diamankan dari crash evaluasi: selalu gunakan `exists()` sebelum memanggil data dari `get()` jika dokumen target berpotensi tidak ada (misalnya saat database baru di-reset/kosong).
+- Kredensial Firebase (`google-services.json` / `GoogleService-Info.plist`) dikonfigurasi dengan benar dan aman.
 
 ## Code Quality Rules
 
-- Satu file boleh besar hanya jika masih satu concern.
-- Jangan punya duplicate event/state class untuk BLoC yang sama.
+- Satu file boleh besar hanya jika masih satu concern (pecah BLoC atau Page yang terlalu besar jika concern-nya sudah bercabang).
+- Jangan memiliki duplicate event/state class untuk BLoC yang sama.
 - Hindari hard-coded brand text di tiap halaman; pakai shared constants/component.
-- Jangan commit generated output yang tidak relevan.
+- Jangan commit generated output atau file konfigurasi local `.env` yang berisi API key sensitif.
 - Test harus menguji behavior sekarang, bukan template lama.
 
 ## AI Collaboration Rules
 
 - Saat meminta AI membuat fitur, sertakan target file/layer.
-- Jangan minta refactor besar tanpa daftar behavior yang harus tetap sama.
-- Untuk perubahan Supabase, minta AI audit RLS dan migration idempotency.
+- Jangan meminta refactor besar tanpa daftar behavior yang harus tetap sama.
+- Untuk perubahan Firestore, minta AI untuk mengaudit Firestore Security Rules agar tidak ada celah keamanan atau rule crash.
 - Untuk UI, minta AI verifikasi provider, navigation, loading, error, empty state, dan dispose lifecycle.

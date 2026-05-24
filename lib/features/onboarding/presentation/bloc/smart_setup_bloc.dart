@@ -8,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/di/service_locator.dart';
+import '../../../../core/di/service_locator.dart'; // Still used by smart_business_setup_page.dart for BlocProvider
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../settings/domain/repositories/app_lock_repository.dart';
@@ -293,11 +293,24 @@ class SetupSubmitRequested extends SmartSetupEvent {
 
 // ─── BLOC ────────────────────────────────────────────────────
 class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
-  final SharedPreferences _prefs = sl<SharedPreferences>();
+  final FirebaseFirestore _firestore;
+  final firebase_auth.FirebaseAuth _auth;
+  final SharedPreferences _prefs;
+  final AppLockRepository _appLockRepository;
+  final AuthBloc _authBloc;
 
-  SmartSetupBloc() : super(const SmartSetupState()) {
+  SmartSetupBloc({
+    required FirebaseFirestore firestore,
+    required firebase_auth.FirebaseAuth auth,
+    required SharedPreferences prefs,
+    required AppLockRepository appLockRepository,
+    required AuthBloc authBloc,
+  })  : _firestore = firestore,
+        _auth = auth,
+        _prefs = prefs,
+        _appLockRepository = appLockRepository,
+        _authBloc = authBloc,
+        super(const SmartSetupState()) {
     on<SetupUpdateField>(_onUpdateField);
     on<SetupNextStepRequested>(_onNextStep);
     on<SetupPreviousStepRequested>(_onPreviousStep);
@@ -439,10 +452,11 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             return;
           }
 
-          // Cek masa berlaku undangan (misal 7 hari)
-          final joinedAt = inviteData['joined_at'] as Timestamp?;
-          if (joinedAt != null) {
-            final date = joinedAt.toDate();
+          // Cek masa berlaku undangan menggunakan created_at (waktu Owner membuat undangan),
+          // bukan joined_at (waktu staff bergabung, diisi setelah join).
+          final createdAt = inviteData['created_at'] as Timestamp?;
+          if (createdAt != null) {
+            final date = createdAt.toDate();
             final diff = DateTime.now().difference(date).inDays;
             if (diff > 7) {
               emit(state.copyWith(
@@ -832,16 +846,16 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
         await _prefs.setString('active_business_id', businessId);
       }
 
-      // If user sets up PIN, save PIN locally using AppLockRepository
+      // If user sets up PIN, save PIN locally using injected AppLockRepository
       if (state.securityPin.isNotEmpty) {
-        await sl<AppLockRepository>().setPin(state.securityPin);
+        await _appLockRepository.setPin(state.securityPin);
       }
 
       // Success
       emit(state.copyWith(isSubmitting: false, isSuccess: true));
 
       // Notify authentication BLoC to reload and refresh redirect guard
-      sl<AuthBloc>().add(const AuthCheckCurrentUserRequested());
+      _authBloc.add(const AuthCheckCurrentUserRequested());
     } catch (e) {
       emit(state.copyWith(
           isSubmitting: false, errorMessage: 'Terjadi kesalahan sistem: $e'));

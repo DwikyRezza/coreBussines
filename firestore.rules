@@ -13,6 +13,7 @@ service cloud.firestore {
 
     function isBusinessOwner(businessId) {
       return signedIn() &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid)).data.role == 'owner';
     }
 
@@ -44,7 +45,8 @@ service cloud.firestore {
             (
               memberId == request.auth.uid &&
               (
-                get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid ||
+                (!exists(/databases/$(database)/documents/businesses/$(businessId)) && request.resource.data.role == 'owner') ||
+                (exists(/databases/$(database)/documents/businesses/$(businessId)) && get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid) ||
                 hasPendingInvite(businessId)
               )
             )
@@ -62,7 +64,12 @@ service cloud.firestore {
 
       match /wallets/{walletId} {
         allow read: if isBusinessMember(businessId);
-        allow create, update: if isBusinessMember(businessId);
+        allow create: if isBusinessMember(businessId) ||
+          (
+            !exists(/databases/$(database)/documents/businesses/$(businessId)) &&
+            signedIn()
+          );
+        allow update: if isBusinessMember(businessId);
         allow delete: if isBusinessOwner(businessId);
       }
 
@@ -82,18 +89,26 @@ service cloud.firestore {
       }
 
       match /notifications/{notificationId} {
+        // Hanya target user yang bisa baca notifikasi miliknya
         allow read: if isBusinessMember(businessId) &&
           resource.data.targetUserId == request.auth.uid;
-        allow create: if isBusinessMember(businessId) &&
-          request.resource.data.targetUserId == request.auth.uid;
+
+        // Setiap member bisnis bisa membuat notifikasi untuk member lain di bisnis
+        // yang sama (misal: Owner mengirim notifikasi ke Staff)
+        allow create: if isBusinessMember(businessId);
+
+        // Hanya target user yang bisa update/delete (misal: mark as read)
         allow update, delete: if isBusinessMember(businessId) &&
           resource.data.targetUserId == request.auth.uid;
       }
 
       match /activity_logs/{logId} {
+        // Hanya Owner yang bisa membaca audit log
         allow read: if isBusinessOwner(businessId);
+        // Semua member bisa mencatat aktivitas, tapi harus atas nama diri sendiri
         allow create: if isBusinessMember(businessId) &&
           request.resource.data.performedByUserId == request.auth.uid;
+        // Log tidak boleh diubah atau dihapus (immutable audit trail)
         allow update, delete: if false;
       }
     }

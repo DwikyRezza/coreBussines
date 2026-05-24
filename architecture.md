@@ -33,50 +33,44 @@ core -> shared infrastructure only
 ```
 
 Yang harus dihindari:
-
 - Domain bergantung ke Flutter widget.
-- Domain bergantung ke Supabase SDK.
+- Domain bergantung ke Firebase/Firestore SDK.
 - Data layer memanggil UI.
 - Feature saling import presentation layer milik feature lain.
 
 ## Layer Responsibilities
 
 ### Presentation
-
 - Widget, page, BLoC, UI state.
 - Validasi input ringan yang dekat dengan form.
 - Tidak menyimpan aturan bisnis inti.
 
 ### Domain
-
 - Entity.
 - Repository contract.
 - Use case.
 - Business rule yang bisa diuji tanpa Flutter.
 
 ### Data
-
 - Model.
-- Data source remote/local.
-- Mapping JSON.
+- Data source remote/local (menghubungkan ke Firestore, Firebase Auth, Firebase Storage).
+- Mapping JSON / Firestore DocumentSnapshot converter.
 - Implementasi repository.
 
 ## State Management
 
-- BLoC digunakan untuk flow yang punya loading, success, error, dan event history.
-- `setState` boleh untuk state form lokal yang tidak perlu dishare.
-- Single source of truth data operasional harus repository, bukan widget.
+- BLoC digunakan untuk flow yang memiliki loading, success, error, dan event history.
+- `setState` diperbolehkan untuk state form lokal yang tidak perlu dibagikan ke widget lain.
+- Single source of truth data operasional harus berupa repository, bukan diletakkan di dalam widget.
 
 ## Runtime Boundaries
 
-- Supabase Auth dan database hanya dipanggil dari data layer.
-- Active business context disimpan di local storage sebagai pointer, tetapi otorisasi tetap di RLS.
-- Dashboard sebaiknya memakai RPC aggregation agar client tidak menarik banyak row.
+- Firebase Auth dan Cloud Firestore hanya dipanggil dari data layer (Data Source).
+- Active business context di-cache pada tingkat shell/presentation layer untuk meminimalkan beban Firestore read di concurrent user yang tinggi.
+- Otentikasi dan otorisasi data wajib divalidasi di sisi Cloud Firestore menggunakan Security Rules.
 
 ## Recommended Next Architecture Work
 
-1. Buat `BusinessContextRepository` untuk active business.
-2. Buat `SupabaseHomeDataSource`.
-3. Buat `SupabaseTransactionDataSource`.
-4. Pisahkan BLoC event/state transaksi ke file sendiri atau biarkan di satu file, jangan dua-duanya.
-5. Buat shared app bar dan page scaffold agar branding tidak tersebar di puluhan page.
+1. Melakukan refaktorisasi `SmartSetupBloc` dan `smart_business_setup_page.dart` yang berukuran besar menjadi modul-modul sub-step yang lebih kecil dan modular.
+2. Meningkatkan cakupan unit testing pada BLoC dan Repository layer.
+3. Membuat shared app bar dan page scaffold terstandarisasi untuk UI yang konsisten.

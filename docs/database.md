@@ -1,123 +1,85 @@
-# CoreBusiness Database
+# CoreBusiness Cloud Firestore Database Design
 
-Dokumen ini menjelaskan schema Supabase utama untuk CoreBusiness. Migration upgrade ada di:
+Dokumen ini mendokumentasikan prinsip desain dan struktur skema Cloud Firestore untuk CoreBusiness.
 
-`supabase/migrations/20260514_business_platform_schema_upgrade.sql`
+## Prinsip Desain Firestore
 
-## Prinsip Desain
+- **Tenant Isolation (`businesses`):** Setiap bisnis/UMKM berdiri sebagai dokumen mandiri di bawah `/businesses/{businessId}`. Semua subkoleksi operasional diletakkan secara hierarkis di bawah dokumen bisnis ini untuk kemudahan partisi data dan kemudahan penerapan Firestore Security Rules.
+- **Role-Based Access Control (`members`):** Keanggotaan dan izin akses user ditentukan dari subkoleksi `/members/{userId}`. Role yang tersedia: `'owner'`, `'admin'`, dan `'staff'`. Firestore Rules membaca dokumen ini untuk menentukan hak akses user terhadap data bisnis bersangkutan.
+- **Denormalisasi untuk Kinerja:** Data pengguna dasar (seperti nama, email, dan avatar) didenormalisasikan di dalam dokumen `/members/{userId}` untuk menghindari N+1 queries saat menampilkan tim di UI.
+- **Audit Trail yang Immutable (`activity_logs`):** Log aktivitas ditulis di tingkat bisnis untuk pelacakan audit. Aturan keamanan melarang keras update dan delete pada koleksi ini.
 
-- `businesses` adalah tenant root. Semua data operasional mengarah ke `business_id`.
-- `business_members` adalah sumber kebenaran akses multi-user. Role tersedia: `owner`, `admin`, `staff`.
-- `products` hanya menyimpan master katalog. Stok hidup di `inventory_items` agar produk bisa dikembangkan untuk multi-lokasi, batch, atau varian tanpa memecah katalog.
-- `wallets` menyimpan akun kas/bank/e-wallet. Saldo diperbarui lewat trigger transaksi.
-- `transactions` adalah header transaksi income/expense. `transaction_items` menyimpan detail produk.
-- Dashboard memakai RPC supaya Flutter tidak perlu menarik banyak rows untuk menghitung ringkasan.
+## Detail Struktur Skema & Dokumen
 
-## Tabel Utama
+### 1. Koleksi `/users/{userId}` (Root)
+Menyimpan informasi global user dari Firebase Auth.
 
-| Tabel | Fungsi |
-| --- | --- |
-| `profiles` | Profil user yang terhubung ke `auth.users`. |
-| `businesses` | Entitas bisnis/tenant. |
-| `business_members` | Relasi user ke bisnis dan role akses. |
-| `wallets` | Akun keuangan seperti Cash, Bank, E-wallet. |
-| `categories` | Kategori income/expense per bisnis. |
-| `goals` | Target finansial per bisnis. |
-| `products` | Master katalog produk. |
-| `inventory_items` | Stok per produk dalam bisnis. |
-| `transactions` | Header transaksi income/expense. |
-| `transaction_items` | Line item produk dalam transaksi. |
+```json
+{
+  "onboarding_completed": true,
+  "active_business_id": "b1b2c3d4-...",
+  "full_name": "Dwiky Rezza",
+  "avatar_url": "https://lh3.googleusercontent.com/...",
+  "updated_at": "Timestamp"
+}
+```
 
-## RLS
+### 2. Koleksi `/businesses/{businessId}` (Root)
+Menyimpan detail operasional tenant bisnis.
 
-Semua tabel di schema `public` memakai Row Level Security.
-
-Aturan umumnya:
-
-- User hanya bisa membaca profil sendiri.
-- User hanya bisa membaca/mengelola data bisnis jika terdaftar di `business_members`.
-- Update data bisnis dan pengelolaan member dibatasi untuk `owner` dan `admin`.
-- `transaction_items` mengikuti akses dari parent `transactions`.
-
-Helper RLS berada di schema `app_private` agar fungsi `security definer` tidak diekspos sebagai endpoint public REST.
-
-## Trigger
-
-- `touch_*_updated_at`: otomatis memperbarui `updated_at`.
-- `sync_wallet_balance_on_transactions`: menambah/mengurangi saldo wallet untuk `INSERT`, `UPDATE`, dan `DELETE`.
-- `sync_inventory_from_transaction_item`: transaksi `income` mengurangi stok, transaksi `expense` menambah stok.
-- `recalculate_transaction_amount_from_items`: jika line item berubah, total header transaksi dihitung ulang dari `transaction_items`.
-
-## RPC Untuk Flutter
-
-### `ensure_current_user_workspace`
-
-Dipanggil setelah login. Fungsi ini memastikan:
-
-- Row `profiles` tersedia.
-- User memiliki minimal satu bisnis.
-- User pertama menjadi `owner`.
-- Wallet `Cash` dan kategori sistem awal dibuat.
-
-Contoh:
-
-```dart
-final businessId = await supabase.rpc<String>(
-  'ensure_current_user_workspace',
-  params: {
-    'p_full_name': user.fullName,
-    'p_email': user.email,
-    'p_avatar_url': user.avatarUrl,
+```json
+{
+  "name": "Warung Kopi Rezza",
+  "owner_id": "user123_auth_uid",
+  "business_type": "F&B",
+  "business_size": "medium",
+  "currency": "IDR",
+  "timezone": "Asia/Jakarta",
+  "details": {
+    "description": "Premium coffee shop and roastery.",
+    "address": "Jl. Sudirman No. 45, Jakarta",
+    "whatsapp": "628123456789",
+    "email": "contact@warungrezza.com"
   },
-);
+  "enabled_features": ["dashboard", "transactions", "wallets", "analytics", "schedule"],
+  "created_at": "Timestamp",
+  "updated_at": "Timestamp"
+}
 ```
 
-### `get_dashboard_summary`
+### Sub-koleksi Bisnis:
 
-Mengembalikan ringkasan income, expense, profit, saldo wallet, jumlah transaksi, dan low-stock count.
+#### A. `/members/{userId}`
+Relasi anggota tim ke bisnis.
+* **Security Rule:** Create/Update/Delete hanya bisa dilakukan oleh `'owner'`. Anggota lain hanya bisa membaca list.
 
-```dart
-final rows = await supabase.rpc(
-  'get_dashboard_summary',
-  params: {
-    'p_business_id': businessId,
-    'p_start_date': start.toIso8601String(),
-    'p_end_date': end.toIso8601String(),
-  },
-);
+#### B. `/wallets/{walletId}`
+Dompet atau akun keuangan bisnis.
+* **Security Rule:** Anggota terdaftar bisa membaca dan menulis transaksi. Penghapusan wallet dibatasi untuk `'owner'`.
+
+#### C. `/categories/{categoryId}`
+Kategori transaksi kustom per-bisnis.
+* **Security Rule:** Anggota terdaftar bisa membaca. Pengeditan kategori sistem dibatasi untuk `'owner'`/`'admin'`.
+
+#### D. `/transactions/{transactionId}`
+Dokumen transaksi bisnis.
+* **Security Rule:** Anggota terdaftar bisa membuat transaksi. Transaksi hanya bisa diperbarui oleh user yang membuatnya.
+
+---
+
+## Mekanisme Firestore Security Rules
+
+Aturan keamanan (`firestore.rules`) ditulis dengan prinsip aman secara bawaan (*secure-by-default*).
+
+### Evaluasi yang Aman Terhadap Database Kosong
+Saat user mendaftar pertama kali, dokumen bisnis dan member belum tersimpan di Firestore. Untuk menghindari rule crash ketika membaca dokumen non-existent via `get()`, aturan pendaftaran menggunakan logika guard:
+```javascript
+(!exists(/databases/$(database)/documents/businesses/$(businessId)) && request.resource.data.role == 'owner')
 ```
+Logika ini memastikan bahwa jika bisnis belum terdaftar di database, user diperbolehkan mendaftarkan dirinya sebagai owner awal bisnis tersebut secara aman.
 
-### `get_monthly_cashflow`
-
-Mengembalikan cashflow bulanan untuk chart.
-
-```dart
-final rows = await supabase.rpc(
-  'get_monthly_cashflow',
-  params: {
-    'p_business_id': businessId,
-    'p_months': 6,
-  },
-);
-```
-
-## Cara Menjalankan Migration
-
-Supabase CLI belum tersedia di environment ini. Untuk sekarang, jalankan isi file migration di Supabase SQL Editor.
-
-Jika Supabase CLI sudah tersedia:
-
-```powershell
-supabase db push
-```
-
-Setelah migration berjalan, login Google dari aplikasi akan memanggil `ensure_current_user_workspace` dan menyimpan `active_business_id` di `SharedPreferences`.
-
-## Catatan Evolusi
-
-Schema ini sengaja disiapkan untuk pengembangan lanjutan:
-
-- Multi-lokasi stok bisa ditambah dengan tabel `inventory_locations`, lalu `inventory_items` diberi `location_id`.
-- Audit trail bisa ditambah dengan tabel `wallet_ledger` tanpa mengubah kontrak transaksi utama.
-- Invite flow bisa ditambah dengan tabel `business_invites` agar user belum terdaftar bisa diundang lewat email.
-- Produk varian bisa ditambah dengan `product_variants`; `inventory_items` dapat diarahkan ke varian tanpa menghapus `products`.
+### Cara Mempublikasikan Rules
+1. Salin seluruh isi file [firestore.rules](file:///d:/Rezza/Self%20Project/corebussiness/firestore.rules).
+2. Masuk ke **[Firebase Console](https://console.firebase.google.com/)** -> pilih project CoreBusiness.
+3. Masuk ke menu **Firestore Database** -> klik tab **Rules**.
+4. Tempelkan seluruh isi rules ke editor, lalu klik **Publish**.
