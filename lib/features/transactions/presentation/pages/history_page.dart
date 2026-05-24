@@ -3,12 +3,13 @@
 // lib/features/transactions/presentation/pages/history_page.dart
 // ============================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/core_app_bar.dart';
@@ -35,6 +36,7 @@ class _HistoryPageState extends State<HistoryPage> {
   String _query = '';
   TransactionType? _typeFilter;
   List<Transaction> _transactions = [];
+  StreamSubscription? _transactionsSubscription;
 
   @override
   void initState() {
@@ -47,31 +49,44 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   void dispose() {
+    _transactionsSubscription?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _loadTransactions() async {
+    await _transactionsSubscription?.cancel();
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    final result = await _repository.getFilteredTransactions(
+    _transactionsSubscription = _repository
+        .watchFilteredTransactions(
       const TransactionFilter(dateRange: DateRangeFilter.custom),
-    );
-
-    if (!mounted) return;
-    result.fold(
-      (failure) => setState(() {
-        _error = failure.message;
-        _isLoading = false;
-      }),
-      (transactions) => setState(() {
-        _transactions = transactions.toList()
-          ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
-        _isLoading = false;
-      }),
+    )
+        .listen(
+      (result) {
+        if (!mounted) return;
+        result.fold(
+          (failure) => setState(() {
+            _error = failure.message;
+            _isLoading = false;
+          }),
+          (transactions) => setState(() {
+            _transactions = transactions.toList()
+              ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
+            _isLoading = false;
+          }),
+        );
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          _error = 'Gagal memuat transaksi real-time.';
+          _isLoading = false;
+        });
+      },
     );
   }
 
@@ -184,15 +199,24 @@ class _HistoryPageState extends State<HistoryPage> {
                             child: Container(
                               height: 52,
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                                border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md),
                               child: Row(
                                 children: [
                                   Icon(Icons.search_rounded,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant, size: 22),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                      size: 22),
                                   const SizedBox(width: AppSpacing.sm),
                                   Expanded(
                                     child: TextField(
@@ -200,9 +224,12 @@ class _HistoryPageState extends State<HistoryPage> {
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
                                         hintText: 'Cari transaksi...',
-                                        hintStyle:
-                                            AppTypography.textTheme.bodyMedium?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        hintStyle: AppTypography
+                                            .textTheme.bodyMedium
+                                            ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                       ),
                                     ),
@@ -219,7 +246,8 @@ class _HistoryPageState extends State<HistoryPage> {
                               icon: const Icon(Icons.filter_list_rounded),
                               label: const Text('Filter'),
                               style: FilledButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -228,72 +256,75 @@ class _HistoryPageState extends State<HistoryPage> {
                           ),
                         ],
                       ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Total Pemasukan',
-                            amount: _currency.format(_totalIncome),
-                            color: Theme.of(context).colorScheme.primary,
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SummaryCard(
+                              title: 'Total Pemasukan',
+                              amount: _currency.format(_totalIncome),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Total Pengeluaran',
-                            amount: _currency.format(_totalExpense),
-                            color: Theme.of(context).colorScheme.error,
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: _SummaryCard(
+                              title: 'Total Pengeluaran',
+                              amount: _currency.format(_totalExpense),
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (_isLoading)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (_error != null)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: _HistoryMessage(message: _error!),
-              )
-            else if (_visibleTransactions.isEmpty)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: _HistoryMessage(
-                  message: 'Belum ada transaksi real yang cocok.',
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: padding),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final entries = _groupedTransactions.entries.toList();
-                      final entry = entries[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _DateHeader(
-                            label: _dateLabel(entry.key),
-                            date: _dateFormat.format(entry.key),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (ResponsiveHelper.isTabletOrLarger(context))
-                            Builder(
-                              builder: (context) {
-                                final totalWidth = MediaQuery.sizeOf(context).width;
-                                final contentWidth = totalWidth > ResponsiveHelper.maxContentWidth(context)
+              if (_isLoading)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_error != null)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _HistoryMessage(message: _error!),
+                )
+              else if (_visibleTransactions.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _HistoryMessage(
+                    message: 'Belum ada transaksi real yang cocok.',
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: padding),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final entries = _groupedTransactions.entries.toList();
+                        final entry = entries[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _DateHeader(
+                              label: _dateLabel(entry.key),
+                              date: _dateFormat.format(entry.key),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            if (ResponsiveHelper.isTabletOrLarger(context))
+                              Builder(builder: (context) {
+                                final totalWidth =
+                                    MediaQuery.sizeOf(context).width;
+                                final contentWidth = totalWidth >
+                                        ResponsiveHelper.maxContentWidth(
+                                            context)
                                     ? ResponsiveHelper.maxContentWidth(context)
                                     : totalWidth;
-                                final availableWidth = contentWidth - 2 * padding;
+                                final availableWidth =
+                                    contentWidth - 2 * padding;
                                 final cardWidth = (availableWidth - 16) / 2;
                                 return Wrap(
                                   spacing: 16,
@@ -305,19 +336,29 @@ class _HistoryPageState extends State<HistoryPage> {
                                         child: _TransactionItem(
                                           icon: _iconFor(transaction),
                                           iconColor: transaction.isIncome
-                                              ? Theme.of(context).colorScheme.primary
-                                              : Theme.of(context).colorScheme.error,
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
                                           iconBg: transaction.isIncome
-                                              ? Theme.of(context).colorScheme.primaryContainer
-                                              : Theme.of(context).colorScheme.errorContainer,
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primaryContainer
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .errorContainer,
                                           title: transaction.title,
                                           category: transaction.category,
                                           amount:
                                               '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
-                                          time: DateFormat('HH:mm').format(transaction.dateTime),
+                                          time: DateFormat('HH:mm')
+                                              .format(transaction.dateTime),
                                           isIncome: transaction.isIncome,
                                           onTap: () => context.push(
-                                            AppRoutes.transactionDetail.replaceAll(
+                                            AppRoutes.transactionDetail
+                                                .replaceAll(
                                               ':id',
                                               transaction.id,
                                             ),
@@ -326,43 +367,48 @@ class _HistoryPageState extends State<HistoryPage> {
                                       ),
                                   ],
                                 );
-                              }
-                            )
-                          else
-                            for (final transaction in entry.value)
-                              _TransactionItem(
-                                icon: _iconFor(transaction),
-                                iconColor: transaction.isIncome
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.error,
-                                iconBg: transaction.isIncome
-                                    ? Theme.of(context).colorScheme.primaryContainer
-                                    : Theme.of(context).colorScheme.errorContainer,
-                                title: transaction.title,
-                                category: transaction.category,
-                                amount:
-                                    '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
-                                time: DateFormat('HH:mm').format(transaction.dateTime),
-                                isIncome: transaction.isIncome,
-                                onTap: () => context.push(
-                                  AppRoutes.transactionDetail.replaceAll(
-                                    ':id',
-                                    transaction.id,
+                              })
+                            else
+                              for (final transaction in entry.value)
+                                _TransactionItem(
+                                  icon: _iconFor(transaction),
+                                  iconColor: transaction.isIncome
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.error,
+                                  iconBg: transaction.isIncome
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .errorContainer,
+                                  title: transaction.title,
+                                  category: transaction.category,
+                                  amount:
+                                      '${transaction.isIncome ? '+' : '-'} ${_currency.format(transaction.amount)}',
+                                  time: DateFormat('HH:mm')
+                                      .format(transaction.dateTime),
+                                  isIncome: transaction.isIncome,
+                                  onTap: () => context.push(
+                                    AppRoutes.transactionDetail.replaceAll(
+                                      ':id',
+                                      transaction.id,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          const SizedBox(height: AppSpacing.lg),
-                          if (index == entries.length - 1) const SizedBox(height: 82),
-                        ],
-                      );
-                    },
-                    childCount: _groupedTransactions.length,
+                            const SizedBox(height: AppSpacing.lg),
+                            if (index == entries.length - 1)
+                              const SizedBox(height: 82),
+                          ],
+                        );
+                      },
+                      childCount: _groupedTransactions.length,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -377,11 +423,15 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   IconData _iconFor(Transaction transaction) {
-    final text = '${transaction.category} ${transaction.categoryIcon}'.toLowerCase();
+    final text =
+        '${transaction.category} ${transaction.categoryIcon}'.toLowerCase();
     if (transaction.isIncome) return Icons.payments_rounded;
-    if (text.contains('makan') || text.contains('food')) return Icons.restaurant_rounded;
+    if (text.contains('makan') || text.contains('food'))
+      return Icons.restaurant_rounded;
     if (text.contains('transport')) return Icons.directions_car_rounded;
-    if (text.contains('tagihan') || text.contains('bill') || text.contains('listrik')) {
+    if (text.contains('tagihan') ||
+        text.contains('bill') ||
+        text.contains('listrik')) {
       return Icons.receipt_long_rounded;
     }
     if (text.contains('kesehatan') || text.contains('health')) {
@@ -409,8 +459,12 @@ class _FilterTile extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       title: Text(title),
       trailing: Icon(
-        selected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-        color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+        selected
+            ? Icons.check_circle_rounded
+            : Icons.radio_button_unchecked_rounded,
+        color: selected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.outline,
       ),
     );
   }
@@ -598,7 +652,9 @@ class _TransactionItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: isIncome ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                      color: isIncome
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),

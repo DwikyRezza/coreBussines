@@ -27,7 +27,10 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<Either<Failure, BalanceSummary>> getBalanceSummary() async {
     try {
       final model = await _dataSource.getBalanceSummary();
-      await _localStorage.setCachedJson(_kHomeBalanceCache, jsonEncode((model as BalanceSummaryModel).toJson()));
+      await _localStorage.setCachedJson(
+        _kHomeBalanceCache,
+        jsonEncode(model.toJson()),
+      );
       return Right(model);
     } catch (e) {
       final cached = _localStorage.getCachedJson(_kHomeBalanceCache);
@@ -46,15 +49,17 @@ class HomeRepositoryImpl implements HomeRepository {
   }) async {
     try {
       final models = await _dataSource.getRecentTransactions(limit: limit);
-      final jsonList = (models as List<TransactionModel>).map((m) => m.toJson()).toList();
-      await _localStorage.setCachedJson(_kHomeRecentTxnCache, jsonEncode(jsonList));
+      final jsonList = models.map((m) => m.toJson()).toList();
+      await _localStorage.setCachedJson(
+          _kHomeRecentTxnCache, jsonEncode(jsonList));
       return Right(models);
     } catch (e) {
       final cached = _localStorage.getCachedJson(_kHomeRecentTxnCache);
       if (cached != null) {
         try {
           final list = jsonDecode(cached) as List<dynamic>;
-          final models = list.map((json) => TransactionModel.fromJson(json)).toList();
+          final models =
+              list.map((json) => TransactionModel.fromJson(json)).toList();
           return Right(models);
         } catch (_) {}
       }
@@ -66,7 +71,10 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<Either<Failure, InsightCard>> getCurrentInsight() async {
     try {
       final model = await _dataSource.getCurrentInsight();
-      await _localStorage.setCachedJson(_kHomeInsightCache, jsonEncode((model as InsightCardModel).toJson()));
+      await _localStorage.setCachedJson(
+        _kHomeInsightCache,
+        jsonEncode(model.toJson()),
+      );
       return Right(model);
     } catch (e) {
       final cached = _localStorage.getCachedJson(_kHomeInsightCache);
@@ -76,6 +84,17 @@ class HomeRepositoryImpl implements HomeRepository {
         } catch (_) {}
       }
       return Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, HomeDashboardData>> watchDashboardData() async* {
+    try {
+      await for (final data in _dataSource.watchDashboardData()) {
+        yield Right(data);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
     }
   }
 }

@@ -5,9 +5,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/services/business_context_service.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -27,85 +29,118 @@ class SettingsPage extends StatelessWidget {
         context: context,
         child: ListView(
           children: [
-          // User profile section
-          _ProfileHeader(),
-          const Divider(height: 1),
+            // User profile section
+            _ProfileHeader(),
+            const Divider(height: 1),
 
-          // General settings
-          _SettingsSection(title: 'Tampilan', items: [
-            _SettingsTile(
-              icon: Icons.dashboard_customize_rounded,
-              title: 'Atur Dashboard',
-              subtitle: 'Pilih dan susun kartu beranda',
-              onTap: () => context.push(AppRoutes.dashboardCustomize),
-            ),
-            _SettingsTile(
-              icon: Icons.color_lens_outlined,
-              title: 'Tema Aplikasi',
-              subtitle: 'Terang / Gelap / Sistem',
-              onTap: () => context.push(AppRoutes.themeSettings),
-            ),
-          ]),
+            // General settings
+            _SettingsSection(title: 'Tampilan', items: [
+              _SettingsTile(
+                icon: Icons.dashboard_customize_rounded,
+                title: 'Atur Dashboard',
+                subtitle: 'Pilih dan susun kartu beranda',
+                onTap: () => context.push(AppRoutes.dashboardCustomize),
+              ),
+              _SettingsTile(
+                icon: Icons.color_lens_outlined,
+                title: 'Tema Aplikasi',
+                subtitle: 'Terang / Gelap / Sistem',
+                onTap: () => context.push(AppRoutes.themeSettings),
+              ),
+            ]),
 
-          _SettingsSection(title: 'Akun', items: [
-            _SettingsTile(
-              icon: Icons.notifications_outlined,
-              title: 'Notifikasi',
-              subtitle: 'Kelola pengingat transaksi',
-              onTap: () => context.push(AppRoutes.alerts),
-            ),
-            _SettingsTile(
-              icon: Icons.lock_outline_rounded,
-              title: 'Keamanan',
-              subtitle: 'PIN, biometrik',
-              onTap: () => context.push(AppRoutes.securitySettings),
-            ),
-            _SettingsTile(
-              icon: Icons.backup_outlined,
-              title: 'Backup Data',
-              subtitle: 'Sinkronisasi ke cloud',
-              onTap: () => context.push(AppRoutes.syncSettings),
-            ),
-          ]),
+            _SettingsSection(title: 'Akun', items: [
+              _SettingsTile(
+                icon: Icons.notifications_outlined,
+                title: 'Notifikasi',
+                subtitle: 'Kelola pengingat transaksi',
+                onTap: () => context.push(AppRoutes.alerts),
+              ),
+              _SettingsTile(
+                icon: Icons.lock_outline_rounded,
+                title: 'Keamanan',
+                subtitle: 'PIN, biometrik',
+                onTap: () => context.push(AppRoutes.securitySettings),
+              ),
+              _SettingsTile(
+                icon: Icons.backup_outlined,
+                title: 'Backup Data',
+                subtitle: 'Sinkronisasi ke cloud',
+                onTap: () => context.push(AppRoutes.syncSettings),
+              ),
+            ]),
 
-          _SettingsSection(title: 'Lainnya', items: [
-            _SettingsTile(
-              icon: Icons.help_outline_rounded,
-              title: 'Bantuan & FAQ',
-              onTap: () => context.push(AppRoutes.helpFaq),
-            ),
-            _SettingsTile(
-              icon: Icons.info_outline_rounded,
-              title: 'Tentang Aplikasi',
-              subtitle: 'CoreBusiness v1.0.0',
-              onTap: () => context.push(AppRoutes.about),
-            ),
-          ]),
+            _SettingsSection(title: 'Bisnis & Tim', items: [
+              _SettingsTile(
+                icon: Icons.business_center_outlined,
+                title: 'Portfolio Bisnis',
+                subtitle: 'Beralih atau buat bisnis baru',
+                onTap: () => context.push(AppRoutes.businessPortfolio),
+              ),
+              _SettingsTile(
+                icon: Icons.people_outline_rounded,
+                title: 'Manajemen Tim',
+                subtitle: 'Kelola anggota dan role bisnis',
+                onTap: () => context.push(AppRoutes.teamManagement),
+              ),
+              _SettingsTile(
+                icon: Icons.category_outlined,
+                title: 'Kategori Transaksi',
+                subtitle: 'Kelola kategori pemasukan & pengeluaran',
+                onTap: () => context.push(AppRoutes.categoryManagement),
+              ),
+              _SettingsTile(
+                icon: Icons.shield_outlined,
+                title: 'Akses Manager',
+                subtitle: 'Atur izin granular role Manager',
+                onTap: () => context.push(AppRoutes.managerAccess),
+              ),
+              _SettingsTile(
+                icon: Icons.history_toggle_off_rounded,
+                title: 'Log Aktivitas Tim',
+                subtitle: 'Audit log riwayat tindakan staff',
+                onTap: () => context.push('/settings/activity-log'),
+              ),
+            ]),
 
-          // Sign out
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                context.read<AuthBloc>().add(const AuthSignOutRequested());
-              },
-              icon: Icon(Icons.logout_rounded, color: colors.error),
-              label: Text(
-                'Keluar',
-                style: TextStyle(
-                  color: colors.error,
-                  fontWeight: FontWeight.w600,
+            _SettingsSection(title: 'Lainnya', items: [
+              _SettingsTile(
+                icon: Icons.help_outline_rounded,
+                title: 'Bantuan & FAQ',
+                onTap: () => context.push(AppRoutes.helpFaq),
+              ),
+              _SettingsTile(
+                icon: Icons.info_outline_rounded,
+                title: 'Tentang Aplikasi',
+                subtitle: 'CoreBusiness v1.0.0',
+                onTap: () => context.push(AppRoutes.about),
+              ),
+            ]),
+
+            // Sign out
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  context.read<AuthBloc>().add(const AuthSignOutRequested());
+                },
+                icon: Icon(Icons.logout_rounded, color: colors.error),
+                label: Text(
+                  'Keluar',
+                  style: TextStyle(
+                    color: colors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  side: BorderSide(color: colors.error),
                 ),
               ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                side: BorderSide(color: colors.error),
-              ),
             ),
-          ),
-          const SizedBox(height: 80),
-        ],
-      ),
+            const SizedBox(height: 80),
+          ],
+        ),
       ),
     );
   }
@@ -135,8 +170,9 @@ class _ProfileHeader extends StatelessWidget {
             CircleAvatar(
               radius: 30,
               backgroundColor: colors.primaryContainer,
-              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-              child: avatarUrl == null 
+              backgroundImage:
+                  avatarUrl != null ? NetworkImage(avatarUrl) : null,
+              child: avatarUrl == null
                   ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'U',
                       style: AppTypography.textTheme.headlineSmall?.copyWith(
                         color: colors.onPrimaryContainer,
@@ -146,17 +182,49 @@ class _ProfileHeader extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.base),
             Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(name,
-                    style: AppTypography.textTheme.titleMedium?.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    )),
-                Text(email,
-                    style: AppTypography.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    )),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name,
+                        style: AppTypography.textTheme.titleMedium?.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w700,
+                        )),
+                    Text(email,
+                        style: AppTypography.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        )),
+                    const SizedBox(height: 6),
+                    FutureBuilder<BusinessContext>(
+                      future: sl<BusinessContextService>().getCurrentContext(),
+                      builder: (context, snapshot) {
+                        final role = snapshot.data?.role;
+                        if (role == null) return const SizedBox.shrink();
+                        final label = role == 'owner' ? 'Owner' : 'Staff';
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.primaryContainer,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              label,
+                              style:
+                                  AppTypography.textTheme.labelSmall?.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ]),
             ),
             IconButton(
               icon: Icon(Icons.edit_outlined, color: colors.primary),
@@ -180,8 +248,8 @@ class _SettingsSection extends StatelessWidget {
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.pagePadding, AppSpacing.base, AppSpacing.pagePadding, AppSpacing.xs),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding,
+            AppSpacing.base, AppSpacing.pagePadding, AppSpacing.xs),
         child: Text(title,
             style: AppTypography.textTheme.labelMedium?.copyWith(
               color: colors.onSurfaceVariant,
@@ -192,10 +260,13 @@ class _SettingsSection extends StatelessWidget {
         color: colors.surface,
         child: Column(children: [
           ...items.map((item) => Column(children: [
-            item,
-            if (item != items.last)
-              Divider(height: 1, indent: 56, color: colors.outlineVariant.withValues(alpha: 0.4)),
-          ])),
+                item,
+                if (item != items.last)
+                  Divider(
+                      height: 1,
+                      indent: 56,
+                      color: colors.outlineVariant.withValues(alpha: 0.4)),
+              ])),
         ]),
       ),
       const SizedBox(height: AppSpacing.base),
@@ -208,8 +279,11 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
-  const _SettingsTile({required this.icon, required this.title,
-      this.subtitle, required this.onTap});
+  const _SettingsTile(
+      {required this.icon,
+      required this.title,
+      this.subtitle,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -218,25 +292,29 @@ class _SettingsTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       leading: Container(
-        width: 36, height: 36,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: colors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: colors.primary, size: 18),
       ),
-      title: Text(title, style: AppTypography.textTheme.bodyMedium?.copyWith(
-        color: colors.onSurface,
-        fontWeight: FontWeight.w500,
-      )),
+      title: Text(title,
+          style: AppTypography.textTheme.bodyMedium?.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w500,
+          )),
       subtitle: subtitle != null
-          ? Text(subtitle!, style: AppTypography.textTheme.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant))
+          ? Text(subtitle!,
+              style: AppTypography.textTheme.bodySmall
+                  ?.copyWith(color: colors.onSurfaceVariant))
           : null,
       trailing: Icon(Icons.chevron_right_rounded,
           color: colors.onSurfaceVariant, size: 18),
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.pagePadding, vertical: AppSpacing.xs,
+        horizontal: AppSpacing.pagePadding,
+        vertical: AppSpacing.xs,
       ),
     );
   }

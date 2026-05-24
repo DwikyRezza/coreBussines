@@ -40,6 +40,15 @@ class Transaction extends Equatable {
   final double amount;
   final bool isIncome;
   final DateTime dateTime;
+  final String? walletId;
+  final String? walletName;
+  final String? receiptImageUrl;
+  final String? createdByUserId;
+  final String? createdByName;
+  final String? createdByEmail;
+  final String? createdByRole;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Transaction({
     required this.id,
@@ -49,10 +58,35 @@ class Transaction extends Equatable {
     required this.amount,
     required this.isIncome,
     required this.dateTime,
+    this.walletId,
+    this.walletName,
+    this.receiptImageUrl,
+    this.createdByUserId,
+    this.createdByName,
+    this.createdByEmail,
+    this.createdByRole,
+    this.createdAt,
+    this.updatedAt,
   });
 
   @override
-  List<Object?> get props => [id, title, category, amount, isIncome, dateTime];
+  List<Object?> get props => [
+        id,
+        title,
+        category,
+        amount,
+        isIncome,
+        dateTime,
+        walletId,
+        walletName,
+        receiptImageUrl,
+        createdByUserId,
+        createdByName,
+        createdByEmail,
+        createdByRole,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 /// AI Insight card data
@@ -69,6 +103,28 @@ class InsightCard extends Equatable {
 
   @override
   List<Object?> get props => [title, message, type];
+}
+
+class HomeDashboardData extends Equatable {
+  final BalanceSummary summary;
+  final List<Transaction> recentTransactions;
+  final List<Transaction> allTransactions;
+  final InsightCard insight;
+
+  const HomeDashboardData({
+    required this.summary,
+    required this.recentTransactions,
+    required this.allTransactions,
+    required this.insight,
+  });
+
+  @override
+  List<Object?> get props => [
+        summary,
+        recentTransactions,
+        allTransactions,
+        insight,
+      ];
 }
 
 /// Quick action button definition

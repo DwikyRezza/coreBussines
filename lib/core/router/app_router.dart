@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../di/service_locator.dart';
 import '../router/router_notifier.dart';
+import '../services/app_lock_controller.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 
 // Onboarding & Auth
 import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/onboarding/presentation/pages/smart_business_setup_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 
 // Home & Shell
@@ -44,7 +46,6 @@ import '../../features/schedule/presentation/pages/schedule_page.dart';
 import '../../features/schedule/presentation/pages/add_schedule_page.dart';
 import '../../features/schedule/data/models/schedule_model.dart';
 
-
 // Notifications
 import '../../features/notifications/presentation/pages/recent_alerts_page.dart';
 import '../../features/notifications/presentation/pages/notifications_empty_page.dart';
@@ -58,10 +59,13 @@ import '../../features/settings/presentation/pages/team_management_page.dart';
 import '../../features/settings/presentation/pages/sync_settings_page.dart';
 import '../../features/settings/presentation/pages/edit_profile_page.dart';
 import '../../features/settings/presentation/pages/security_settings_page.dart';
+import '../../features/settings/presentation/pages/app_lock_page.dart';
 import '../../features/settings/presentation/pages/empty_states_overview_page.dart';
 import '../../features/settings/presentation/pages/theme_settings_page.dart';
 import '../../features/settings/presentation/pages/help_faq_page.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
+import '../../features/settings/presentation/pages/category_management_page.dart';
+import '../../features/settings/presentation/pages/activity_log_page.dart';
 
 // Additional Features
 import '../../features/search/presentation/pages/search_page.dart';
@@ -75,8 +79,10 @@ abstract class AppRoutes {
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
+  static const String lock = '/lock';
+  static const String smartBusinessSetup = '/setup';
   static const String home = '/';
-  
+
   // Transactions
   static const String history = '/history';
   static const String addTransaction = '/transaction/add';
@@ -110,6 +116,7 @@ abstract class AppRoutes {
   static const String dashboardCustomize = '/settings/dashboard';
   static const String managerAccess = '/settings/manager-access';
   static const String tagManagement = '/settings/tags';
+  static const String categoryManagement = '/settings/categories';
   static const String teamManagement = '/settings/team';
   static const String syncSettings = '/settings/sync';
   static const String securitySettings = '/settings/security';
@@ -117,7 +124,8 @@ abstract class AppRoutes {
   static const String themeSettings = '/settings/theme';
   static const String helpFaq = '/settings/help';
   static const String about = '/settings/about';
-  
+  static const String activityLog = '/settings/activity-log';
+
   // Profile (Non-shell)
   static const String editProfile = '/profile/edit';
 
@@ -131,11 +139,17 @@ abstract class AppRoutes {
 }
 
 // Protected routes — unauthenticated access is blocked.
-const _publicRoutes = {AppRoutes.splash, AppRoutes.onboarding, AppRoutes.login};
+const _publicRoutes = {
+  AppRoutes.splash,
+  AppRoutes.onboarding,
+  AppRoutes.login,
+  AppRoutes.lock,
+};
 
 GoRouter _buildRouter() {
   final authRepo = sl<AuthRepository>();
-  final notifier = RouterAuthNotifier(authRepo);
+  final appLock = sl<AppLockController>();
+  final notifier = RouterAuthNotifier(authRepo, appLock);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -148,263 +162,309 @@ GoRouter _buildRouter() {
       final cachedUser = (authRepo as AuthRepositoryImpl).cachedUser;
       final isLoggedIn = cachedUser != null;
       final isPublic = _publicRoutes.contains(location);
+      final isLock = location == AppRoutes.lock;
 
       // Unauthenticated user trying to access a protected route
       if (!isLoggedIn && !isPublic) return AppRoutes.login;
 
-      // Authenticated user hitting login — redirect to home
-      if (isLoggedIn && isPublic) return AppRoutes.home;
+      if (isLoggedIn && appLock.requiresUnlock && !isLock) {
+        return AppRoutes.lock;
+      }
+
+      if (isLoggedIn && !appLock.requiresUnlock && isLock) {
+        return AppRoutes.home;
+      }
+
+      // Authenticated user hitting public route (like login)
+      if (isLoggedIn && isPublic && !isLock) {
+        if (!cachedUser.onboardingCompleted) {
+          return AppRoutes.smartBusinessSetup;
+        }
+        return AppRoutes.home;
+      }
+
+      // Redirect new user who hasn't completed onboarding to setup page
+      if (isLoggedIn && !cachedUser.onboardingCompleted && location != AppRoutes.smartBusinessSetup) {
+        return AppRoutes.smartBusinessSetup;
+      }
+
+      // Redirect setup completion page tries to access setup again
+      if (isLoggedIn && cachedUser.onboardingCompleted && location == AppRoutes.smartBusinessSetup) {
+        return AppRoutes.home;
+      }
 
       return null; // No redirect needed
     },
     routes: [
-    // Top Level Routes
-    GoRoute(
-      path: AppRoutes.splash,
-      name: 'splash',
-      builder: (context, state) => const SplashPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.onboarding,
-      name: 'onboarding',
-      builder: (context, state) => const OnboardingPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.login,
-      name: 'login',
-      builder: (context, state) => const LoginPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.addTransaction,
-      name: 'addTransaction',
-      builder: (context, state) {
-        final type = state.uri.queryParameters['type'];
-        final amount = state.uri.queryParameters['amount'];
-        final title = state.uri.queryParameters['title'];
-        final category = state.uri.queryParameters['category'];
-        final notes = state.uri.queryParameters['notes'];
-        final imagePath = state.uri.queryParameters['imagePath'];
+      // Top Level Routes
+      GoRoute(
+        path: AppRoutes.splash,
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        name: 'onboarding',
+        builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.login,
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.lock,
+        name: 'lock',
+        builder: (context, state) => const AppLockPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.smartBusinessSetup,
+        name: 'smartBusinessSetup',
+        builder: (context, state) => const SmartBusinessSetupPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.addTransaction,
+        name: 'addTransaction',
+        builder: (context, state) {
+          final type = state.uri.queryParameters['type'];
+          final amount = state.uri.queryParameters['amount'];
+          final title = state.uri.queryParameters['title'];
+          final category = state.uri.queryParameters['category'];
+          final notes = state.uri.queryParameters['notes'];
+          final imagePath = state.uri.queryParameters['imagePath'];
+          final isManualReceipt = state.uri.queryParameters['isManualReceipt'] == 'true';
 
-        return AddTransactionPage(
-          initialType: type == 'income' ? 1 : 0,
-          initialAmount: amount,
-          initialTitle: title,
-          initialCategory: category,
-          initialNotes: notes,
-          receiptImagePath: imagePath,
-        );
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.aiDetection,
-      name: 'aiDetection',
-      builder: (context, state) => const AiDetectionPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.cameraScan,
-      name: 'cameraScan',
-      builder: (context, state) => const CameraScanPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.scanReceiptIntro,
-      name: 'scanReceiptIntro',
-      builder: (context, state) => const ScanReceiptIntroPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.scanReceiptResult,
-      name: 'scanReceiptResult',
-      builder: (context, state) => const ScanReceiptResultPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.reportExport,
-      name: 'reportExport',
-      builder: (context, state) => const ReportExportPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.addSchedule,
-      name: 'addSchedule',
-      builder: (context, state) {
-        final existing = state.extra as ScheduleModel?;
-        return AddSchedulePage(existingSchedule: existing);
-      },
-    ),
+          return AddTransactionPage(
+            initialType: type == 'income' ? 1 : 0,
+            initialAmount: amount,
+            initialTitle: title,
+            initialCategory: category,
+            initialNotes: notes,
+            receiptImagePath: imagePath,
+            isManualReceipt: isManualReceipt,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.aiDetection,
+        name: 'aiDetection',
+        builder: (context, state) => const AiDetectionPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.cameraScan,
+        name: 'cameraScan',
+        builder: (context, state) => const CameraScanPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.scanReceiptIntro,
+        name: 'scanReceiptIntro',
+        builder: (context, state) => const ScanReceiptIntroPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.scanReceiptResult,
+        name: 'scanReceiptResult',
+        builder: (context, state) => const ScanReceiptResultPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.reportExport,
+        name: 'reportExport',
+        builder: (context, state) => const ReportExportPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.addSchedule,
+        name: 'addSchedule',
+        builder: (context, state) {
+          final existing = state.extra as ScheduleModel?;
+          return AddSchedulePage(existingSchedule: existing);
+        },
+      ),
 
-    GoRoute(
-      path: AppRoutes.alerts,
-      name: 'alerts',
-      builder: (context, state) => const RecentAlertsPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.notificationsEmpty,
-      name: 'notificationsEmpty',
-      builder: (context, state) => const NotificationsEmptyPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.managerAccess,
-      name: 'managerAccess',
-      builder: (context, state) => const ManagerAccessPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.editProfile,
-      name: 'editProfile',
-      builder: (context, state) => const EditProfilePage(),
-    ),
+      GoRoute(
+        path: AppRoutes.alerts,
+        name: 'alerts',
+        builder: (context, state) => const RecentAlertsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationsEmpty,
+        name: 'notificationsEmpty',
+        builder: (context, state) => const NotificationsEmptyPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.managerAccess,
+        name: 'managerAccess',
+        builder: (context, state) => const ManagerAccessPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: 'editProfile',
+        builder: (context, state) => const EditProfilePage(),
+      ),
 
-    // Shell Route (Bottom Navigation)
-    ShellRoute(
-      builder: (context, state, child) => AppShell(child: child),
-      routes: [
-        GoRoute(
-          path: AppRoutes.home,
-          name: 'home',
-          builder: (context, state) => const HomePage(),
-        ),
-        GoRoute(
-          path: AppRoutes.history,
-          name: 'history',
-          builder: (context, state) => const HistoryPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.analytics,
-          name: 'analytics',
-          builder: (context, state) => const AnalyticsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.analyticsOverview,
-          name: 'analyticsOverview',
-          builder: (context, state) => const AnalyticsOverviewPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.financialOverview,
-          name: 'financialOverview',
-          builder: (context, state) => const FinancialOverviewPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.smartAiInsights,
-          name: 'smartAiInsights',
-          builder: (context, state) => const SmartAiInsightsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.businessScore,
-          name: 'businessScore',
-          builder: (context, state) => const BusinessScorePage(),
-        ),
-        GoRoute(
-          path: AppRoutes.financialGoals,
-          name: 'financialGoals',
-          builder: (context, state) => const FinancialGoalsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.schedule,
-          name: 'schedule',
-          builder: (context, state) => const SchedulePage(),
-        ),
-        GoRoute(
-          path: AppRoutes.settings,
-          name: 'settings',
-          builder: (context, state) => const SettingsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.tagManagement,
-          name: 'tagManagement',
-          builder: (context, state) => const TagManagementPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.teamManagement,
-          name: 'teamManagement',
-          builder: (context, state) => const TeamManagementPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.syncSettings,
-          name: 'syncSettings',
-          builder: (context, state) => const SyncSettingsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.securitySettings,
-          name: 'securitySettings',
-          builder: (context, state) => const SecuritySettingsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.themeSettings,
-          name: 'themeSettings',
-          builder: (context, state) => const ThemeSettingsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.helpFaq,
-          name: 'helpFaq',
-          builder: (context, state) => const HelpFaqPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.about,
-          name: 'about',
-          builder: (context, state) => const AboutPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.emptyStatesOverview,
-          name: 'emptyStatesOverview',
-          builder: (context, state) => const EmptyStatesOverviewPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.editTransaction,
-          name: 'editTransaction',
-          builder: (context, state) {
-            final id = state.pathParameters['id'] ?? '';
-            return EditTransactionPage(transactionId: id);
-          },
-        ),
-        GoRoute(
-          path: AppRoutes.search,
-          name: 'search',
-          builder: (context, state) => const SearchPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.searchEmpty,
-          name: 'searchEmpty',
-          builder: (context, state) => const SearchEmptyPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.wallets,
-          name: 'wallets',
-          builder: (context, state) => const WalletsPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.businessPortfolio,
-          name: 'businessPortfolio',
-          builder: (context, state) => const BusinessPortfolioPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.inventoryOverview,
-          name: 'inventoryOverview',
-          builder: (context, state) => const InventoryOverviewPage(),
-        ),
-        GoRoute(
-          path: AppRoutes.catalog,
-          name: 'catalog',
-          builder: (context, state) => const CatalogPage(),
-        ),
-      ],
-    ),
-    
-    // Other Details
-    GoRoute(
-      path: AppRoutes.transactionDetail,
-      name: 'transactionDetail',
-      builder: (context, state) {
-        final id = state.pathParameters['id'] ?? '';
-        return TransactionDetailPage(transactionId: id);
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.invoiceDetail,
-      name: 'invoiceDetail',
-      builder: (context, state) => const InvoiceDetailPage(),
-    ),
-    GoRoute(
-      path: AppRoutes.dashboardCustomize,
-      name: 'dashboardCustomize',
-      builder: (context, state) => const DashboardCustomizePage(),
-    ),
-  ],
+      // Shell Route (Bottom Navigation)
+      ShellRoute(
+        builder: (context, state, child) => AppShell(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            name: 'home',
+            builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.history,
+            name: 'history',
+            builder: (context, state) => const HistoryPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.analytics,
+            name: 'analytics',
+            builder: (context, state) => const AnalyticsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.analyticsOverview,
+            name: 'analyticsOverview',
+            builder: (context, state) => const AnalyticsOverviewPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.financialOverview,
+            name: 'financialOverview',
+            builder: (context, state) => const FinancialOverviewPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.smartAiInsights,
+            name: 'smartAiInsights',
+            builder: (context, state) => const SmartAiInsightsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.businessScore,
+            name: 'businessScore',
+            builder: (context, state) => const BusinessScorePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.financialGoals,
+            name: 'financialGoals',
+            builder: (context, state) => const FinancialGoalsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.schedule,
+            name: 'schedule',
+            builder: (context, state) => const SchedulePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.tagManagement,
+            name: 'tagManagement',
+            builder: (context, state) => const TagManagementPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.categoryManagement,
+            name: 'categoryManagement',
+            builder: (context, state) => const CategoryManagementPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.teamManagement,
+            name: 'teamManagement',
+            builder: (context, state) => const TeamManagementPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.activityLog,
+            name: 'activityLog',
+            builder: (context, state) => const ActivityLogPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.syncSettings,
+            name: 'syncSettings',
+            builder: (context, state) => const SyncSettingsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.securitySettings,
+            name: 'securitySettings',
+            builder: (context, state) => const SecuritySettingsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.themeSettings,
+            name: 'themeSettings',
+            builder: (context, state) => const ThemeSettingsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.helpFaq,
+            name: 'helpFaq',
+            builder: (context, state) => const HelpFaqPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.about,
+            name: 'about',
+            builder: (context, state) => const AboutPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.emptyStatesOverview,
+            name: 'emptyStatesOverview',
+            builder: (context, state) => const EmptyStatesOverviewPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.editTransaction,
+            name: 'editTransaction',
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return EditTransactionPage(transactionId: id);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.search,
+            name: 'search',
+            builder: (context, state) => const SearchPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.searchEmpty,
+            name: 'searchEmpty',
+            builder: (context, state) => const SearchEmptyPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.wallets,
+            name: 'wallets',
+            builder: (context, state) => const WalletsPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.businessPortfolio,
+            name: 'businessPortfolio',
+            builder: (context, state) => const BusinessPortfolioPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.inventoryOverview,
+            name: 'inventoryOverview',
+            builder: (context, state) => const InventoryOverviewPage(),
+          ),
+          GoRoute(
+            path: AppRoutes.catalog,
+            name: 'catalog',
+            builder: (context, state) => const CatalogPage(),
+          ),
+        ],
+      ),
+
+      // Other Details
+      GoRoute(
+        path: AppRoutes.transactionDetail,
+        name: 'transactionDetail',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return TransactionDetailPage(transactionId: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.invoiceDetail,
+        name: 'invoiceDetail',
+        builder: (context, state) => const InvoiceDetailPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.dashboardCustomize,
+        name: 'dashboardCustomize',
+        builder: (context, state) => const DashboardCustomizePage(),
+      ),
+    ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
         child: Text('Route not found: ${state.uri}'),

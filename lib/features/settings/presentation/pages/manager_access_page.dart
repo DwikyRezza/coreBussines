@@ -10,6 +10,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
+import '../../../../core/widgets/core_app_bar.dart';
+
 class ManagerAccessPage extends StatefulWidget {
   const ManagerAccessPage({super.key});
 
@@ -32,35 +34,7 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        titleSpacing: AppSpacing.pagePadding,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.primary, // Blue
-              child: Text('AM', style: AppTypography.textTheme.labelMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'CoreBusiness',
-              style: AppTypography.textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
-            onPressed: () => context.push(AppRoutes.alerts),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
+      appBar: const CoreAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
         child: Column(

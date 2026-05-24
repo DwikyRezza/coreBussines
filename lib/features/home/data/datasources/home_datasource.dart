@@ -9,4 +9,5 @@ abstract class HomeDataSource {
   Future<BalanceSummaryModel> getBalanceSummary();
   Future<List<TransactionModel>> getRecentTransactions({int limit = 10});
   Future<InsightCardModel> getCurrentInsight();
+  Stream<HomeDashboardDataModel> watchDashboardData();
 }

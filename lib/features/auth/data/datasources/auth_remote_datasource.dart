@@ -142,21 +142,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'id': profile.id,
         ...profileData,
       });
-      await _ensureWorkspace(userModel);
+      await _ensureWorkspace(userModel, activeBusinessId: activeBusinessId);
       return userModel;
     }
 
     return null;
   }
 
-  Future<void> _ensureWorkspace(UserModel user) async {
-    final businessId = _prefs.getString(_activeBusinessIdKey) ?? 'business_${user.id}';
+  Future<void> _ensureWorkspace(
+    UserModel user, {
+    String? activeBusinessId,
+  }) async {
+    final storedBusinessId = activeBusinessId?.isNotEmpty == true
+        ? activeBusinessId
+        : _prefs.getString(_activeBusinessIdKey);
+    final shouldCreateLegacyWorkspace = user.onboardingCompleted &&
+        (storedBusinessId == null || storedBusinessId.isEmpty);
+    final businessId =
+        shouldCreateLegacyWorkspace ? 'business_${user.id}' : storedBusinessId;
     final now = FieldValue.serverTimestamp();
     final userRef = _firestore.collection('users').doc(user.id);
-    final businessRef = _firestore.collection('businesses').doc(businessId);
+    final businessRef = businessId == null
+        ? null
+        : _firestore.collection('businesses').doc(businessId);
 
     await _firestore.runTransaction((transaction) async {
-      final businessSnapshot = await transaction.get(businessRef);
+      final businessSnapshot =
+          businessRef == null ? null : await transaction.get(businessRef);
 
       transaction.set(
         userRef,
@@ -164,11 +176,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'full_name': user.fullName,
           'email': user.email,
           'avatar_url': user.avatarUrl,
-          'active_business_id': businessId,
+          'onboarding_completed': user.onboardingCompleted,
           'updated_at': now,
+          if (businessId != null) 'active_business_id': businessId,
         },
         SetOptions(merge: true),
       );
+
+      if (!shouldCreateLegacyWorkspace || businessRef == null) return;
 
       transaction.set(
         businessRef,
@@ -176,17 +191,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'name': '${user.fullName ?? user.email} Workspace',
           'owner_id': user.id,
           'updated_at': now,
-          if (!businessSnapshot.exists) 'created_at': now,
+          if (businessSnapshot?.exists != true) 'created_at': now,
         },
         SetOptions(merge: true),
       );
     });
 
+    if (!shouldCreateLegacyWorkspace || businessRef == null) {
+      if (businessId != null) {
+        await _prefs.setString(_activeBusinessIdKey, businessId);
+      }
+      return;
+    }
+
     await businessRef.collection('members').doc(user.id).set(
       {
         'user_id': user.id,
+        'name': user.fullName ?? user.email,
+        'email': user.email,
+        'photo_url': user.avatarUrl,
         'role': 'owner',
         'joined_at': now,
+        'updated_at': now,
       },
       SetOptions(merge: true),
     );
@@ -201,6 +227,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       SetOptions(merge: true),
     );
 
-    await _prefs.setString(_activeBusinessIdKey, businessId);
+    await _prefs.setString(_activeBusinessIdKey, businessId!);
   }
 }

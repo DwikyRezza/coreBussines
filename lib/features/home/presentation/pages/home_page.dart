@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
 import '../../domain/entities/home_entities.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -13,8 +14,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/responsive_helper.dart';
-import '../../../notifications/data/datasources/notification_local_datasource.dart';
-import '../../../notifications/data/models/notification_model.dart';
+import '../../../../core/services/business_context_service.dart';
+import '../../../notifications/data/services/weekly_summary_notification_service.dart';
+import '../../../notifications/domain/repositories/notification_repository.dart';
+import '../widgets/business_setup_score_card.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -22,13 +25,16 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      // Use DI — avoids hardcoded datasource, fully testable via sl mock swap
-      create: (_) => sl<HomeBloc>()..add(const HomeLoadRequested()),
+      create: (_) {
+        sl<WeeklySummaryNotificationService>()
+            .ensureCurrentWeekSummary()
+            .catchError((_) {});
+        return sl<HomeBloc>()..add(const HomeLoadRequested());
+      },
       child: const _HomeView(),
     );
   }
 }
-
 
 class _HomeView extends StatelessWidget {
   const _HomeView();
@@ -56,7 +62,7 @@ class _HomeView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// MAIN CONTENT
+// MAIN CONTENT (ADAPTIVE & PREMIUM)
 // ─────────────────────────────────────────────────────────────
 class _HomeContent extends StatelessWidget {
   final HomeLoaded state;
@@ -66,7 +72,6 @@ class _HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final padding = ResponsiveHelper.pagePadding(context);
-    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
 
     return RefreshIndicator(
       color: Theme.of(context).colorScheme.primary,
@@ -74,165 +79,494 @@ class _HomeContent extends StatelessWidget {
       onRefresh: () async {
         final bloc = context.read<HomeBloc>();
         bloc.add(const HomeRefreshRequested());
-        await bloc.stream.firstWhere(
-            (state) => state is HomeLoaded || state is HomeError);
+        await bloc.stream
+            .firstWhere((state) => state is HomeLoaded || state is HomeError);
       },
       child: ResponsiveHelper.constrainWidth(
         context: context,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // AppBar
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              titleSpacing: padding,
-              title: _HomeAppBar(state: state),
-            ),
+        child: FutureBuilder<BusinessContext>(
+          future: sl<BusinessContextService>().getCurrentContext(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-            if (isTablet)
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: padding),
-                sliver: SliverList(
+            final businessContext = snapshot.data!;
+            final role = businessContext.role;
+            final cleanRole = role.toLowerCase();
+
+            // Build dynamic list of widgets for CustomScrollView
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // AppBar
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  titleSpacing: padding,
+                  title: _HomeAppBar(state: state, role: role),
+                ),
+
+                SliverList(
                   delegate: SliverChildListDelegate([
                     const SizedBox(height: AppSpacing.base),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left column
-                        Expanded(
-                          flex: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BalanceCard(summary: state.summary),
-                              const SizedBox(height: AppSpacing.xl),
-                              const QuickActionsGrid(),
-                              const SizedBox(height: AppSpacing.xl),
-                              HomeInsightCard(insight: state.insight),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 24),
-                        // Right column
-                        Expanded(
-                          flex: 6,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _FinanceChartSection(transactions: state.allTransactions),
-                              const SizedBox(height: AppSpacing.xl),
-                              SectionHeader(
-                                title: 'Transaksi Terakhir',
-                                actionLabel: 'Semua',
-                                onAction: () => context.go(AppRoutes.history),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              ...state.recentTransactions.map(
-                                (txn) => Column(
-                                  children: [
-                                    TransactionTile(transaction: txn),
-                                    if (txn != state.recentTransactions.last)
-                                      Divider(
-                                        height: 1,
-                                        indent: AppSpacing.pagePadding,
-                                        endIndent: AppSpacing.pagePadding,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .outlineVariant
-                                            .withOpacity(0.4),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.pagePadding),
+                      child: BusinessSetupScoreCard(),
                     ),
-                    const SizedBox(height: 100), // Bottom nav clearance
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // 1. TAMPILKAN METRIK UTAMA ADAPTIF BERDASARKAN ROLE
+                    _buildAdaptiveHeaderCard(context, cleanRole),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // 2. TAMPILKAN TOMBOL PINTASAN CEPAT CEPAT SECARA ADAPTIF
+                    _buildAdaptiveQuickActions(context, cleanRole),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // 3. TAMPILKAN AI INSIGHTS JIKA BUKAN KASIR / INVENTORY
+                    if (cleanRole != 'cashier' && cleanRole != 'inventory') ...[
+                      HomeInsightCard(insight: state.insight),
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
+
+                    // 4. TAMPILKAN GRAFIK CASHFLOW HANYA UNTUK OWNER, ADMIN, FINANCE, AUDITOR
+                    if (cleanRole == 'owner' ||
+                        cleanRole == 'admin' ||
+                        cleanRole == 'finance' ||
+                        cleanRole == 'auditor') ...[
+                      _FinanceChartSection(transactions: state.allTransactions),
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
+
+                    // 5. TRANSAKSI TERAKHIR (Daftar)
+                    SectionHeader(
+                      title: cleanRole == 'cashier' || cleanRole == 'sales'
+                          ? 'Transaksi Terakhir Saya'
+                          : 'Transaksi Terakhir',
+                      actionLabel: 'Semua',
+                      onAction: () => context.go(AppRoutes.history),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Rendering List Transaksi
+                    if (state.recentTransactions.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: Text(
+                            'Belum ada transaksi tercatat.',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ...state.recentTransactions.map(
+                        (txn) => Column(
+                          children: [
+                            TransactionTile(transaction: txn),
+                            if (txn != state.recentTransactions.last)
+                              Divider(
+                                height: 1,
+                                indent: AppSpacing.pagePadding,
+                                endIndent: AppSpacing.pagePadding,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant
+                                    .withOpacity(0.4),
+                              ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 120), // Bottom nav clearance
                   ]),
                 ),
-              )
-            else ...[
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: AppSpacing.base),
-                  BalanceCard(summary: state.summary),
-                  const SizedBox(height: AppSpacing.xl),
-                  const QuickActionsGrid(),
-                  const SizedBox(height: AppSpacing.xl),
-                  HomeInsightCard(insight: state.insight),
-                  const SizedBox(height: AppSpacing.xl),
-                  _FinanceChartSection(transactions: state.allTransactions),
-                  const SizedBox(height: AppSpacing.xl),
-                  SectionHeader(
-                    title: 'Transaksi Terakhir',
-                    actionLabel: 'Semua',
-                    onAction: () => context.go(AppRoutes.history),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  ...state.recentTransactions.map(
-                    (txn) => Column(
-                      children: [
-                        TransactionTile(transaction: txn),
-                        if (txn != state.recentTransactions.last)
-                          Divider(
-                            height: 1,
-                            indent: AppSpacing.pagePadding,
-                            endIndent: AppSpacing.pagePadding,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outlineVariant
-                                .withOpacity(0.4),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 100), // Bottom nav clearance
-                ]),
-              ),
-            ],
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Card Metrik Utama Adaptif
+  Widget _buildAdaptiveHeaderCard(BuildContext context, String role) {
+    final colors = Theme.of(context).colorScheme;
+
+    if (role == 'cashier') {
+      // Dashboard Kasir: Sembunyikan profit penuh & total saldo bisnis
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colors.primary, colors.secondary],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXxl),
+          boxShadow: [
+            BoxShadow(
+              color: colors.primary.withOpacity(0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
           ],
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'DASHBOARD KASIR AKTIF',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.circle, color: Colors.green, size: 8),
+                      SizedBox(width: 4),
+                      Text('Online',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Mesin Kasir Siap',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 26,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Catat transaksi penjualan & scan struk pelanggan Anda secara cepat.',
+              style:
+                  TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            ),
+          ],
+        ),
+      );
+    } else if (role == 'inventory') {
+      // Dashboard Inventory: Tampilkan log stok & persediaan barang
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colors.tertiaryContainer, colors.primaryContainer],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXxl),
+          border: Border.all(color: colors.outlineVariant.withOpacity(0.4)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'INVENTORY STAFF',
+                  style: TextStyle(
+                    color: colors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Icon(Icons.warehouse_rounded, color: colors.primary),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Stok Aman & Terkendali',
+              style: TextStyle(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Peringatan: 3 Item stok hampir habis! Periksa katalog inventaris segera.',
+              style: TextStyle(
+                  color: colors.error,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
+    } else if (role == 'sales') {
+      // Dashboard Sales: Ringkasan kinerja penjualan saya
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colors.secondaryContainer, colors.surfaceContainerHighest],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXxl),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'SALES KINERJA HARI INI',
+                  style: TextStyle(
+                    color: colors.secondary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Icon(Icons.trending_up_rounded, color: colors.secondary),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Fokus Target Penjualan',
+              style: TextStyle(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Catat semua pencapaian deals & transaksi penjualan Anda secara real-time.',
+              style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Default Owner/Admin/Finance/Auditor/Manager: Balance card lengkap
+    return BalanceCard(summary: state.summary);
+  }
+
+  // Quick actions dinamis berdasarkan role
+  Widget _buildAdaptiveQuickActions(BuildContext context, String role) {
+    final colors = Theme.of(context).colorScheme;
+
+    if (role == 'viewer' || role == 'auditor') {
+      return const SizedBox
+          .shrink(); // Viewer / Auditor tidak punya aksi penambahan data
+    }
+
+    final List<_QuickActionCustomItem> actions = [];
+
+    if (role == 'cashier') {
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.add_circle_outline_rounded,
+        label: 'Tambah\nTransaksi',
+        onTap: () => context.push('${AppRoutes.addTransaction}?type=expense'),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Scan\nStruk',
+        onTap: () => context.push(AppRoutes.scanReceiptIntro),
+      ));
+    } else if (role == 'inventory') {
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.warehouse_outlined,
+        label: 'Stok\nOverview',
+        onTap: () => context.push(AppRoutes.inventoryOverview),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Scan\nStruk Masuk',
+        onTap: () => context.push(AppRoutes.scanReceiptIntro),
+      ));
+    } else if (role == 'sales') {
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.add_circle_outline_rounded,
+        label: 'Tambah\nPenjualan',
+        onTap: () => context.push('${AppRoutes.addTransaction}?type=income'),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Scan\nStruk',
+        onTap: () => context.push(AppRoutes.scanReceiptIntro),
+      ));
+    } else {
+      // Owner, Admin, Finance, Secretary, Manager
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.add_circle_outline_rounded,
+        label: 'Tambah\nPemasukan',
+        onTap: () => context.push('${AppRoutes.addTransaction}?type=income'),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.remove_circle_outline_rounded,
+        label: 'Tambah\nPengeluaran',
+        onTap: () => context.push('${AppRoutes.addTransaction}?type=expense'),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Scan\nStruk',
+        onTap: () => context.push(AppRoutes.scanReceiptIntro),
+      ));
+      actions.add(_QuickActionCustomItem(
+        icon: Icons.calendar_month_rounded,
+        label: 'Jadwal',
+        onTap: () => context.push(AppRoutes.addSchedule),
+      ));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: actions.map((act) {
+          return Column(
+            children: [
+              Material(
+                color: colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                child: InkWell(
+                  onTap: act.onTap,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                      border: Border.all(
+                        color: colors.outlineVariant.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Icon(
+                      act.icon,
+                      color: colors.primary,
+                      size: 26,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                act.label,
+                textAlign: TextAlign.center,
+                style: AppTypography.textTheme.labelSmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
 }
 
-class _HomeAppBar extends StatefulWidget {
-  final HomeLoaded state;
-
-  const _HomeAppBar({required this.state});
-
-  @override
-  State<_HomeAppBar> createState() => _HomeAppBarState();
+class _QuickActionCustomItem {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _QuickActionCustomItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 }
 
-class _HomeAppBarState extends State<_HomeAppBar> {
+class _HomeAppBar extends StatelessWidget {
+  final HomeLoaded state;
+  final String role;
+
+  const _HomeAppBar({required this.state, required this.role});
+
+  String _getRoleLabel(String role) {
+    switch (role.toLowerCase()) {
+      case 'owner':
+        return 'Owner / Pemilik';
+      case 'admin':
+        return 'Administrator';
+      case 'finance':
+        return 'Staf Finance';
+      case 'secretary':
+        return 'Sekretaris';
+      case 'cashier':
+        return 'Kasir Aktif';
+      case 'inventory':
+        return 'Staf Logistik';
+      case 'sales':
+        return 'Sales Eksekutif';
+      case 'manager':
+        return 'Manajer Divisi';
+      case 'viewer':
+        return 'Viewer (Read-only)';
+      case 'auditor':
+        return 'Auditor Bisnis';
+      default:
+        return role;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Avatar + Greeting
         Row(
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: widget.state.summary.userPhotoUrl != null
-                  ? NetworkImage(widget.state.summary.userPhotoUrl!)
+              backgroundColor: colors.primaryContainer,
+              backgroundImage: state.summary.userPhotoUrl != null
+                  ? NetworkImage(state.summary.userPhotoUrl!)
                   : null,
-              child: widget.state.summary.userPhotoUrl == null
+              child: state.summary.userPhotoUrl == null
                   ? Text(
-                      widget.state.summary.userName[0].toUpperCase(),
+                      state.summary.userName[0].toUpperCase(),
                       style: AppTypography.textTheme.titleSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: colors.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     )
@@ -244,15 +578,16 @@ class _HomeAppBarState extends State<_HomeAppBar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Halo,',
+                  _getRoleLabel(role),
                   style: AppTypography.textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  widget.state.summary.userName,
+                  state.summary.userName,
                   style: AppTypography.textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: colors.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                   ),
@@ -262,31 +597,25 @@ class _HomeAppBarState extends State<_HomeAppBar> {
           ],
         ),
 
-        // Notification Bell with dynamic badge count
-        FutureBuilder<List<NotificationModel>>(
-          future: sl<NotificationLocalDataSource>().getNotifications(),
+        // Notification Bell
+        StreamBuilder<int>(
+          stream: sl<NotificationRepository>().watchUnreadCount(),
           builder: (context, snapshot) {
-            final unreadCount = snapshot.hasData
-                ? snapshot.data!.where((n) => !n.isRead).length
-                : 0;
+            final unreadCount = snapshot.data ?? 0;
             return IconButton(
               icon: unreadCount > 0
                   ? Badge(
                       label: Text(
                         '$unreadCount',
-                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 10),
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.error,
+                      backgroundColor: colors.error,
                       child: const Icon(Icons.notifications_outlined),
                     )
                   : const Icon(Icons.notifications_outlined),
-              color: Theme.of(context).colorScheme.onSurface,
-              onPressed: () {
-                context.push(AppRoutes.alerts).then((_) {
-                  // Re-fetch notifications & update badge when coming back
-                  setState(() {});
-                });
-              },
+              color: colors.onSurface,
+              onPressed: () => context.push(AppRoutes.alerts),
             );
           },
         ),
@@ -296,91 +625,7 @@ class _HomeAppBarState extends State<_HomeAppBar> {
 }
 
 // ─────────────────────────────────────────────────────────────
-// WEEKLY CHART SECTION (Bar chart placeholder + tab)
-// ─────────────────────────────────────────────────────────────
-class _WeeklyChartSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    // Mock bar heights (normalized 0.0–1.0)
-    const values = [0.6, 0.3, 0.85, 0.45, 0.7, 0.55, 0.2];
-    const activeDay = 4; // Friday
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeader(
-          title: 'Analisis Mingguan',
-          actionLabel: 'Lihat Detail',
-          onAction: () => context.go(AppRoutes.analytics),
-        ),
-        const SizedBox(height: AppSpacing.base),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
-          padding: const EdgeInsets.all(AppSpacing.base),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
-          ),
-          child: Column(
-            children: [
-              // Bar chart
-              SizedBox(
-                height: 100,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(7, (i) {
-                    final isActive = i == activeDay;
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AnimatedContainer(
-                          duration: Duration(milliseconds: 300 + i * 50),
-                          curve: Curves.easeOutBack,
-                          width: 28,
-                          height: values[i] * 80,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.primary
-                                : Theme.of(context).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              // Day labels
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(7, (i) {
-                  final isActive = i == activeDay;
-                  return Text(
-                    days[i],
-                    style: AppTypography.textTheme.labelSmall?.copyWith(
-                      color: isActive
-                          ? AppColors.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight:
-                          isActive ? FontWeight.w700 : FontWeight.w400,
-                    ),
-                  );
-                }),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// SKELETON LOADER
+// CHART METRICS PERIOD CHIPS AND CUSTOM RANGES
 // ─────────────────────────────────────────────────────────────
 enum _ChartPeriod { weekly, monthly, yearly, custom }
 
@@ -436,12 +681,16 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
         ),
         const SizedBox(height: AppSpacing.base),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+          margin:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+            border: Border.all(
+              color:
+                  Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
+            ),
           ),
           child: Column(
             children: [
@@ -451,7 +700,8 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                     child: _PeriodChip(
                       label: 'Mingguan',
                       selected: _period == _ChartPeriod.weekly,
-                      onTap: () => setState(() => _period = _ChartPeriod.weekly),
+                      onTap: () =>
+                          setState(() => _period = _ChartPeriod.weekly),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -459,7 +709,8 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                     child: _PeriodChip(
                       label: 'Bulanan',
                       selected: _period == _ChartPeriod.monthly,
-                      onTap: () => setState(() => _period = _ChartPeriod.monthly),
+                      onTap: () =>
+                          setState(() => _period = _ChartPeriod.monthly),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -467,7 +718,8 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                     child: _PeriodChip(
                       label: 'Tahunan',
                       selected: _period == _ChartPeriod.yearly,
-                      onTap: () => setState(() => _period = _ChartPeriod.yearly),
+                      onTap: () =>
+                          setState(() => _period = _ChartPeriod.yearly),
                     ),
                   ),
                 ],
@@ -519,7 +771,9 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -533,9 +787,13 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _LegendDot(color: Theme.of(context).colorScheme.primary, label: 'Pemasukan'),
-                  SizedBox(width: 16),
-                  _LegendDot(color: Theme.of(context).colorScheme.error, label: 'Pengeluaran'),
+                  _LegendDot(
+                      color: Theme.of(context).colorScheme.primary,
+                      label: 'Pemasukan'),
+                  const SizedBox(width: 16),
+                  _LegendDot(
+                      color: Theme.of(context).colorScheme.error,
+                      label: 'Pengeluaran'),
                 ],
               ),
             ],
@@ -587,7 +845,8 @@ class _FinanceChartSectionState extends State<_FinanceChartSection> {
           final start = DateTime(now.year, index + 1);
           final end =
               DateTime(now.year, index + 2).subtract(const Duration(days: 1));
-          return _bucketFor(DateFormat('MMM', 'id_ID').format(start), start, end);
+          return _bucketFor(
+              DateFormat('MMM', 'id_ID').format(start), start, end);
         });
       case _ChartPeriod.custom:
         final range = _customRange ??
@@ -723,7 +982,9 @@ class _PeriodChip extends StatelessWidget {
         height: 34,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Theme.of(context).colorScheme.surfaceContainer,
+          color: selected
+              ? AppColors.primary
+              : Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
@@ -731,7 +992,9 @@ class _PeriodChip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.textTheme.labelSmall?.copyWith(
-            color: selected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+            color: selected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -740,6 +1003,9 @@ class _PeriodChip extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// SKELETON LOADER
+// ─────────────────────────────────────────────────────────────
 class _HomeSkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -753,33 +1019,34 @@ class _HomeSkeletonLoader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Balance card skeleton
           const SkeletonBox(
             width: double.infinity,
             height: 140,
             borderRadius: AppSpacing.radiusXl,
           ),
           const SizedBox(height: AppSpacing.xl),
-          // Quick actions skeleton
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(
               4,
-              (_) => const SkeletonBox(width: 64, height: 80, borderRadius: AppSpacing.radiusLg),
+              (_) => const SkeletonBox(
+                  width: 64, height: 80, borderRadius: AppSpacing.radiusLg),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          // Insight card skeleton
-          const SkeletonBox(width: double.infinity, height: 80, borderRadius: AppSpacing.radiusLg),
+          const SkeletonBox(
+              width: double.infinity,
+              height: 80,
+              borderRadius: AppSpacing.radiusLg),
           const SizedBox(height: AppSpacing.xl),
-          // Transaction list skeletons
           ...List.generate(
             4,
             (_) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Row(
                 children: [
-                  const SkeletonBox(width: 46, height: 46, borderRadius: AppSpacing.radiusMd),
+                  const SkeletonBox(
+                      width: 46, height: 46, borderRadius: AppSpacing.radiusMd),
                   const SizedBox(width: AppSpacing.md),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -818,7 +1085,10 @@ class _HomeErrorView extends StatelessWidget {
             Icon(
               Icons.cloud_off_rounded,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.5),
             ),
             const SizedBox(height: AppSpacing.base),
             Text(

@@ -297,7 +297,7 @@ class _ScanReceiptView extends StatelessWidget {
                         onPressed: isLoading
                             ? null
                             : () {
-                                context.push(AppRoutes.addTransaction);
+                                context.push('${AppRoutes.addTransaction}?isManualReceipt=true');
                               },
                         child: Text(
                           'Input Struk Manual',

@@ -10,10 +10,15 @@
 import 'package:get_it/get_it.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../storage/local_storage_service.dart';
 import '../config/app_config.dart';
+import '../services/app_lock_controller.dart';
+import '../services/business_context_service.dart';
 import '../services/scan_usage_limiter.dart';
 import '../theme/theme_controller.dart';
 
@@ -48,8 +53,16 @@ import '../../features/schedule/data/datasources/schedule_local_datasource.dart'
 
 // Notifications
 import '../../features/notifications/data/datasources/notification_local_datasource.dart';
+import '../../features/notifications/data/datasources/notification_remote_datasource.dart';
+import '../../features/notifications/data/repositories/notification_repository_impl.dart';
 import '../../features/notifications/data/services/notification_service.dart';
+import '../../features/notifications/data/services/weekly_summary_notification_service.dart';
+import '../../features/notifications/domain/repositories/notification_repository.dart';
 
+// Security
+import '../../features/settings/data/datasources/app_lock_local_datasource.dart';
+import '../../features/settings/data/repositories/app_lock_repository_impl.dart';
+import '../../features/settings/domain/repositories/app_lock_repository.dart';
 
 /// Global service locator instance.
 final sl = GetIt.instance;
@@ -60,23 +73,49 @@ Future<void> initDependencies() async {
   // ─── External Dependencies ────────────────────────────────
   sl.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
-      serverClientId:
-          AppConfig.googleWebClientId.isEmpty ? null : AppConfig.googleWebClientId,
+      serverClientId: AppConfig.googleWebClientId.isEmpty
+          ? null
+          : AppConfig.googleWebClientId,
       scopes: ['email', 'profile'],
     ),
   );
 
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  sl.registerLazySingleton<FlutterSecureStorage>(
+    () => const FlutterSecureStorage(),
+  );
+  sl.registerLazySingleton<LocalAuthentication>(() => LocalAuthentication());
 
   // SharedPreferences must be awaited before registration.
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
 
   // Storage Service
-  sl.registerLazySingleton<LocalStorageService>(() => LocalStorageService(sl()));
+  sl.registerLazySingleton<LocalStorageService>(
+      () => LocalStorageService(sl()));
+  sl.registerLazySingleton<BusinessContextService>(
+    () => BusinessContextService(
+      auth: sl(),
+      firestore: sl(),
+      localStorage: sl(),
+    ),
+  );
   sl.registerLazySingleton<ThemeController>(() => ThemeController(sl()));
   sl.registerLazySingleton<ScanUsageLimiter>(() => ScanUsageLimiter(sl()));
+  sl.registerLazySingleton<AppLockLocalDataSource>(
+    () => AppLockLocalDataSourceImpl(
+      secureStorage: sl(),
+      localAuthentication: sl(),
+    ),
+  );
+  sl.registerLazySingleton<AppLockRepository>(
+    () => AppLockRepositoryImpl(sl()),
+  );
+  final appLockController = AppLockController(sl());
+  await appLockController.load();
+  sl.registerLazySingleton<AppLockController>(() => appLockController);
 
   // ─── Auth Feature ─────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -122,17 +161,34 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<NotificationLocalDataSource>(
     () => NotificationLocalDataSourceImpl(sharedPreferences: sl()),
   );
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(
+      firestore: sl(),
+      businessContext: sl(),
+    ),
+  );
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<WeeklySummaryNotificationService>(
+    () => WeeklySummaryNotificationService(
+      firestore: sl(),
+      businessContext: sl(),
+      notificationRepository: sl(),
+    ),
+  );
 
   final notificationService = NotificationService();
   await notificationService.initialize();
   sl.registerLazySingleton<NotificationService>(() => notificationService);
-
 
   sl.registerLazySingleton<TransactionRemoteDataSource>(
     () => TransactionRemoteDataSourceImpl(
       auth: sl(),
       firestore: sl(),
       localStorage: sl(),
+      storage: sl(),
+      businessContext: sl(),
     ),
   );
 

@@ -66,5 +66,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>CoreBusiness memerlukan Face ID untuk mengamankan data keuangan dan masuk ke aplikasi secara instan.</string>
 </dict>
 </plist>

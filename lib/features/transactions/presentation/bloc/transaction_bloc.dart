@@ -5,7 +5,6 @@
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/error/error_mapper.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
@@ -43,8 +42,12 @@ class TransactionSubmitRequested extends TransactionEvent {
   final bool isIncome;
   final String category;
   final String categoryIcon;
+  final String walletId;
   final String walletName;
+  final DateTime dateTime;
   final String? note;
+  final String? receiptImagePath;
+  final String source;
 
   const TransactionSubmitRequested({
     required this.title,
@@ -52,13 +55,28 @@ class TransactionSubmitRequested extends TransactionEvent {
     required this.isIncome,
     required this.category,
     required this.categoryIcon,
+    required this.walletId,
     required this.walletName,
+    required this.dateTime,
     this.note,
+    this.receiptImagePath,
+    this.source = 'manual',
   });
 
   @override
-  List<Object?> get props =>
-      [title, amount, isIncome, category, categoryIcon, walletName, note];
+  List<Object?> get props => [
+        title,
+        amount,
+        isIncome,
+        category,
+        categoryIcon,
+        walletId,
+        walletName,
+        dateTime,
+        note,
+        receiptImagePath,
+        source,
+      ];
 }
 
 /// Resets BLoC to idle after UI has reacted to success/failure.
@@ -160,7 +178,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     emit(const TransactionLoading());
     try {
       final result = await _scanner.scanReceipt(event.photo);
-      
+
       // Highly resilient amount parsing to completely guard against TypeErrors
       double amount = 0.0;
       final rawAmount = result['amount'];
@@ -189,11 +207,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         categoryIcon: 'bill', // Default icon
         dateTime: DateTime.now(),
       );
-      
+
       // Auto save the scanned transaction directly (or emit success to open form pre-filled)
       // Based on user request: "langsung mengscan struk dengan kamera belakang, lalu ai akan menyimpan hasil scan ke database"
       final saveResult = _addTransaction != null
-          ? await _addTransaction.call(AddTransactionParams(transaction: scannedTxn))
+          ? await _addTransaction
+              .call(AddTransactionParams(transaction: scannedTxn))
           : await _repository.addTransaction(scannedTxn);
 
       saveResult.fold(
@@ -207,7 +226,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       } else {
         message = e.toString();
       }
-      emit(TransactionError('Gagal memproses struk: $message', photoPath: event.photo.path));
+      emit(TransactionError('Gagal memproses struk: $message',
+          photoPath: event.photo.path));
     }
   }
 
@@ -253,19 +273,23 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     emit(const TransactionLoading());
 
-    final transaction = Transaction(
-      id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
+    final input = TransactionInput(
       title: event.title,
       amount: event.amount,
       isIncome: event.isIncome,
       category: event.category,
       categoryIcon: event.categoryIcon,
-      dateTime: DateTime.now(),
+      walletId: event.walletId,
+      walletName: event.walletName,
+      dateTime: event.dateTime,
+      note: event.note,
+      receiptImagePath: event.receiptImagePath,
+      source: event.source,
     );
 
     final result = _addTransaction != null
-        ? await _addTransaction.call(AddTransactionParams(transaction: transaction))
-        : await _repository.addTransaction(transaction);
+        ? await _addTransaction.call(AddTransactionParams.input(input))
+        : await _repository.addTransactionInput(input);
 
     result.fold(
       (f) => emit(TransactionError(f.message)),

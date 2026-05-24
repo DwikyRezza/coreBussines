@@ -16,6 +16,37 @@ void main() {
         return true;
       },
     );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'read':
+            return null;
+          case 'write':
+          case 'delete':
+          case 'deleteAll':
+            return true;
+          case 'readAll':
+            return <String, String>{};
+        }
+        return null;
+      },
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/local_auth'),
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'deviceSupportsBiometrics':
+          case 'isDeviceSupported':
+            return false;
+          case 'getAvailableBiometrics':
+            return <String>[];
+        }
+        return false;
+      },
+    );
     SharedPreferences.setMockInitialValues({});
     await sl.reset();
     await initDependencies();
@@ -39,4 +70,3 @@ void main() {
     expect(find.text('CoreBusiness test shell'), findsOneWidget);
   });
 }
-

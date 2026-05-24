@@ -131,4 +131,17 @@ class HomeLocalDataSourceImpl implements HomeDataSource {
       type: 'info',
     );
   }
+
+  @override
+  Stream<HomeDashboardDataModel> watchDashboardData() async* {
+    final summary = await getBalanceSummary();
+    final transactions = await getRecentTransactions(limit: 9999);
+    final insight = await getCurrentInsight();
+    yield HomeDashboardDataModel(
+      summary: summary,
+      recentTransactions: transactions.take(5).toList(),
+      allTransactions: transactions,
+      insight: insight,
+    );
+  }
 }

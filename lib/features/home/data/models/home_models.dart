@@ -44,6 +44,15 @@ class TransactionModel extends Transaction {
     required super.amount,
     required super.isIncome,
     required super.dateTime,
+    super.walletId,
+    super.walletName,
+    super.receiptImageUrl,
+    super.createdByUserId,
+    super.createdByName,
+    super.createdByEmail,
+    super.createdByRole,
+    super.createdAt,
+    super.updatedAt,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +64,19 @@ class TransactionModel extends Transaction {
       amount: (json['amount'] as num).toDouble(),
       isIncome: json['is_income'] as bool,
       dateTime: DateTime.parse(json['date_time'] as String),
+      walletId: json['wallet_id'] as String?,
+      walletName: json['wallet_name'] as String?,
+      receiptImageUrl: json['receipt_image_url'] as String?,
+      createdByUserId: json['created_by_user_id'] as String? ??
+          json['createdByUserId'] as String?,
+      createdByName: json['created_by_name'] as String? ??
+          json['createdByName'] as String?,
+      createdByEmail: json['created_by_email'] as String? ??
+          json['createdByEmail'] as String?,
+      createdByRole: json['created_by_role'] as String? ??
+          json['createdByRole'] as String?,
+      createdAt: _dateTimeFromJson(json['created_at'] ?? json['createdAt']),
+      updatedAt: _dateTimeFromJson(json['updated_at'] ?? json['updatedAt']),
     );
   }
 
@@ -67,7 +89,22 @@ class TransactionModel extends Transaction {
       'amount': amount,
       'is_income': isIncome,
       'date_time': dateTime.toIso8601String(),
+      'wallet_id': walletId,
+      'wallet_name': walletName,
+      'receipt_image_url': receiptImageUrl,
+      'created_by_user_id': createdByUserId,
+      'created_by_name': createdByName,
+      'created_by_email': createdByEmail,
+      'created_by_role': createdByRole,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
+  }
+
+  static DateTime? _dateTimeFromJson(Object? value) {
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 }
 
@@ -93,4 +130,13 @@ class InsightCardModel extends InsightCard {
       'type': type,
     };
   }
+}
+
+class HomeDashboardDataModel extends HomeDashboardData {
+  const HomeDashboardDataModel({
+    required super.summary,
+    required super.recentTransactions,
+    required super.allTransactions,
+    required super.insight,
+  });
 }

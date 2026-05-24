@@ -38,6 +38,19 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
+  Stream<Either<Failure, TransactionDetail>> watchTransactionDetail(
+    String id,
+  ) async* {
+    try {
+      await for (final model in remoteDataSource.watchTransactionDetail(id)) {
+        yield Right(model);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Transaction>>> getFilteredTransactions(
     TransactionFilter filter,
   ) async {
@@ -47,11 +60,52 @@ class TransactionRepositoryImpl implements TransactionRepository {
       return Right(models);
     } catch (e) {
       try {
-        final localModels = await localDataSource.getFilteredTransactions(filter);
+        final localModels =
+            await localDataSource.getFilteredTransactions(filter);
         return Right(localModels);
       } catch (_) {
         return Left(ErrorMapper.mapToFailure(e));
       }
+    }
+  }
+
+  @override
+  Stream<Either<Failure, List<Transaction>>> watchFilteredTransactions(
+    TransactionFilter filter,
+  ) async* {
+    try {
+      await for (final models
+          in remoteDataSource.watchFilteredTransactions(filter)) {
+        yield Right(models);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, List<Transaction>>> watchRecentTransactions({
+    int limit = 5,
+  }) async* {
+    try {
+      await for (final models in remoteDataSource.watchRecentTransactions(
+        limit: limit,
+      )) {
+        yield Right(models);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, List<WalletOption>>> watchWalletOptions() async* {
+    try {
+      await for (final wallets in remoteDataSource.watchWalletOptions()) {
+        yield Right(wallets);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
     }
   }
 
@@ -87,6 +141,49 @@ class TransactionRepositoryImpl implements TransactionRepository {
       // OFFLINE QUEUE (Option B): Save to local storage for immediate UI feedback.
       await localDataSource.addTransaction(model);
       return const Right(null);
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addTransactionInput(
+    TransactionInput input,
+  ) async {
+    try {
+      await remoteDataSource.addTransactionInput(input);
+      return const Right(null);
+    } catch (e) {
+      return Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, List<TransactionCategory>>> watchCategories() async* {
+    try {
+      await for (final categories in remoteDataSource.watchCategories()) {
+        yield Right(categories);
+      }
+    } catch (e) {
+      yield Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addCategory(TransactionCategory category) async {
+    try {
+      await remoteDataSource.addCategory(category);
+      return const Right(null);
+    } catch (e) {
+      return Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteCategory(String categoryId) async {
+    try {
+      await remoteDataSource.deleteCategory(categoryId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ErrorMapper.mapToFailure(e));
     }
   }
 }

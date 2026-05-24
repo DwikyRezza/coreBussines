@@ -3,11 +3,12 @@
 // lib/features/wallets/presentation/pages/wallets_page.dart
 // ============================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/core_app_bar.dart';
@@ -30,6 +31,7 @@ class _WalletsPageState extends State<WalletsPage> {
   bool _isLoading = true;
   double _totalNetWorth = 0;
   List<Map<String, dynamic>> _wallets = [];
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _walletSubscription;
 
   @override
   void initState() {
@@ -37,8 +39,15 @@ class _WalletsPageState extends State<WalletsPage> {
     _loadWallets();
   }
 
+  @override
+  void dispose() {
+    _walletSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadWallets() async {
     try {
+      await _walletSubscription?.cancel();
       final user = _auth.currentUser;
       if (user == null) {
         throw StateError('User belum login.');
@@ -52,32 +61,40 @@ class _WalletsPageState extends State<WalletsPage> {
         await _localStorage.setActiveBusinessId(businessId);
       }
 
-      final res = await _firestore
+      final query = _firestore
           .collection('businesses')
           .doc(businessId)
-          .collection('wallets')
-          .get();
+          .collection('wallets');
 
-      double total = 0;
-      final walletList = <Map<String, dynamic>>[];
-      for (final doc in res.docs) {
-        final w = doc.data();
-        final balance = (w['balance'] as num?)?.toDouble() ?? 0.0;
-        total += balance;
-        walletList.add({
-          'name': w['name'] ?? 'Wallet',
-          'type': w['type'] ?? 'cash',
-          'balance': balance,
-        });
-      }
+      _walletSubscription = query.snapshots().listen((res) {
+        double total = 0;
+        final walletList = <Map<String, dynamic>>[];
+        for (final doc in res.docs) {
+          final w = doc.data();
+          final balance = (w['balance'] as num?)?.toDouble() ?? 0.0;
+          total += balance;
+          walletList.add({
+            'id': doc.id,
+            'name': w['name'] ?? 'Wallet',
+            'type': w['type'] ?? 'cash',
+            'balance': balance,
+          });
+        }
 
-      if (mounted) {
-        setState(() {
-          _totalNetWorth = total;
-          _wallets = walletList;
-          _isLoading = false;
-        });
-      }
+        if (mounted) {
+          setState(() {
+            _totalNetWorth = total;
+            _wallets = walletList;
+            _isLoading = false;
+          });
+        }
+      }, onError: (_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      });
     } catch (e) {
       if (mounted) {
         setState(() {

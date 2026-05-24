@@ -6,67 +6,138 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../di/service_locator.dart';
+import '../services/business_context_service.dart';
 import '../theme/app_typography.dart';
 import '../router/app_router.dart';
+
+class _TabItem {
+  final String route;
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+
+  const _TabItem({
+    required this.route,
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
+}
 
 class AppShell extends StatelessWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
 
-  int _locationToIndex(String location) {
-    if (location.startsWith(AppRoutes.history)) return 1;
-    if (location.startsWith(AppRoutes.analytics)) return 2;
-    if (location.startsWith(AppRoutes.settings)) return 3;
-    return 0;
+  List<_TabItem> _getTabsForRole(String role) {
+    final cleanRole = role.toLowerCase();
+    final List<_TabItem> tabs = [
+      const _TabItem(
+        route: AppRoutes.home,
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home_rounded,
+        label: 'Beranda',
+      ),
+      const _TabItem(
+        route: AppRoutes.history,
+        icon: Icons.history_outlined,
+        activeIcon: Icons.history_rounded,
+        label: 'Riwayat',
+      ),
+    ];
+
+    // Sembunyikan menu Analisis untuk Kasir, Inventory Staff, dan Sales
+    if (cleanRole != 'cashier' && cleanRole != 'inventory' && cleanRole != 'sales') {
+      tabs.add(
+        const _TabItem(
+          route: AppRoutes.analytics,
+          icon: Icons.bar_chart_outlined,
+          activeIcon: Icons.bar_chart_rounded,
+          label: 'Analisis',
+        ),
+      );
+    }
+
+    tabs.add(
+      const _TabItem(
+        route: AppRoutes.settings,
+        icon: Icons.settings_outlined,
+        activeIcon: Icons.settings_rounded,
+        label: 'Pengaturan',
+      ),
+    );
+
+    return tabs;
   }
 
-  void _onTabTapped(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go(AppRoutes.home);
-        break;
-      case 1:
-        context.go(AppRoutes.history);
-        break;
-      case 2:
-        context.go(AppRoutes.analytics);
-        break;
-      case 3:
-        context.go(AppRoutes.settings);
-        break;
+  int _locationToIndex(String location, List<_TabItem> tabs) {
+    for (int i = 0; i < tabs.length; i++) {
+      if (location == tabs[i].route || location.startsWith('${tabs[i].route}/')) {
+        return i;
+      }
     }
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    final currentIndex = _locationToIndex(location);
 
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: _AppBottomNavBar(
-        currentIndex: currentIndex,
-        onTap: (index) => _onTabTapped(context, index),
-      ),
-      floatingActionButton: const _ExpandableFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    return FutureBuilder<BusinessContext>(
+      future: sl<BusinessContextService>().getCurrentContext(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Scaffold(body: child);
+        }
+
+        final businessContext = snapshot.data!;
+        final role = businessContext.role;
+        final cleanRole = role.toLowerCase();
+        final tabs = _getTabsForRole(role);
+        final currentIndex = _locationToIndex(location, tabs);
+
+        // Jangan tampilkan FAB untuk Viewer dan Auditor (Read-only)
+        final showFab = cleanRole != 'viewer' && cleanRole != 'auditor';
+
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: _AppBottomNavBar(
+            currentIndex: currentIndex,
+            tabs: tabs,
+            onTap: (index) {
+              context.go(tabs[index].route);
+            },
+          ),
+          floatingActionButton: showFab
+              ? _ExpandableFAB(role: role)
+              : null,
+          floatingActionButtonLocation: showFab
+              ? FloatingActionButtonLocation.centerDocked
+              : null,
+        );
+      },
     );
   }
 }
 
 class _AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
+  final List<_TabItem> tabs;
   final ValueChanged<int> onTap;
 
   const _AppBottomNavBar({
     required this.currentIndex,
+    required this.tabs,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final showFabSpace = tabs.length > 3; // Beri spasi FAB jika ada banyak tab
+
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -81,40 +152,26 @@ class _AppBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: 'Beranda',
-                isActive: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
-              _NavItem(
-                icon: Icons.history_outlined,
-                activeIcon: Icons.history_rounded,
-                label: 'Riwayat',
-                isActive: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-              const SizedBox(width: 56), // Gap for FAB
-              _NavItem(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart_rounded,
-                label: 'Analisis',
-                isActive: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-              _NavItem(
-                icon: Icons.settings_outlined,
-                activeIcon: Icons.settings_rounded,
-                label: 'Pengaturan',
-                isActive: currentIndex == 3,
-                onTap: () => onTap(3),
-              ),
-            ],
+            children: List.generate(tabs.length + (showFabSpace ? 1 : 0), (index) {
+              // Jika ini adalah posisi tengah, beri gap untuk FAB
+              if (showFabSpace && index == tabs.length ~/ 2) {
+                return const SizedBox(width: 56);
+              }
+
+              final tabIndex = (showFabSpace && index > tabs.length ~/ 2) ? index - 1 : index;
+              final tab = tabs[tabIndex];
+
+              return _NavItem(
+                icon: tab.icon,
+                activeIcon: tab.activeIcon,
+                label: tab.label,
+                isActive: currentIndex == tabIndex,
+                onTap: () => onTap(tabIndex),
+              );
+            }),
           ),
         ),
       ),
@@ -173,7 +230,8 @@ class _NavItem extends StatelessWidget {
 }
 
 class _ExpandableFAB extends StatefulWidget {
-  const _ExpandableFAB();
+  final String role;
+  const _ExpandableFAB({required this.role});
 
   @override
   State<_ExpandableFAB> createState() => _ExpandableFABState();
@@ -225,12 +283,166 @@ class _ExpandableFABState extends State<_ExpandableFAB>
   }
 
   OverlayEntry _createOverlayEntry() {
+    final cleanRole = widget.role.toLowerCase();
+
     return OverlayEntry(
       builder: (context) {
         final bottomPadding = MediaQuery.of(context).padding.bottom;
         final actionWidth = ((MediaQuery.of(context).size.width - 46) / 2)
             .clamp(128.0, 164.0)
             .toDouble();
+
+        // Bangun baris menu FAB secara adaptif berdasarkan role
+        final List<Widget> menuRows = [];
+
+        if (cleanRole == 'cashier') {
+          // Kasir hanya boleh Tambah Transaksi dan Scan Struk
+          menuRows.add(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.add_rounded,
+                  label: 'Tambah Transaksi',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    _toggle();
+                    context.push('${AppRoutes.addTransaction}?type=expense');
+                  },
+                ),
+                const SizedBox(width: 14),
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Scan Struk',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  onTap: () {
+                    _toggle();
+                    context.push(AppRoutes.scanReceiptIntro);
+                  },
+                ),
+              ],
+            ),
+          );
+        } else if (cleanRole == 'inventory') {
+          // Inventory Staff hanya boleh scan struk masuk / log
+          menuRows.add(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Scan Struk Masuk',
+                  width: actionWidth * 1.5,
+                  color: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    _toggle();
+                    context.push(AppRoutes.scanReceiptIntro);
+                  },
+                ),
+              ],
+            ),
+          );
+        } else if (cleanRole == 'sales') {
+          // Sales boleh tambah pemasukan dan scan struk
+          menuRows.add(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.add_rounded,
+                  label: 'Tambah Penjualan',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    _toggle();
+                    context.push('${AppRoutes.addTransaction}?type=income');
+                  },
+                ),
+                const SizedBox(width: 14),
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Scan Struk',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  onTap: () {
+                    _toggle();
+                    context.push(AppRoutes.scanReceiptIntro);
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          // Owner, Admin, Finance, Secretary, Manager, dll (Menu penuh)
+          menuRows.add(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.add_rounded,
+                  label: 'Tambah Pemasukan',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.primary,
+                  onTap: () {
+                    _toggle();
+                    context.push('${AppRoutes.addTransaction}?type=income');
+                  },
+                ),
+                const SizedBox(width: 14),
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.remove_rounded,
+                  label: 'Tambah Pengeluaran',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.error,
+                  onTap: () {
+                    _toggle();
+                    context.push('${AppRoutes.addTransaction}?type=expense');
+                  },
+                ),
+              ],
+            ),
+          );
+          menuRows.add(const SizedBox(height: 14));
+          menuRows.add(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Scan Struk',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  onTap: () {
+                    _toggle();
+                    context.push(AppRoutes.scanReceiptIntro);
+                  },
+                ),
+                const SizedBox(width: 14),
+                _buildActionItem(
+                  context: context,
+                  icon: Icons.calendar_today_rounded,
+                  label: 'Tambah Jadwal',
+                  width: actionWidth,
+                  color: Theme.of(context).colorScheme.error,
+                  onTap: () {
+                    _toggle();
+                    context.push(AppRoutes.addSchedule);
+                  },
+                ),
+              ],
+            ),
+          );
+        }
 
         return Stack(
           children: [
@@ -252,7 +464,6 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                 },
               ),
             ),
-
             Positioned(
               bottom: 74 + bottomPadding,
               left: 0,
@@ -260,7 +471,7 @@ class _ExpandableFABState extends State<_ExpandableFAB>
               child: Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  height: 220,
+                  height: 240,
                   child: AnimatedBuilder(
                     animation: _expandAnimation,
                     builder: (context, child) {
@@ -271,65 +482,7 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                           opacity: _controller.value.clamp(0.0, 1.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildActionItem(
-                                    context: context,
-                                    icon: Icons.add_rounded,
-                                    label: 'Tambah Pemasukan',
-                                    width: actionWidth,
-                                    color: Theme.of(context).colorScheme.primary,
-                                    onTap: () {
-                                      _toggle();
-                                      context.push('${AppRoutes.addTransaction}?type=income');
-                                    },
-                                  ),
-                                  const SizedBox(width: 14),
-                                  _buildActionItem(
-                                    context: context,
-                                    icon: Icons.remove_rounded,
-                                    label: 'Tambah Pengeluaran',
-                                    width: actionWidth,
-                                    color: Theme.of(context).colorScheme.error,
-                                    onTap: () {
-                                      _toggle();
-                                      context.push('${AppRoutes.addTransaction}?type=expense');
-                                    },
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 14),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildActionItem(
-                                    context: context,
-                                    icon: Icons.receipt_long_rounded,
-                                    label: 'Scan Struk',
-                                    width: actionWidth,
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                    onTap: () {
-                                      _toggle();
-                                      context.push(AppRoutes.scanReceiptIntro);
-                                    },
-                                  ),
-                                  const SizedBox(width: 14),
-                                  _buildActionItem(
-                                    context: context,
-                                    icon: Icons.calendar_today_rounded,
-                                    label: 'Tambah Jadwal',
-                                    width: actionWidth,
-                                    color: Theme.of(context).colorScheme.error,
-                                    onTap: () {
-                                      _toggle();
-                                      context.push(AppRoutes.addSchedule);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
+                            children: menuRows,
                           ),
                         ),
                       );

@@ -13,6 +13,7 @@ class UserModel extends UserEntity {
     super.fullName,
     required super.email,
     super.avatarUrl,
+    super.onboardingCompleted = false,
     required super.updatedAt,
   });
 
@@ -24,6 +25,7 @@ class UserModel extends UserEntity {
       fullName: json['full_name'] as String? ?? json['name'] as String?,
       email: json['email'] as String,
       avatarUrl: json['avatar_url'] as String? ?? json['photo_url'] as String?,
+      onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
       updatedAt: updatedAt is DateTime
           ? updatedAt
           : updatedAt is Timestamp
@@ -38,6 +40,7 @@ class UserModel extends UserEntity {
       'full_name': fullName,
       'email': email,
       'avatar_url': avatarUrl,
+      'onboarding_completed': onboardingCompleted,
       'updated_at': updatedAt.toIso8601String(),
     };
   }
@@ -54,6 +57,7 @@ class UserModel extends UserEntity {
       fullName: name,
       email: email,
       avatarUrl: photoUrl,
+      onboardingCompleted: false,
       updatedAt: DateTime.now(),
     );
   }

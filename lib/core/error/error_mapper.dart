@@ -172,6 +172,8 @@ class ErrorMapper {
     switch (exception.code) {
       case 'permission-denied':
         return 'Anda tidak memiliki izin untuk mengakses atau mengubah data ini.';
+      case 'unauthorized':
+        return 'Gagal mengunggah berkas. Anda tidak memiliki izin untuk mengunggah gambar ke server (Storage Unauthorized).';
       case 'unavailable':
         return 'Layanan basis data sedang offline atau tidak tersedia. Data Anda disimpan secara lokal.';
       case 'cancelled':
@@ -185,7 +187,7 @@ class ErrorMapper {
       case 'resource-exhausted':
         return 'Batas penggunaan sistem telah terlampaui. Silakan coba beberapa saat lagi.';
       default:
-        return 'Gagal memproses data di server. Silakan coba beberapa saat lagi.';
+        return 'Gagal memproses data di server (${exception.code}: ${exception.message ?? 'Unknown error'}). Silakan coba beberapa saat lagi.';
     }
   }
 }

@@ -11,4 +11,5 @@ abstract class HomeRepository {
   Future<Either<Failure, BalanceSummary>> getBalanceSummary();
   Future<Either<Failure, List<Transaction>>> getRecentTransactions({int limit});
   Future<Either<Failure, InsightCard>> getCurrentInsight();
+  Stream<Either<Failure, HomeDashboardData>> watchDashboardData();
 }

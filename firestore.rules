@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isBusinessMember(businessId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid));
+    }
+
+    function isBusinessOwner(businessId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid)).data.role == 'owner';
+    }
+
+    function hasPendingInvite(businessId) {
+      return signedIn() &&
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)) &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.user_id == null &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.status == 'active' &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.role == request.resource.data.role;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if signedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /businesses/{businessId} {
+      allow read: if isBusinessMember(businessId);
+      allow create: if signedIn() && request.resource.data.owner_id == request.auth.uid;
+      allow update, delete: if isBusinessOwner(businessId);
+
+      match /members/{memberId} {
+        allow read: if isBusinessMember(businessId);
+        allow create: if signedIn() &&
+          (
+            isBusinessOwner(businessId) ||
+            (
+              memberId == request.auth.uid &&
+              (
+                get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid ||
+                hasPendingInvite(businessId)
+              )
+            )
+          );
+        allow update: if isBusinessOwner(businessId) ||
+          (
+            resource.data.email == request.auth.token.email &&
+            resource.data.user_id == null &&
+            request.resource.data.user_id == request.auth.uid &&
+            request.resource.data.status == 'used' &&
+            request.resource.data.role == resource.data.role
+          );
+        allow delete: if isBusinessOwner(businessId);
+      }
+
+      match /wallets/{walletId} {
+        allow read: if isBusinessMember(businessId);
+        allow create, update: if isBusinessMember(businessId);
+        allow delete: if isBusinessOwner(businessId);
+      }
+
+      match /categories/{categoryId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isBusinessMember(businessId);
+        allow create: if isBusinessMember(businessId) &&
+          request.resource.data.createdByUserId == request.auth.uid &&
+          request.resource.data.businessId == businessId;
+        allow update: if isBusinessMember(businessId) &&
+          resource.data.createdByUserId == request.resource.data.createdByUserId;
+        allow delete: if isBusinessMember(businessId);
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if isBusinessMember(businessId) &&
+          resource.data.targetUserId == request.auth.uid;
+        allow create: if isBusinessMember(businessId) &&
+          request.resource.data.targetUserId == request.auth.uid;
+        allow update, delete: if isBusinessMember(businessId) &&
+          resource.data.targetUserId == request.auth.uid;
+      }
+
+      match /activity_logs/{logId} {
+        allow read: if isBusinessOwner(businessId);
+        allow create: if isBusinessMember(businessId) &&
+          request.resource.data.performedByUserId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+  }
+}

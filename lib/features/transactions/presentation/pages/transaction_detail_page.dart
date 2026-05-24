@@ -1,13 +1,18 @@
 // ============================================================
-// FEATURE: Transactions — Transaction Detail Page
+// FEATURE: Transactions - Transaction Detail Page
 // lib/features/transactions/presentation/pages/transaction_detail_page.dart
 // ============================================================
 
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/core_app_bar.dart';
+import '../../domain/entities/transaction_entities.dart';
+import '../../domain/repositories/transaction_repository.dart';
 
 class TransactionDetailPage extends StatelessWidget {
   final String transactionId;
@@ -16,245 +21,293 @@ class TransactionDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final repository = sl<TransactionRepository>();
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CoreAppBar(
+      appBar: const CoreAppBar(),
+      body: StreamBuilder(
+        stream: repository.watchTransactionDetail(transactionId),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return snapshot.data!.fold(
+            (failure) => _MessageView(message: failure.message),
+            (detail) => _TransactionDetailContent(
+              detail: detail,
+              onDelete: () => _confirmDelete(context, repository, detail.id),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    TransactionRepository repository,
+    String id,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus transaksi?'),
+        content: const Text(
+          'Saldo wallet akan dikembalikan sesuai nominal transaksi ini.',
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
-            onPressed: () {},
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Hapus'),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Main Card
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.business_center_rounded, color: Theme.of(context).colorScheme.primary),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Active',
-                              style: AppTypography.textTheme.labelMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
+    );
 
-                  // Title
-                  Text(
-                    'Rapat Koordinasi Bisnis',
-                    style: AppTypography.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
+    if (confirmed != true || !context.mounted) return;
+    final result = await repository.deleteTransaction(id);
+    if (!context.mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(failure.message)),
+      ),
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Transaksi berhasil dihapus.')),
+        );
+        context.pop();
+      },
+    );
+  }
+}
 
-                  // Description
-                  Text(
-                    'Membahas target penjualan kuartal ini, evaluasi inventaris stok barang, dan laporan keuangan cabang baru.',
-                    style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                  const SizedBox(height: AppSpacing.lg),
+class _TransactionDetailContent extends StatelessWidget {
+  final TransactionDetail detail;
+  final VoidCallback onDelete;
 
-                  // Details
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.access_time_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Besok, 09:00 AM', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Durasi 120 menit', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.location_on_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Kantor Pusat CoreBusiness', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                            Text('Ruang Rapat Utama, Lantai 3', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+  const _TransactionDetailContent({
+    required this.detail,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final amountColor = detail.isIncome ? colors.primary : colors.error;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.pagePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: colors.outlineVariant),
             ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Related Transaction
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: amountColor.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        detail.isIncome
+                            ? Icons.trending_up_rounded
+                            : Icons.receipt_long_rounded,
+                        color: amountColor,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            detail.title,
+                            style: AppTypography.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            detail.category,
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  AppFormatter.currency(
+                    detail.isIncome ? detail.amount : -detail.amount,
+                    showSign: true,
+                  ),
+                  style: AppTypography.textTheme.displaySmall?.copyWith(
+                    color: amountColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _InfoRow(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Wallet',
+                  value: detail.walletName ?? detail.paymentMethod,
+                ),
+                _InfoRow(
+                  icon: Icons.calendar_month_outlined,
+                  label: 'Tanggal',
+                  value:
+                      '${AppFormatter.fullDate(detail.dateTime)} ${AppFormatter.timeWib(detail.dateTime)}',
+                ),
+                _InfoRow(
+                  icon: Icons.person_outline_rounded,
+                  label: 'Dicatat oleh',
+                  value: detail.createdByName ?? 'Pengguna',
+                ),
+                if (detail.createdByRole != null)
+                  _InfoRow(
+                    icon: Icons.verified_user_outlined,
+                    label: 'Role',
+                    value: detail.createdByRole == 'owner' ? 'Owner' : 'Staff',
+                  ),
+                if (detail.note?.trim().isNotEmpty == true)
+                  _InfoRow(
+                    icon: Icons.notes_rounded,
+                    label: 'Catatan',
+                    value: detail.note!,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          if (detail.receiptImageUrl != null) ...[
             Text(
-              'Related Transaction',
+              'Bukti Pembayaran',
               style: AppTypography.textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.receipt_long_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Konsumsi Rapat', style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
-                        Text('Oct 24, 2023', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '\$45.00',
-                    style: AppTypography.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                detail.receiptImageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 160,
+                  alignment: Alignment.center,
+                  color: colors.surfaceContainerHighest,
+                  child: const Text('Gagal memuat gambar struk.'),
+                ),
               ),
             ),
-            const SizedBox(height: 100), // Bottom padding
+            const SizedBox(height: AppSpacing.xl),
           ],
-        ),
+          OutlinedButton.icon(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline_rounded),
+            label: const Text('Hapus Transaksi'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colors.error,
+              side: BorderSide(color: colors.error),
+              minimumSize: const Size.fromHeight(52),
+            ),
+          ),
+          const SizedBox(height: 100),
+        ],
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: AppTypography.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 20),
-                    const SizedBox(width: 12),
-                    Text('Mark as Done', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: const Color(0xFFE3E8EF), // Light greyish blue
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
-                    const SizedBox(width: 12),
-                    Text('Edit Details', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MessageView extends StatelessWidget {
+  final String message;
+
+  const _MessageView({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTypography.textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),

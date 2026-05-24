@@ -15,49 +15,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../notifications/data/models/notification_model.dart';
-import '../../../notifications/data/datasources/notification_local_datasource.dart';
 import '../../../notifications/data/services/notification_service.dart';
+import '../../../notifications/data/models/notification_model.dart';
+import '../../../notifications/domain/repositories/notification_repository.dart';
+import '../../domain/entities/transaction_entities.dart';
+import '../../domain/repositories/transaction_repository.dart';
 import '../bloc/transaction_bloc.dart';
+import 'package:dartz/dartz.dart' hide State;
+import '../../../../core/error/failures.dart';
 
-// ─── Category model for the category picker ──────────────────
-class _Category {
-  final String label;
-  final String iconKey;
-  final IconData icon;
-  const _Category({
-    required this.label,
-    required this.iconKey,
-    required this.icon,
-  });
-}
 
-const _expenseCategories = [
-  _Category(label: 'Makanan', iconKey: 'food', icon: Icons.restaurant),
-  _Category(label: 'Transportasi', iconKey: 'transport', icon: Icons.directions_car),
-  _Category(label: 'Belanja', iconKey: 'shopping', icon: Icons.shopping_bag),
-  _Category(label: 'Hiburan', iconKey: 'entertainment', icon: Icons.movie),
-  _Category(label: 'Tagihan', iconKey: 'bill', icon: Icons.receipt_long),
-  _Category(label: 'Kesehatan', iconKey: 'health', icon: Icons.local_hospital),
-  _Category(label: 'Pendidikan', iconKey: 'education', icon: Icons.school),
-  _Category(label: 'Lainnya', iconKey: 'other', icon: Icons.more_horiz),
-];
-
-const _incomeCategories = [
-  _Category(label: 'Gaji', iconKey: 'income', icon: Icons.attach_money),
-  _Category(label: 'Freelance', iconKey: 'income', icon: Icons.work),
-  _Category(label: 'Investasi', iconKey: 'income', icon: Icons.trending_up),
-  _Category(label: 'Bonus', iconKey: 'income', icon: Icons.card_giftcard),
-  _Category(label: 'Lainnya', iconKey: 'income', icon: Icons.more_horiz),
-];
-
-const _wallets = ['Bank', 'Tunai', 'E-Wallet'];
 
 class AddTransactionPage extends StatefulWidget {
   final int initialType;
@@ -66,6 +40,7 @@ class AddTransactionPage extends StatefulWidget {
   final String? initialCategory;
   final String? initialNotes;
   final String? receiptImagePath;
+  final bool isManualReceipt;
 
   const AddTransactionPage({
     super.key,
@@ -75,6 +50,7 @@ class AddTransactionPage extends StatefulWidget {
     this.initialCategory,
     this.initialNotes,
     this.receiptImagePath,
+    this.isManualReceipt = false,
   });
 
   @override
@@ -85,14 +61,40 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   // Form state
   int _transactionType = 0; // 0 = Pengeluaran, 1 = Pemasukan
   int _selectedCategoryIndex = 0;
-  int _selectedWalletIndex = 0;
   bool _isRecurring = false;
   String? _receiptImagePath;
+  DateTime _selectedDate = DateTime.now();
+  String? _selectedWalletId;
+  String? _selectedWalletName;
 
   // Controllers
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   final _titleController = TextEditingController();
+  final _picker = ImagePicker();
+  final _repository = sl<TransactionRepository>();
+
+  bool _firstTimeCategoryLoad = true;
+  List<TransactionCategory> _currentCategories = [];
+  
+  final Map<String, IconData> _iconList = {
+    'food': Icons.restaurant_rounded,
+    'transport': Icons.directions_car_rounded,
+    'shopping': Icons.shopping_bag_rounded,
+    'entertainment': Icons.movie_rounded,
+    'bill': Icons.receipt_long_rounded,
+    'health': Icons.local_hospital_rounded,
+    'education': Icons.school_rounded,
+    'income': Icons.attach_money_rounded,
+    'freelance': Icons.work_rounded,
+    'investment': Icons.trending_up_rounded,
+    'bonus': Icons.card_giftcard_rounded,
+    'other': Icons.more_horiz_rounded,
+    'business': Icons.business_rounded,
+    'travel': Icons.flight_rounded,
+    'fitness': Icons.fitness_center_rounded,
+    'home': Icons.home_rounded,
+  };
 
   @override
   void dispose() {
@@ -123,14 +125,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     if (widget.initialNotes != null) {
       _notesController.text = widget.initialNotes!;
     }
-    if (widget.initialCategory != null) {
-      final index = _categories.indexWhere(
-        (c) => c.label.toLowerCase() == widget.initialCategory!.toLowerCase(),
-      );
-      if (index != -1) {
-        _selectedCategoryIndex = index;
-      }
-    }
   }
 
   String _formatThousands(int number) {
@@ -143,18 +137,47 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return buffer.toString();
   }
 
-  List<_Category> get _categories =>
-      _transactionType == 0 ? _expenseCategories : _incomeCategories;
+  Future<void> _pickReceipt(ImageSource source) async {
+    final image = await _picker.pickImage(
+      source: source,
+      imageQuality: 82,
+      maxWidth: 1600,
+    );
+    if (image == null) return;
+    setState(() => _receiptImagePath = image.path);
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1),
+    );
+    if (picked == null) return;
+    setState(() {
+      _selectedDate = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _selectedDate.hour,
+        _selectedDate.minute,
+      );
+    });
+  }
 
   /// Validate and dispatch submit event to BLoC.
   void _onSave(BuildContext context) {
     final amountText = _amountController.text.replaceAll('.', '').trim();
     final title = _titleController.text.trim();
 
+    final amount = double.tryParse(amountText);
+
     // Validation
-    if (amountText.isEmpty || double.tryParse(amountText) == null) {
+    if (amountText.isEmpty || amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan jumlah transaksi yang valid.')),
+        const SnackBar(content: Text('Nominal wajib angka dan lebih dari 0.')),
       );
       return;
     }
@@ -164,29 +187,42 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       );
       return;
     }
-
-    final category = _categories[_selectedCategoryIndex];
-    final amount = double.parse(amountText);
-
-    final receiptFileName = _receiptImagePath != null ? _receiptImagePath!.split(RegExp(r'[/\\]')).last : '';
-    final String? note;
-    if (_notesController.text.trim().isNotEmpty) {
-      note = _receiptImagePath != null
-          ? '${_notesController.text.trim()}\n\n[Struk: $receiptFileName]'
-          : _notesController.text.trim();
-    } else {
-      note = _receiptImagePath != null ? '[Struk: $receiptFileName]' : null;
+    if (_selectedWalletId == null || _selectedWalletName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Wallet wajib dipilih.')),
+      );
+      return;
     }
+    if (_currentCategories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kategori belum selesai dimuat.')),
+      );
+      return;
+    }
+    if (widget.isManualReceipt && (_receiptImagePath == null || _receiptImagePath!.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bukti pembayaran wajib dilampirkan untuk input manual.')),
+      );
+      return;
+    }
+    final category = _currentCategories[_selectedCategoryIndex];
+    final note = _notesController.text.trim().isEmpty
+        ? null
+        : _notesController.text.trim();
 
     context.read<TransactionBloc>().add(
           TransactionSubmitRequested(
             title: title,
             amount: amount,
             isIncome: _transactionType == 1,
-            category: category.label,
+            category: category.name,
             categoryIcon: category.iconKey,
-            walletName: _wallets[_selectedWalletIndex],
+            walletId: _selectedWalletId!,
+            walletName: _selectedWalletName!,
+            dateTime: _selectedDate,
             note: note,
+            receiptImagePath: _receiptImagePath,
+            source: 'manual',
           ),
         );
   }
@@ -204,27 +240,29 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
             );
-            
+
             // Pemicu Notifikasi HP Native & Riwayat Lokal
             final notifTitle = 'Transaksi Berhasil Dicatat';
-            final category = _categories[_selectedCategoryIndex];
-            final amountText = _amountController.text.replaceAll('.', '').trim();
+            final amountText =
+                _amountController.text.replaceAll('.', '').trim();
             final amount = double.tryParse(amountText) ?? 0.0;
             final isIncome = _transactionType == 1;
-            final notifBody = 'Mencatat ${isIncome ? "pemasukan" : "pengeluaran"} "${_titleController.text.trim()}" sebesar ${AppFormatter.currency(amount)} ke dompet ${_wallets[_selectedWalletIndex]}.';
+            final notifBody =
+                'Mencatat ${isIncome ? "pemasukan" : "pengeluaran"} "${_titleController.text.trim()}" sebesar ${AppFormatter.currency(amount)} ke dompet ${_selectedWalletName ?? '-'}.';
 
-            sl<NotificationLocalDataSource>().saveNotification(
+            sl<NotificationRepository>().saveNotification(
               NotificationModel(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 title: notifTitle,
                 body: notifBody,
-                timestamp: DateTime.now(),
+                createdAt: DateTime.now(),
                 type: 'success',
                 isRead: false,
               ),
             );
 
-            sl<NotificationService>().showInstantNotification(notifTitle, notifBody);
+            sl<NotificationService>()
+                .showInstantNotification(notifTitle, notifBody);
 
             context.pop(); // Go back to home/history
           } else if (state is TransactionError) {
@@ -242,7 +280,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               leading: IconButton(
-                icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.primary),
+                icon: Icon(Icons.close_rounded,
+                    color: Theme.of(context).colorScheme.primary),
                 onPressed: () => context.pop(),
               ),
               title: Text(
@@ -266,6 +305,51 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (widget.isManualReceipt) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primaryContainer.withAlpha(76),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.primary.withAlpha(51),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.receipt_long_rounded,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    size: 22,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Mode Input Manual',
+                                          style: AppTypography.textTheme.labelLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Foto bukti pembayaran wajib dilampirkan.',
+                                          style: AppTypography.textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                          ],
                           // ── Type Selector ────────────────────────────
                           _TypeSelector(
                             selected: _transactionType,
@@ -294,25 +378,95 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
-                          // ── Category ─────────────────────────────────
-                          Text(
-                            'Kategori',
-                            style: AppTypography.textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                           // ── Category ─────────────────────────────────
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Kategori',
+                                style: AppTypography.textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.settings_outlined),
+                                tooltip: 'Kelola Kategori',
+                                onPressed: () => context.push(AppRoutes.categoryManagement),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 10,
-                            children: List.generate(_categories.length, (i) {
-                              return _CategoryChip(
-                                icon: _categories[i].icon,
-                                label: _categories[i].label,
-                                isSelected: _selectedCategoryIndex == i,
-                                onTap: () =>
-                                    setState(() => _selectedCategoryIndex = i),
+                          StreamBuilder<Either<Failure, List<TransactionCategory>>>(
+                            stream: _repository.watchCategories(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'Gagal memuat kategori: ${snapshot.error}',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                );
+                              }
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              return snapshot.data!.fold(
+                                (failure) => Text(
+                                  'Gagal memuat kategori: ${failure.message}',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                ),
+                                (allCategories) {
+                                  final isCurrentIncome = _transactionType == 1;
+                                  final categories = allCategories
+                                      .where((c) => c.isIncome == isCurrentIncome)
+                                      .toList();
+
+                                  if (categories.isEmpty) {
+                                    return const Text('Tidak ada kategori tersedia.');
+                                  }
+
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    if (mounted) {
+                                      _currentCategories = categories;
+                                      if (_selectedCategoryIndex >= categories.length) {
+                                        setState(() {
+                                          _selectedCategoryIndex = 0;
+                                        });
+                                      }
+                                      if (widget.initialCategory != null && _firstTimeCategoryLoad) {
+                                        final idx = categories.indexWhere(
+                                          (c) => c.name.toLowerCase() == widget.initialCategory!.toLowerCase(),
+                                        );
+                                        if (idx != -1) {
+                                          setState(() {
+                                            _selectedCategoryIndex = idx;
+                                          });
+                                        }
+                                        _firstTimeCategoryLoad = false;
+                                      }
+                                    }
+                                  });
+
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 10,
+                                    children: List.generate(categories.length, (i) {
+                                      final cat = categories[i];
+                                      final icon = _iconList[cat.iconKey] ?? Icons.category_rounded;
+                                      return _CategoryChip(
+                                        icon: icon,
+                                        label: cat.name,
+                                        isSelected: _selectedCategoryIndex == i,
+                                        onTap: () => setState(() => _selectedCategoryIndex = i),
+                                      );
+                                    }),
+                                  );
+                                },
                               );
-                            }),
+                            },
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
@@ -323,27 +477,111 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          Row(
-                            children: List.generate(_wallets.length, (i) {
-                              final icons = [
-                                Icons.account_balance,
-                                Icons.payments,
-                                Icons.account_balance_wallet,
-                              ];
-                              return Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      right: i < _wallets.length - 1 ? 12 : 0),
-                                  child: _WalletCard(
-                                    icon: icons[i],
-                                    label: _wallets[i],
-                                    isSelected: _selectedWalletIndex == i,
-                                    onTap: () => setState(
-                                        () => _selectedWalletIndex = i),
+                          StreamBuilder(
+                            stream: _repository.watchWalletOptions(),
+                            builder: (context, snapshot) {
+                              final walletResult = snapshot.data;
+                              final wallets = walletResult?.fold(
+                                    (failure) => <WalletOption>[],
+                                    (items) => items,
+                                  ) ??
+                                  const <WalletOption>[];
+
+                              if (wallets.isNotEmpty &&
+                                  _selectedWalletId == null) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (!mounted || _selectedWalletId != null)
+                                    return;
+                                  setState(() {
+                                    _selectedWalletId = wallets.first.id;
+                                    _selectedWalletName = wallets.first.name;
+                                  });
+                                });
+                              }
+
+                              if (walletResult != null &&
+                                  walletResult.isLeft()) {
+                                return Text(
+                                  'Gagal memuat wallet. Coba buka ulang halaman.',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
-                                ),
+                                );
+                              }
+
+                              if (wallets.isEmpty) {
+                                return const _EmptyWalletNotice();
+                              }
+
+                              return Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                children: wallets.map((wallet) {
+                                  return SizedBox(
+                                    width: 112,
+                                    child: _WalletCard(
+                                      icon: _walletIcon(wallet.type),
+                                      label: wallet.name,
+                                      isSelected:
+                                          _selectedWalletId == wallet.id,
+                                      onTap: () => setState(() {
+                                        _selectedWalletId = wallet.id;
+                                        _selectedWalletName = wallet.name;
+                                      }),
+                                    ),
+                                  );
+                                }).toList(),
                               );
-                            }),
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          Text(
+                            'Tanggal Transaksi',
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _pickDate,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_month_rounded,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      AppFormatter.fullDate(_selectedDate),
+                                      style: AppTypography.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
@@ -362,77 +600,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           const SizedBox(height: AppSpacing.xl),
 
                           // ── Attachment Card ─────────────────────────
-                          if (_receiptImagePath != null) ...[
-                            Text(
-                              'Struk Terlampir',
-                              style: AppTypography.textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                              ),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.file(
-                                      File(_receiptImagePath!),
-                                      width: 48,
-                                      height: 48,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          width: 48,
-                                          height: 48,
-                                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                                          child: Icon(Icons.receipt_long, color: Theme.of(context).colorScheme.outlineVariant),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _receiptImagePath!.split(RegExp(r'[/\\]')).last,
-                                          style: AppTypography.textTheme.labelMedium
-                                              ?.copyWith(fontWeight: FontWeight.w700),
-                                        ),
-                                        Text(
-                                          'Struk berhasil dilampirkan',
-                                          style: AppTypography.textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete_outline_rounded, color: Theme.of(context).colorScheme.error),
-                                    onPressed: () {
-                                      setState(() {
-                                        _receiptImagePath = null;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xl),
-                          ],
+                          _ReceiptPickerCard(
+                            imagePath: _receiptImagePath,
+                            onCamera: () => _pickReceipt(ImageSource.camera),
+                            onGallery: () => _pickReceipt(ImageSource.gallery),
+                            onRemove: () =>
+                                setState(() => _receiptImagePath = null),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
 
                           // ── Recurring Toggle ─────────────────────────
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.4),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
@@ -440,29 +624,37 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primaryContainer,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     Icons.restore_rounded,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Transaksi Berulang',
-                                        style: AppTypography.textTheme.labelLarge
-                                            ?.copyWith(fontWeight: FontWeight.w700),
+                                        style: AppTypography
+                                            .textTheme.labelLarge
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w700),
                                       ),
                                       Text(
                                         'Setel sebagai pengeluaran bulanan',
                                         style: AppTypography.textTheme.bodySmall
                                             ?.copyWith(
-                                                color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant),
                                       ),
                                     ],
                                   ),
@@ -471,7 +663,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   value: _isRecurring,
                                   onChanged: (val) =>
                                       setState(() => _isRecurring = val),
-                                  activeColor: Theme.of(context).colorScheme.primary,
+                                  activeColor:
+                                      Theme.of(context).colorScheme.primary,
                                 ),
                               ],
                             ),
@@ -489,7 +682,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .shadow
+                              .withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, -4),
                         ),
@@ -500,7 +696,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         onPressed: isLoading ? null : () => _onSave(context),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -516,8 +713,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               )
                             : Text(
                                 'Simpan Transaksi',
-                                style:
-                                    AppTypography.textTheme.labelLarge?.copyWith(
+                                style: AppTypography.textTheme.labelLarge
+                                    ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -559,7 +756,9 @@ class _TypeSelector extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isActive ? Theme.of(context).colorScheme.surface : Colors.transparent,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.surface
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
@@ -569,8 +768,7 @@ class _TypeSelector extends StatelessWidget {
                     color: isActive
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isActive ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
               ),
@@ -709,10 +907,14 @@ class _CategoryChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Row(
@@ -727,15 +929,191 @@ class _CategoryChip extends StatelessWidget {
             Text(
               label,
               style: AppTypography.textTheme.labelMedium?.copyWith(
-                color:
-                    isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+IconData _walletIcon(String type) {
+  switch (type.toLowerCase()) {
+    case 'bank':
+      return Icons.account_balance_rounded;
+    case 'ewallet':
+    case 'e-wallet':
+      return Icons.account_balance_wallet_rounded;
+    case 'cash':
+    default:
+      return Icons.payments_rounded;
+  }
+}
+
+class _EmptyWalletNotice extends StatelessWidget {
+  const _EmptyWalletNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .errorContainer
+            .withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        'Belum ada wallet yang bisa dipilih.',
+        style: AppTypography.textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.error,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReceiptPickerCard extends StatelessWidget {
+  final String? imagePath;
+  final VoidCallback onCamera;
+  final VoidCallback onGallery;
+  final VoidCallback onRemove;
+
+  const _ReceiptPickerCard({
+    required this.imagePath,
+    required this.onCamera,
+    required this.onGallery,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Bukti Pembayaran',
+          style: AppTypography.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border:
+                Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          ),
+          child: imagePath == null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.receipt_long_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Foto struk wajib dilampirkan.',
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onCamera,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Kamera'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onGallery,
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: const Text('Galeri'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(imagePath!),
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 56,
+                            height: 56,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: Icon(
+                              Icons.receipt_long,
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            imagePath!.split(RegExp(r'[/\\]')).last,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.textTheme.labelMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          Text(
+                            'Struk siap diunggah',
+                            style: AppTypography.textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      onPressed: onRemove,
+                    ),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 }
@@ -764,13 +1142,18 @@ class _WalletCard extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )
@@ -787,10 +1170,10 @@ class _WalletCard extends StatelessWidget {
             Text(
               label,
               style: AppTypography.textTheme.labelMedium?.copyWith(
-                color:
-                    isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
-                fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],

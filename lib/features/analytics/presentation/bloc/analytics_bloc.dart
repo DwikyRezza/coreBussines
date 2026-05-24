@@ -1,37 +1,65 @@
 // ============================================================
-// FEATURE: Analytics — BLoC (Events + States + BLoC)
+// FEATURE: Analytics - BLoC (real-time)
 // lib/features/analytics/presentation/bloc/analytics_bloc.dart
 // ============================================================
 
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/analytics_entities.dart';
 import '../../../transactions/domain/entities/transaction_entities.dart';
 import '../../../transactions/domain/repositories/transaction_repository.dart';
 import '../../../home/domain/entities/home_entities.dart';
 
-// ─── Events ──────────────────────────────────────────────────
 abstract class AnalyticsEvent extends Equatable {
   const AnalyticsEvent();
-  @override List<Object?> get props => [];
+
+  @override
+  List<Object?> get props => [];
 }
 
 class AnalyticsLoadRequested extends AnalyticsEvent {
-  final int tabIndex; // 0=Harian, 1=Mingguan, 2=Bulanan
+  final int tabIndex;
+
   const AnalyticsLoadRequested({this.tabIndex = 2});
-  @override List<Object?> get props => [tabIndex];
+
+  @override
+  List<Object?> get props => [tabIndex];
 }
 
 class AnalyticsTabChanged extends AnalyticsEvent {
   final int tabIndex;
+
   const AnalyticsTabChanged(this.tabIndex);
-  @override List<Object?> get props => [tabIndex];
+
+  @override
+  List<Object?> get props => [tabIndex];
 }
 
-// ─── States ──────────────────────────────────────────────────
+class _AnalyticsTransactionsUpdated extends AnalyticsEvent {
+  final Either<Failure, List<Transaction>> result;
+  final DateRangeFilter filterType;
+  final int tabIndex;
+
+  const _AnalyticsTransactionsUpdated({
+    required this.result,
+    required this.filterType,
+    required this.tabIndex,
+  });
+
+  @override
+  List<Object?> get props => [result, filterType, tabIndex];
+}
+
 abstract class AnalyticsState extends Equatable {
   const AnalyticsState();
-  @override List<Object?> get props => [];
+
+  @override
+  List<Object?> get props => [];
 }
 
 class AnalyticsInitial extends AnalyticsState {
@@ -55,24 +83,29 @@ class AnalyticsLoaded extends AnalyticsState {
     );
   }
 
-  @override List<Object?> get props => [summary, selectedTabIndex];
+  @override
+  List<Object?> get props => [summary, selectedTabIndex];
 }
 
 class AnalyticsError extends AnalyticsState {
   final String message;
+
   const AnalyticsError(this.message);
-  @override List<Object?> get props => [message];
+
+  @override
+  List<Object?> get props => [message];
 }
 
-// ─── BLoC ────────────────────────────────────────────────────
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   final TransactionRepository _transactionRepository;
+  StreamSubscription<Either<Failure, List<Transaction>>>? _transactionsSubscription;
 
-  AnalyticsBloc({required TransactionRepository transactionRepository}) 
+  AnalyticsBloc({required TransactionRepository transactionRepository})
       : _transactionRepository = transactionRepository,
         super(const AnalyticsInitial()) {
     on<AnalyticsLoadRequested>(_onLoadRequested);
     on<AnalyticsTabChanged>(_onTabChanged);
+    on<_AnalyticsTransactionsUpdated>(_onTransactionsUpdated);
   }
 
   Future<void> _onLoadRequested(
@@ -80,7 +113,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     Emitter<AnalyticsState> emit,
   ) async {
     emit(const AnalyticsLoading());
-    await _fetchAndEmitSummary(event.tabIndex, emit);
+    await _subscribeTransactions(event.tabIndex);
   }
 
   Future<void> _onTabChanged(
@@ -91,65 +124,71 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       emit((state as AnalyticsLoaded).copyWith(selectedTabIndex: event.tabIndex));
     }
     emit(const AnalyticsLoading());
-    await _fetchAndEmitSummary(event.tabIndex, emit);
+    await _subscribeTransactions(event.tabIndex);
   }
 
-  Future<void> _fetchAndEmitSummary(int tabIndex, Emitter<AnalyticsState> emit) async {
-    // Determine the date range based on tabIndex
-    DateRangeFilter filterType;
-    switch (tabIndex) {
-      case 0:
-        filterType = DateRangeFilter.thisWeek;
-        break;
-      case 1:
-        filterType = DateRangeFilter.thisMonth;
-        break;
-      case 2:
-      default:
-        filterType = DateRangeFilter.thisYear;
-        break;
-    }
+  Future<void> _subscribeTransactions(int tabIndex) async {
+    await _transactionsSubscription?.cancel();
+    final filterType = _filterForTab(tabIndex);
+    _transactionsSubscription = _transactionRepository
+        .watchFilteredTransactions(TransactionFilter(dateRange: filterType))
+        .listen((result) => add(_AnalyticsTransactionsUpdated(
+              result: result,
+              filterType: filterType,
+              tabIndex: tabIndex,
+            )));
+  }
 
-    final result = await _transactionRepository.getFilteredTransactions(
-        TransactionFilter(dateRange: filterType));
-
-    result.fold(
+  void _onTransactionsUpdated(
+    _AnalyticsTransactionsUpdated event,
+    Emitter<AnalyticsState> emit,
+  ) {
+    event.result.fold(
       (failure) => emit(AnalyticsError(failure.message)),
-      (transactions) {
-        final summary = _generateSummary(transactions, filterType);
-        emit(AnalyticsLoaded(
-          summary: summary,
-          selectedTabIndex: tabIndex,
-        ));
-      },
+      (transactions) => emit(AnalyticsLoaded(
+        summary: _generateSummary(transactions, event.filterType),
+        selectedTabIndex: event.tabIndex,
+      )),
     );
   }
 
-  CashFlowSummary _generateSummary(List<Transaction> transactions, DateRangeFilter filterType) {
+  DateRangeFilter _filterForTab(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return DateRangeFilter.thisWeek;
+      case 1:
+        return DateRangeFilter.thisMonth;
+      case 2:
+      default:
+        return DateRangeFilter.thisYear;
+    }
+  }
+
+  CashFlowSummary _generateSummary(
+    List<Transaction> transactions,
+    DateRangeFilter filterType,
+  ) {
     double totalIncome = 0;
     double totalExpense = 0;
-    
-    // Calculate totals
-    for (var txn in transactions) {
+
+    for (final txn in transactions) {
       if (txn.isIncome) {
         totalIncome += txn.amount;
       } else {
         totalExpense += txn.amount;
       }
     }
-    
-    final totalBalance = totalIncome - totalExpense;
-    final changeAmount = totalBalance; // Simplified
-    final changePercent = totalIncome > 0 ? (totalBalance / totalIncome) * 100 : 0.0;
 
-    // Group transactions by date
-    final Map<DateTime, CashFlowPoint> pointsMap = {};
-    for (var txn in transactions) {
+    final totalBalance = totalIncome - totalExpense;
+    final changeAmount = totalBalance;
+    final changePercent =
+        totalIncome > 0 ? (totalBalance / totalIncome) * 100 : 0.0;
+
+    final pointsMap = <DateTime, CashFlowPoint>{};
+    for (final txn in transactions) {
       final date = DateTime(txn.dateTime.year, txn.dateTime.month, txn.dateTime.day);
-      if (!pointsMap.containsKey(date)) {
-        pointsMap[date] = CashFlowPoint(date: date, income: 0, expense: 0);
-      }
-      final current = pointsMap[date]!;
+      final current = pointsMap[date] ??
+          CashFlowPoint(date: date, income: 0, expense: 0);
       pointsMap[date] = CashFlowPoint(
         date: date,
         income: current.income + (txn.isIncome ? txn.amount : 0),
@@ -157,23 +196,21 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       );
     }
 
-    final trendPoints = pointsMap.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    final trendPoints = pointsMap.values.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
 
-    // Daily flows
-    final dailyFlows = trendPoints.map((p) {
-      final isSurplus = p.income > p.expense;
-      final netAmount = (p.income - p.expense).abs();
-      // simplified transaction count
-      final count = transactions.where((t) => 
-        t.dateTime.year == p.date.year && 
-        t.dateTime.month == p.date.month && 
-        t.dateTime.day == p.date.day).length;
-        
+    final dailyFlows = trendPoints.map((point) {
+      final count = transactions.where((txn) {
+        return txn.dateTime.year == point.date.year &&
+            txn.dateTime.month == point.date.month &&
+            txn.dateTime.day == point.date.day;
+      }).length;
+      final isSurplus = point.income >= point.expense;
       return DailyFlow(
-        date: p.date,
-        dayLabel: p.date.weekday.toString(), // e.g., '1' for Monday
+        date: point.date,
+        dayLabel: point.date.weekday.toString(),
         transactionCount: count,
-        netAmount: netAmount,
+        netAmount: (point.income - point.expense).abs(),
         isSurplus: isSurplus,
       );
     }).toList();
@@ -187,5 +224,11 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       trendPoints: trendPoints,
       dailyFlows: dailyFlows,
     );
+  }
+
+  @override
+  Future<void> close() async {
+    await _transactionsSubscription?.cancel();
+    return super.close();
   }
 }

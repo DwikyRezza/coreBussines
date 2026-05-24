@@ -14,10 +14,8 @@ import 'package:corebussiness/features/home/presentation/bloc/home_bloc.dart';
 import 'package:corebussiness/features/home/presentation/bloc/home_event.dart';
 import 'package:corebussiness/features/home/presentation/bloc/home_state.dart';
 
-// ─── Mocks ────────────────────────────────────────────────────
 class MockHomeRepository extends Mock implements HomeRepository {}
 
-// ─── Fake data ────────────────────────────────────────────────
 const _fakeBalance = BalanceSummary(
   totalBalance: 42850000,
   monthlyChange: 2400000,
@@ -33,6 +31,13 @@ const _fakeInsight = InsightCard(
 
 const _fakeTransactions = <Transaction>[];
 
+const _fakeDashboard = HomeDashboardData(
+  summary: _fakeBalance,
+  recentTransactions: _fakeTransactions,
+  allTransactions: _fakeTransactions,
+  insight: _fakeInsight,
+);
+
 void main() {
   late MockHomeRepository mockRepository;
 
@@ -40,18 +45,13 @@ void main() {
     mockRepository = MockHomeRepository();
   });
 
-  group('HomeBloc — Load', () {
+  group('HomeBloc - real-time dashboard', () {
     blocTest<HomeBloc, HomeState>(
-      'emits [HomeLoading, HomeLoaded] on successful load',
+      'emits [HomeLoading, HomeLoaded] on successful stream update',
       build: () {
-        when(() => mockRepository.getBalanceSummary())
-            .thenAnswer((_) async => const Right(_fakeBalance));
-        when(() => mockRepository.getRecentTransactions(limit: 5))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getRecentTransactions(limit: 500))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getCurrentInsight())
-            .thenAnswer((_) async => const Right(_fakeInsight));
+        when(() => mockRepository.watchDashboardData()).thenAnswer(
+          (_) => Stream.value(const Right(_fakeDashboard)),
+        );
         return HomeBloc(repository: mockRepository);
       },
       act: (bloc) => bloc.add(const HomeLoadRequested()),
@@ -64,17 +64,13 @@ void main() {
     );
 
     blocTest<HomeBloc, HomeState>(
-      'emits [HomeLoading, HomeError] when repository fails',
+      'emits [HomeLoading, HomeError] when stream emits failure',
       build: () {
-        when(() => mockRepository.getBalanceSummary()).thenAnswer(
-          (_) async => const Left(ServerFailure(message: 'Server error')),
+        when(() => mockRepository.watchDashboardData()).thenAnswer(
+          (_) => Stream.value(
+            const Left(ServerFailure(message: 'Server error')),
+          ),
         );
-        when(() => mockRepository.getRecentTransactions(limit: 5))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getRecentTransactions(limit: 500))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getCurrentInsight())
-            .thenAnswer((_) async => const Right(_fakeInsight));
         return HomeBloc(repository: mockRepository);
       },
       act: (bloc) => bloc.add(const HomeLoadRequested()),
@@ -83,20 +79,13 @@ void main() {
         isA<HomeError>().having((s) => s.message, 'message', 'Server error'),
       ],
     );
-  });
 
-  group('HomeBloc — Refresh', () {
     blocTest<HomeBloc, HomeState>(
-      'refresh from HomeLoaded keeps existing data visible',
+      'refresh from HomeLoaded keeps existing data visible until stream updates',
       build: () {
-        when(() => mockRepository.getBalanceSummary())
-            .thenAnswer((_) async => const Right(_fakeBalance));
-        when(() => mockRepository.getRecentTransactions(limit: 5))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getRecentTransactions(limit: 500))
-            .thenAnswer((_) async => const Right(_fakeTransactions));
-        when(() => mockRepository.getCurrentInsight())
-            .thenAnswer((_) async => const Right(_fakeInsight));
+        when(() => mockRepository.watchDashboardData()).thenAnswer(
+          (_) => Stream.value(const Right(_fakeDashboard)),
+        );
         return HomeBloc(repository: mockRepository);
       },
       seed: () => const HomeLoaded(
