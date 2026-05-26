@@ -63,6 +63,7 @@ class SmartSetupState extends Equatable {
   final String staffNickname;
   final String staffPhone;
   final String staffInviteCode;
+  final String ownerInviteStaffEmail;
 
   // Validated Invite Data Cached
   final String validatedBusinessId;
@@ -113,6 +114,7 @@ class SmartSetupState extends Equatable {
     this.staffNickname = '',
     this.staffPhone = '',
     this.staffInviteCode = '',
+    this.ownerInviteStaffEmail = '',
     this.validatedBusinessId = '',
     this.validatedBusinessName = '',
     this.validatedRole = '',
@@ -158,6 +160,7 @@ class SmartSetupState extends Equatable {
     String? staffNickname,
     String? staffPhone,
     String? staffInviteCode,
+    String? ownerInviteStaffEmail,
     String? validatedBusinessId,
     String? validatedBusinessName,
     String? validatedRole,
@@ -205,6 +208,8 @@ class SmartSetupState extends Equatable {
       staffNickname: staffNickname ?? this.staffNickname,
       staffPhone: staffPhone ?? this.staffPhone,
       staffInviteCode: staffInviteCode ?? this.staffInviteCode,
+      ownerInviteStaffEmail:
+          ownerInviteStaffEmail ?? this.ownerInviteStaffEmail,
       validatedBusinessId: validatedBusinessId ?? this.validatedBusinessId,
       validatedBusinessName:
           validatedBusinessName ?? this.validatedBusinessName,
@@ -253,6 +258,7 @@ class SmartSetupState extends Equatable {
         staffNickname,
         staffPhone,
         staffInviteCode,
+        ownerInviteStaffEmail,
         validatedBusinessId,
         validatedBusinessName,
         validatedRole,
@@ -696,7 +702,25 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'updated_at': now,
           });
 
-          // 4. Update user profile to setup finished
+          // 4. Set pending staff invitation if provided in setup
+          if (state.ownerInviteStaffEmail.isNotEmpty) {
+            final staffInviteRef = businessRef
+                .collection('members')
+                .doc(state.ownerInviteStaffEmail.trim().toLowerCase());
+            transaction.set(staffInviteRef, {
+              'name': 'Staf Baru',
+              'email': state.ownerInviteStaffEmail.trim().toLowerCase(),
+              'role': 'cashier', // Default role for setup-invited employees
+              'division': 'Umum',
+              'permissions': ['add_transaction'],
+              'status': 'active',
+              'joined_at': now,
+              'updated_at': now,
+              'user_id': null,
+            });
+          }
+
+          // 5. Update user profile to setup finished
           transaction.set(
               userRef,
               {

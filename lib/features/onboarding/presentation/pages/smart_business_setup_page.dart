@@ -305,6 +305,21 @@ class _SmartSetupViewState extends State<_SmartSetupView> {
         return;
       }
 
+      if (state.currentStep == 12) {
+        final email = _staffInviteEmailController.text.trim();
+        if (email.isNotEmpty) {
+          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+            _showNotice('Format email karyawan tidak valid.');
+            return;
+          }
+        }
+        bloc.add(SetupUpdateField((current) => current.copyWith(
+              ownerInviteStaffEmail: email,
+            )));
+        bloc.add(const SetupNextStepRequested());
+        return;
+      }
+
       if (state.currentStep == 13) {
         final pin = _securityPinController.text.trim();
         if (pin.length < 4) {
@@ -1132,6 +1147,16 @@ class _SmartSetupViewState extends State<_SmartSetupView> {
                     const SizedBox(height: 4),
                     Text(_fields[state.businessField]?.label ?? '',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
+                    if (state.ownerInviteStaffEmail.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text('KARYAWAN DIUNDANG',
+                          style: AppTypography.textTheme.labelMedium?.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(state.ownerInviteStaffEmail,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
                     const Divider(height: 24),
                   ],
                   if (state.usageType == 'staff') ...[
@@ -1208,9 +1233,13 @@ class _SmartSetupViewState extends State<_SmartSetupView> {
     if (state.currentStep == 15) {
       return Column(
         children: [
-          const SizedBox(height: 40),
-          Icon(Icons.check_circle_outline_rounded,
-              color: colors.primary, size: 84),
+          LucideAnimatedIcon(
+            icon: rocket,
+            size: 84,
+            color: colors.primary,
+            trigger: AnimationTrigger.loop,
+            duration: const Duration(milliseconds: 2200),
+          ),
           const SizedBox(height: 24),
           Text(
             'Semua Setup Selesai!',

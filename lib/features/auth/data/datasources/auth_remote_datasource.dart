@@ -153,9 +153,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     UserModel user, {
     String? activeBusinessId,
   }) async {
-    final storedBusinessId = activeBusinessId?.isNotEmpty == true
-        ? activeBusinessId
-        : _prefs.getString(_activeBusinessIdKey);
+    // Only load active business ID if the user has completed onboarding.
+    // If onboarding is false, any existing business ID in SharedPreferences is stale.
+    final storedBusinessId = user.onboardingCompleted
+        ? (activeBusinessId?.isNotEmpty == true
+            ? activeBusinessId
+            : _prefs.getString(_activeBusinessIdKey))
+        : null;
     final shouldCreateLegacyWorkspace = user.onboardingCompleted &&
         (storedBusinessId == null || storedBusinessId.isEmpty);
     final businessId =
