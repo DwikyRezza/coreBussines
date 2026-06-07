@@ -92,6 +92,18 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<UserEntity?> get authStateChanges => _authController.stream;
 
+  @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    try {
+      await _remoteDataSource.deleteAccount();
+      _cachedUser = null;
+      _authController.add(null); // notify router & BLoC → redirect to login
+      return const Right(null);
+    } catch (e) {
+      return Left(ErrorMapper.mapToFailure(e));
+    }
+  }
+
   /// Call this when the app is disposed to avoid stream leaks.
   void dispose() => _authController.close();
 }

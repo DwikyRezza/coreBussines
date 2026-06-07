@@ -16,6 +16,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> signInWithGoogle({bool isRegister = false});
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
+  Future<void> deleteAccount();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -129,6 +130,51 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) throw const AuthException(message: 'Sesi tidak ditemukan.');
+
+    // Re-authenticate via Google to get fresh credentials.
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      throw const AuthException(message: 'Autentikasi Google dibatalkan.');
+    }
+    final googleAuth = await googleUser.authentication;
+    final credential = firebase_auth.GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+    await user.reauthenticateWithCredential(credential);
+
+    // Delete all Firestore data for this user.
+    final uid = user.uid;
+    final batch = _firestore.batch();
+
+    // Remove member records from all businesses the user belongs to.
+    final memberSnap = await _firestore
+        .collectionGroup('members')
+        .where('user_id', isEqualTo: uid)
+        .get();
+    for (final doc in memberSnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Delete the user document.
+    batch.delete(_firestore.collection('users').doc(uid));
+    await batch.commit();
+
+    // Delete the Firebase Auth account.
+    await user.delete();
+
+    // Clear local prefs.
+    await _googleSignIn.signOut();
+    await _prefs.remove(_activeBusinessIdKey);
+    await _prefs.remove('active_member_role');
+    await _prefs.remove('active_member_status');
+    await _prefs.remove('active_member_permissions');
   }
 
   @override

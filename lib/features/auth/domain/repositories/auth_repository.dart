@@ -14,5 +14,6 @@ abstract class AuthRepository {
       {bool isRegister = false});
   Future<Either<Failure, void>> signOut();
   Future<Either<Failure, UserEntity?>> getCurrentUser();
+  Future<Either<Failure, void>> deleteAccount();
   Stream<UserEntity?> get authStateChanges;
 }

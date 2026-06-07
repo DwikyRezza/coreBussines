@@ -68,6 +68,7 @@ import '../../features/settings/presentation/pages/help_faq_page.dart';
 import '../../features/settings/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/category_management_page.dart';
 import '../../features/settings/presentation/pages/activity_log_page.dart';
+import '../../features/settings/presentation/pages/delete_account_page.dart';
 
 // Additional Features
 import '../../features/search/presentation/pages/search_page.dart';
@@ -130,6 +131,7 @@ abstract class AppRoutes {
 
   // Profile (Non-shell)
   static const String editProfile = '/profile/edit';
+  static const String deleteAccount = '/profile/delete-account';
 
   // Other Core Features
   static const String search = '/search';
@@ -326,6 +328,11 @@ GoRouter _buildRouter() {
         path: AppRoutes.editProfile,
         name: 'editProfile',
         builder: (context, state) => const EditProfilePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.deleteAccount,
+        name: 'deleteAccount',
+        builder: (context, state) => const DeleteAccountPage(),
       ),
 
       // Shell Route (Bottom Navigation)

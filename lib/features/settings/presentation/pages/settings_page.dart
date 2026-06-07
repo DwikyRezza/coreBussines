@@ -119,7 +119,9 @@ class SettingsPage extends StatelessWidget {
 
             // Sign out
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePadding,
+              ),
               child: OutlinedButton.icon(
                 onPressed: () {
                   context.read<AuthBloc>().add(const AuthSignOutRequested());
@@ -135,6 +137,60 @@ class SettingsPage extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
                   side: BorderSide(color: colors.error),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.base),
+
+            // ─── Danger Zone ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePadding,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.errorContainer.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: colors.error.withOpacity(0.3),
+                  ),
+                ),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  leading: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: colors.errorContainer.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.delete_forever_rounded,
+                      color: colors.error,
+                      size: 18,
+                    ),
+                  ),
+                  title: Text(
+                    'Hapus Akun',
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                      color: colors.error,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Hapus permanen semua data Anda',
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: colors.error.withOpacity(0.7),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: colors.error.withOpacity(0.7),
+                    size: 18,
+                  ),
+                  onTap: () => context.push(AppRoutes.deleteAccount),
                 ),
               ),
             ),
