@@ -259,21 +259,24 @@ class _HistoryPageState extends State<HistoryPage> {
                       const SizedBox(height: AppSpacing.lg),
                       Row(
                         children: [
-                          Expanded(
-                            child: _SummaryCard(
-                              title: 'Total Pemasukan',
-                              amount: _currency.format(_totalIncome),
-                              color: Theme.of(context).colorScheme.primary,
+                          if (_typeFilter == null || _typeFilter == TransactionType.income)
+                            Expanded(
+                              child: _SummaryCard(
+                                title: 'Total Pemasukan',
+                                amount: _currency.format(_totalIncome),
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: _SummaryCard(
-                              title: 'Total Pengeluaran',
-                              amount: _currency.format(_totalExpense),
-                              color: Theme.of(context).colorScheme.error,
+                          if (_typeFilter == null)
+                            const SizedBox(width: AppSpacing.md),
+                          if (_typeFilter == null || _typeFilter == TransactionType.expense)
+                            Expanded(
+                              child: _SummaryCard(
+                                title: 'Total Pengeluaran',
+                                amount: _currency.format(_totalExpense),
+                                color: Theme.of(context).colorScheme.error,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xl),
