@@ -140,11 +140,7 @@ service cloud.firestore {
 
     // Allow collection group query on members to resolve business portfolios securely
     match /{path=**}/members/{memberId} {
-      allow read: if signedIn() && (
-        resource.data.email == request.auth.token.email ||
-        resource.data.user_id == request.auth.uid ||
-        memberId == request.auth.uid
-      );
+      allow read: if signedIn();
     }
 
     match /businesses/{businessId} {

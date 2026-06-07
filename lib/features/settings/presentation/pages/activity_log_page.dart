@@ -228,21 +228,22 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
 
                       return DropdownButtonFormField<String?>(
                         value: _selectedStaffName,
+                        isExpanded: true,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                              horizontal: 8, vertical: 6),
                           isDense: true,
                           labelText: 'Pilih Staff',
-                          labelStyle: AppTypography.textTheme.bodySmall,
+                          labelStyle: AppTypography.textTheme.bodySmall?.copyWith(fontSize: 11),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         items: [
                           const DropdownMenuItem(
-                              value: null, child: Text('Semua Staff')),
+                              value: null, child: Text('Semua Staff', style: TextStyle(fontSize: 12))),
                           ...staffNames.map((name) =>
-                              DropdownMenuItem(value: name, child: Text(name))),
+                              DropdownMenuItem(value: name, child: Text(name, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis))),
                         ],
                         onChanged: (val) =>
                             setState(() => _selectedStaffName = val),
@@ -250,29 +251,30 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 // Date Range
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _selectedDateRange,
+                    isExpanded: true,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                          horizontal: 8, vertical: 6),
                       isDense: true,
                       labelText: 'Periode Waktu',
-                      labelStyle: AppTypography.textTheme.bodySmall,
+                      labelStyle: AppTypography.textTheme.bodySmall?.copyWith(fontSize: 11),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     items: const [
                       DropdownMenuItem(
-                          value: 'all', child: Text('Semua Waktu')),
-                      DropdownMenuItem(value: 'today', child: Text('Hari Ini')),
+                          value: 'all', child: Text('Semua Waktu', style: TextStyle(fontSize: 12))),
+                      DropdownMenuItem(value: 'today', child: Text('Hari Ini', style: TextStyle(fontSize: 12))),
                       DropdownMenuItem(
-                          value: 'week', child: Text('7 Hari Terakhir')),
+                          value: 'week', child: Text('7 Hari', style: TextStyle(fontSize: 12))),
                       DropdownMenuItem(
-                          value: 'month', child: Text('30 Hari Terakhir')),
+                          value: 'month', child: Text('30 Hari', style: TextStyle(fontSize: 12))),
                     ],
                     onChanged: (val) {
                       if (val != null) {
@@ -355,13 +357,18 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Oleh: $performedByName ($performedByRole)',
-                        style: AppTypography.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          'Oleh: $performedByName ($performedByRole)',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.textTheme.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         AppFormatter.fullDate(createdAt),
                         style: AppTypography.textTheme.bodySmall?.copyWith(
