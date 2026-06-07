@@ -764,7 +764,30 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: const CoreAppBar(),
           body: businessContext == null
-              ? const Center(child: CircularProgressIndicator())
+              ? (contextSnapshot.hasError
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline_rounded,
+                                color: Theme.of(context).colorScheme.error,
+                                size: 48),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Gagal mengakses manajemen tim: ${contextSnapshot.error}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const Center(child: CircularProgressIndicator()))
               : _TeamList(
                   contextData: businessContext,
                   onManageMember: (memberId, memberData) {

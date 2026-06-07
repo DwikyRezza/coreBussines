@@ -916,6 +916,9 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
 
         // 6. Save locally in SharedPrefs
         await _prefs.setString('active_business_id', newBusinessId);
+        await _prefs.setString('active_member_role', 'owner');
+        await _prefs.setString('active_member_status', 'active');
+        await _prefs.setStringList('active_member_permissions', ownerPermissions);
       } else if (state.usageType == 'staff') {
         // ── STAFF JOIN FLOW SUBMISSION ────────────────────────────────────
         final businessId = state.validatedBusinessId;
@@ -948,6 +951,9 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             .collection('members')
             .doc(user.uid);
 
+        String resolvedRole = state.validatedRole;
+        List<String> resolvedPermissions = state.validatedPermissions;
+
         await _firestore.runTransaction((transaction) async {
           final inviteSnapshot = await transaction.get(inviteRef);
           if (!inviteSnapshot.exists) {
@@ -962,6 +968,13 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
           if (invitedUserId != null && invitedUserId != user.uid) {
             throw StateError('Undangan ini sudah digunakan oleh akun lain.');
           }
+
+          resolvedRole = inviteData['role'] as String? ?? state.validatedRole;
+          resolvedPermissions = List<String>.from(
+            inviteData['permission_keys'] ??
+                inviteData['permissions'] ??
+                state.validatedPermissions,
+          );
 
           transaction.update(inviteRef, {
             'user_id': user.uid,
@@ -978,13 +991,9 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
               'invite_id': state.validatedInviteId,
             'phone': state.staffPhone.isEmpty ? null : state.staffPhone,
             'photo_url': userPhoto,
-            'role': inviteData['role'] ?? state.validatedRole,
+            'role': resolvedRole,
             'division': inviteData['division'] ?? state.validatedDivision,
-            'permissions': List<String>.from(
-              inviteData['permission_keys'] ??
-                  inviteData['permissions'] ??
-                  state.validatedPermissions,
-            ),
+            'permissions': resolvedPermissions,
             'status': 'active',
             'joined_at': now,
             'updated_at': now,
@@ -1003,6 +1012,13 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
 
         // Save locally in SharedPrefs
         await _prefs.setString('active_business_id', businessId);
+        await _prefs.setString('active_member_role', resolvedRole);
+        await _prefs.setString('active_member_status', 'active');
+        final resolvedPermKeys = PermissionPolicy.resolvePermissions(
+          role: resolvedRole,
+          explicitPermissions: resolvedPermissions,
+        );
+        await _prefs.setStringList('active_member_permissions', resolvedPermKeys);
       }
 
       // If user sets up PIN, save PIN locally using injected AppLockRepository

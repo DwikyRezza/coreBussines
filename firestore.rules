@@ -138,6 +138,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Allow collection group query on members to resolve business portfolios securely
+    match /{path=**}/members/{memberId} {
+      allow read: if signedIn() && (
+        resource.data.email == request.auth.token.email ||
+        resource.data.user_id == request.auth.uid ||
+        memberId == request.auth.uid
+      );
+    }
+
     match /businesses/{businessId} {
       allow read: if isBusinessMember(businessId);
       allow create: if signedIn() && request.resource.data.owner_id == request.auth.uid;
