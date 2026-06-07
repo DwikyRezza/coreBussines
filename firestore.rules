@@ -143,6 +143,11 @@ service cloud.firestore {
       allow read: if signedIn();
     }
 
+    // Allow collection group query on invites to validate employee invitations securely
+    match /{path=**}/invites/{inviteId} {
+      allow read: if signedIn();
+    }
+
     match /businesses/{businessId} {
       allow read: if isBusinessMember(businessId);
       allow create: if signedIn() && request.resource.data.owner_id == request.auth.uid;

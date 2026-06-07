@@ -3,8 +3,11 @@
 // lib/features/settings/presentation/pages/team_management_page.dart
 // ============================================================
 
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/security/permission_policy.dart';
@@ -23,6 +26,12 @@ class TeamManagementPage extends StatefulWidget {
 }
 
 class _TeamManagementPageState extends State<TeamManagementPage> {
+  String _generateInviteCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = math.Random();
+    return List.generate(6, (index) => chars[rand.nextInt(chars.length)]).join();
+  }
+
   final List<String> _availablePermissions = [
     'manage_members',
     'add_transaction',
@@ -326,13 +335,28 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                             Navigator.pop(context);
 
                             try {
+                              final inviteCode = _generateInviteCode();
+
                               final memberDocRef = FirebaseFirestore.instance
                                   .collection('businesses')
                                   .doc(businessId)
                                   .collection('members')
                                   .doc(email.toLowerCase());
 
-                              await memberDocRef.set({
+                              final inviteDocRef = FirebaseFirestore.instance
+                                  .collection('businesses')
+                                  .doc(businessId)
+                                  .collection('invites')
+                                  .doc(inviteCode);
+
+                              final resolvedPerms = _resolvePermissionKeys(
+                                selectedRole,
+                                selectedPermissions,
+                              );
+
+                              final batch = FirebaseFirestore.instance.batch();
+
+                              batch.set(memberDocRef, {
                                 'name': name,
                                 'email': email.toLowerCase(),
                                 'phone': phone.isEmpty ? null : phone,
@@ -341,10 +365,7 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                                     division.isEmpty ? 'Umum' : division,
                                 'branch': branch.isEmpty ? null : branch,
                                 'permissions': selectedPermissions,
-                                'permission_keys': _resolvePermissionKeys(
-                                  selectedRole,
-                                  selectedPermissions,
-                                ),
+                                'permission_keys': resolvedPerms,
                                 'status': 'active',
                                 'start_work_date': selectedDate != null
                                     ? Timestamp.fromDate(selectedDate!)
@@ -353,7 +374,29 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                                 'joined_at': FieldValue.serverTimestamp(),
                                 'updated_at': FieldValue.serverTimestamp(),
                                 'user_id': null, // Diisi saat staff login
+                                'invite_code': inviteCode,
                               });
+
+                              batch.set(inviteDocRef, {
+                                'name': name,
+                                'email': email.toLowerCase(),
+                                'role': selectedRole,
+                                'division': division.isEmpty ? 'Umum' : division,
+                                'branch': branch.isEmpty ? null : branch,
+                                'permissions': selectedPermissions,
+                                'permission_keys': resolvedPerms,
+                                'status': 'active',
+                                'invite_code': inviteCode,
+                                'expires_at': Timestamp.fromDate(
+                                  DateTime.now().add(const Duration(days: 7)),
+                                ),
+                                'created_by_user_id': FirebaseAuth.instance.currentUser?.uid,
+                                'created_at': FieldValue.serverTimestamp(),
+                                'updated_at': FieldValue.serverTimestamp(),
+                                'user_id': null,
+                              });
+
+                              await batch.commit();
 
                               ActivityLogger.log(
                                 action: 'invite_employee',
@@ -1046,6 +1089,45 @@ class _MemberCard extends StatelessWidget {
                           color: colors.onSurfaceVariant,
                         ),
                       ),
+                    if (data['user_id'] == null && data['invite_code'] != null) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colors.secondaryContainer.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colors.secondary.withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.vpn_key_outlined, size: 14, color: colors.secondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Kode: ${data['invite_code']}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSecondaryContainer,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: data['invite_code'] as String));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Kode undangan berhasil disalin!'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              child: Icon(Icons.copy_rounded, size: 14, color: colors.secondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 6),
                     Row(
                       children: [

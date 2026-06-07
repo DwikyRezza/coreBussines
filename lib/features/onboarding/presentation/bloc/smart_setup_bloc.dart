@@ -409,10 +409,22 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
         final staffEmail = user.email?.trim().toLowerCase() ?? '';
 
         try {
-          final inviteSnap = await _firestore
-              .collectionGroup('invites')
-              .where('email', isEqualTo: staffEmail)
-              .get();
+          final inputVal = state.staffInviteOwnerEmail.trim();
+          QuerySnapshot<Map<String, dynamic>> inviteSnap;
+
+          final isInputCode = inputVal.isNotEmpty && !inputVal.contains('@');
+
+          if (isInputCode) {
+            inviteSnap = await _firestore
+                .collectionGroup('invites')
+                .where('invite_code', isEqualTo: inputVal)
+                .get();
+          } else {
+            inviteSnap = await _firestore
+                .collectionGroup('invites')
+                .where('email', isEqualTo: staffEmail)
+                .get();
+          }
 
           if (inviteSnap.docs.isNotEmpty) {
             final targetInvite = inviteSnap.docs.first;
@@ -472,17 +484,26 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             return;
           }
 
-          // Cari dokumen members dengan email karyawan di semua subkoleksi businesses
-          final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
-              .collectionGroup('members')
-              .where('email', isEqualTo: staffEmail)
-              .get();
+          // Cari dokumen members dengan email/kode karyawan di semua subkoleksi businesses
+          QuerySnapshot<Map<String, dynamic>> snap;
+          if (isInputCode) {
+            snap = await _firestore
+                .collectionGroup('members')
+                .where('invite_code', isEqualTo: inputVal)
+                .get();
+          } else {
+            snap = await _firestore
+                .collectionGroup('members')
+                .where('email', isEqualTo: staffEmail)
+                .get();
+          }
 
           if (snap.docs.isEmpty) {
             emit(state.copyWith(
               isSubmitting: false,
-              errorMessage:
-                  'Email Anda ($staffEmail) belum terdaftar dalam undangan bisnis mana pun. Silakan hubungi Owner bisnis Anda.',
+              errorMessage: isInputCode
+                  ? 'Kode undangan "$inputVal" tidak ditemukan. Silakan hubungi Owner bisnis Anda.'
+                  : 'Email Anda ($staffEmail) belum terdaftar dalam undangan bisnis mana pun. Silakan hubungi Owner bisnis Anda.',
             ));
             return;
           }
@@ -982,6 +1003,23 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'used_at': now,
             'updated_at': now,
           });
+
+          // Update the pending members document as well
+          if (state.validatedInviteId.isNotEmpty) {
+            final invitedEmail = inviteData['email'] as String?;
+            if (invitedEmail != null && invitedEmail.isNotEmpty) {
+              final pendingMemberRef = _firestore
+                  .collection('businesses')
+                  .doc(businessId)
+                  .collection('members')
+                  .doc(invitedEmail.trim().toLowerCase());
+              transaction.update(pendingMemberRef, {
+                'user_id': user.uid,
+                'status': 'used',
+                'updated_at': now,
+              });
+            }
+          }
 
           transaction.set(memberRef, {
             'user_id': user.uid,
