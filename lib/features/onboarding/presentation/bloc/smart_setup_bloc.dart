@@ -8,11 +8,12 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/di/service_locator.dart'; // Still used by smart_business_setup_page.dart for BlocProvider
+import '../../../../core/security/permission_policy.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../settings/domain/repositories/app_lock_repository.dart';
 import '../../../transactions/domain/entities/transaction_entities.dart';
+import '../../domain/entities/smart_setup_policy.dart';
 
 // ─── STATE ──────────────────────────────────────────────────
 class SmartSetupState extends Equatable {
@@ -71,6 +72,7 @@ class SmartSetupState extends Equatable {
   final String validatedRole;
   final String validatedDivision;
   final List<String> validatedPermissions;
+  final String validatedInviteId;
 
   // Security
   final String securityPin;
@@ -120,6 +122,7 @@ class SmartSetupState extends Equatable {
     this.validatedRole = '',
     this.validatedDivision = '',
     this.validatedPermissions = const [],
+    this.validatedInviteId = '',
     this.securityPin = '',
     this.isSubmitting = false,
     this.errorMessage,
@@ -166,6 +169,7 @@ class SmartSetupState extends Equatable {
     String? validatedRole,
     String? validatedDivision,
     List<String>? validatedPermissions,
+    String? validatedInviteId,
     String? securityPin,
     bool? isSubmitting,
     String? errorMessage,
@@ -216,6 +220,7 @@ class SmartSetupState extends Equatable {
       validatedRole: validatedRole ?? this.validatedRole,
       validatedDivision: validatedDivision ?? this.validatedDivision,
       validatedPermissions: validatedPermissions ?? this.validatedPermissions,
+      validatedInviteId: validatedInviteId ?? this.validatedInviteId,
       securityPin: securityPin ?? this.securityPin,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: errorMessage,
@@ -264,6 +269,7 @@ class SmartSetupState extends Equatable {
         validatedRole,
         validatedDivision,
         validatedPermissions,
+        validatedInviteId,
         securityPin,
         isSubmitting,
         errorMessage,
@@ -403,6 +409,69 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
         final staffEmail = user.email?.trim().toLowerCase() ?? '';
 
         try {
+          final inviteSnap = await _firestore
+              .collectionGroup('invites')
+              .where('email', isEqualTo: staffEmail)
+              .get();
+
+          if (inviteSnap.docs.isNotEmpty) {
+            final targetInvite = inviteSnap.docs.first;
+            final inviteData = targetInvite.data();
+            final expiresAtValue = inviteData['expires_at'];
+            final expiresAt =
+                expiresAtValue is Timestamp ? expiresAtValue.toDate() : null;
+            final validation = SmartSetupPolicy.validateInvite(
+              inviteEmail: inviteData['email'] as String? ?? '',
+              currentUserEmail: staffEmail,
+              status: inviteData['status'] as String? ?? 'active',
+              expiresAt: expiresAt,
+              now: DateTime.now(),
+            );
+
+            if (validation != InviteValidationResult.valid) {
+              emit(state.copyWith(
+                isSubmitting: false,
+                errorMessage: _inviteErrorMessage(validation, staffEmail),
+              ));
+              return;
+            }
+
+            final businessRef = targetInvite.reference.parent.parent;
+            if (businessRef == null) {
+              emit(state.copyWith(
+                  isSubmitting: false,
+                  errorMessage: 'Data bisnis tidak valid.'));
+              return;
+            }
+
+            final businessDoc = await businessRef.get();
+            if (!businessDoc.exists) {
+              emit(state.copyWith(
+                  isSubmitting: false,
+                  errorMessage: 'Data bisnis tidak ditemukan.'));
+              return;
+            }
+
+            final businessName =
+                businessDoc.data()?['name'] as String? ?? 'Bisnis Tanpa Nama';
+
+            emit(state.copyWith(
+              isSubmitting: false,
+              validatedBusinessId: businessRef.id,
+              validatedBusinessName: businessName,
+              validatedRole: inviteData['role'] as String? ?? 'cashier',
+              validatedDivision: inviteData['division'] as String? ?? 'Umum',
+              validatedPermissions: List<String>.from(
+                inviteData['permission_keys'] ??
+                    inviteData['permissions'] ??
+                    [],
+              ),
+              validatedInviteId: targetInvite.id,
+              currentStep: 3,
+            ));
+            return;
+          }
+
           // Cari dokumen members dengan email karyawan di semua subkoleksi businesses
           final QuerySnapshot<Map<String, dynamic>> snap = await _firestore
               .collectionGroup('members')
@@ -444,33 +513,26 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
           final inviteData = targetDoc.data();
           final status = inviteData['status'] as String? ?? 'active';
 
-          // Cek status undangan
-          if (status == 'suspended') {
-            emit(state.copyWith(
-                isSubmitting: false,
-                errorMessage: 'Akses undangan Anda ditangguhkan.'));
-            return;
-          }
-          if (status == 'inactive') {
-            emit(state.copyWith(
-                isSubmitting: false,
-                errorMessage: 'Akses undangan Anda tidak aktif.'));
-            return;
-          }
-
-          // Cek masa berlaku undangan menggunakan created_at (waktu Owner membuat undangan),
-          // bukan joined_at (waktu staff bergabung, diisi setelah join).
+          DateTime? expiresAt;
           final createdAt = inviteData['created_at'] as Timestamp?;
           if (createdAt != null) {
             final date = createdAt.toDate();
-            final diff = DateTime.now().difference(date).inDays;
-            if (diff > 7) {
-              emit(state.copyWith(
-                  isSubmitting: false,
-                  errorMessage:
-                      'Masa berlaku undangan Anda telah kedaluwarsa (melebihi 7 hari).'));
-              return;
-            }
+            expiresAt = date.add(const Duration(days: 7));
+          }
+
+          final validation = SmartSetupPolicy.validateInvite(
+            inviteEmail: inviteData['email'] as String? ?? '',
+            currentUserEmail: staffEmail,
+            status: status,
+            expiresAt: expiresAt,
+            now: DateTime.now(),
+          );
+          if (validation != InviteValidationResult.valid) {
+            emit(state.copyWith(
+              isSubmitting: false,
+              errorMessage: _inviteErrorMessage(validation, staffEmail),
+            ));
+            return;
           }
 
           // Cek apakah undangan sudah terpakai oleh user lain
@@ -508,8 +570,9 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             validatedBusinessName: businessName,
             validatedRole: inviteData['role'] ?? 'cashier',
             validatedDivision: inviteData['division'] ?? 'Umum',
-            validatedPermissions:
-                List<String>.from(inviteData['permissions'] ?? []),
+            validatedPermissions: List<String>.from(
+              inviteData['permission_keys'] ?? inviteData['permissions'] ?? [],
+            ),
             currentStep: 3, // Pindah ke Step 3 (Lengkapi Profil Karyawan)
           ));
         } catch (e) {
@@ -650,6 +713,37 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'Pemilik Bisnis';
         final userPhoto =
             userDoc.data()?['avatar_url'] as String? ?? user.photoURL;
+        final enabledFeatures = isPersonal
+            ? [
+                'dashboard',
+                'transactions',
+                'wallets',
+                'analytics',
+                'schedule',
+              ]
+            : state.enabledFeatures;
+        final setupScore = SmartSetupPolicy.calculateSetupScore(
+          SmartSetupChecklist(
+            hasBusinessProfile: isPersonal || state.businessName.isNotEmpty,
+            hasOwnerRole: true,
+            hasInitialWallet: state.walletName.isNotEmpty,
+            hasInitialCategories: true,
+            hasSelectedFeatures: enabledFeatures.isNotEmpty,
+            hasLogo: false,
+            hasEmployees: isPersonal ||
+                state.businessSize == 'solo' ||
+                state.ownerInviteStaffEmail.isNotEmpty,
+            hasSecurityPin: state.securityPin.isNotEmpty,
+          ),
+        );
+        final ownerPermissions = PermissionPolicy.resolvePermissions(
+          role: 'owner',
+          explicitPermissions: const <String>[],
+        );
+        final cashierPermissions = PermissionPolicy.resolvePermissions(
+          role: 'cashier',
+          explicitPermissions: const <String>[],
+        );
 
         await _firestore.runTransaction((transaction) async {
           // 1. Write business configuration
@@ -658,7 +752,9 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
                 isPersonal ? 'Keuangan Pribadi $userName' : state.businessName,
             'owner_id': user.uid,
             'business_type': isPersonal ? 'personal' : state.businessField,
+            'field': isPersonal ? 'personal' : state.businessField,
             'business_size': isPersonal ? 'solo' : state.businessSize,
+            'businessSize': isPersonal ? 'solo' : state.businessSize,
             'currency': 'IDR',
             'timezone': 'Asia/Jakarta',
             'details': {
@@ -667,15 +763,21 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
               'whatsapp': state.businessWhatsApp,
               'email': state.businessEmail,
             },
-            'enabled_features': isPersonal
-                ? [
-                    'dashboard',
-                    'transactions',
-                    'wallets',
-                    'analytics',
-                    'schedule'
-                  ]
-                : state.enabledFeatures,
+            'enabled_features': enabledFeatures,
+            'enabledModules': enabledFeatures,
+            'menu_config': {
+              'by_size': SmartSetupPolicy.menuForBusinessSize(
+                isPersonal ? 'solo' : state.businessSize,
+              ),
+              'owner': SmartSetupPolicy.menuForRole('owner'),
+            },
+            'setup_score': setupScore.percent,
+            'setupScore': setupScore.percent,
+            'setup_checklist': {
+              'completed_items': setupScore.completedItems,
+              'total_items': setupScore.totalItems,
+              'ctas': setupScore.ctas,
+            },
             'created_at': now,
             'updated_at': now,
           });
@@ -688,6 +790,7 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'email': userEmail,
             'photo_url': userPhoto,
             'role': 'owner',
+            'permissions': ownerPermissions,
             'joined_at': now,
             'updated_at': now,
             'status': 'active',
@@ -702,25 +805,7 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'updated_at': now,
           });
 
-          // 4. Set pending staff invitation if provided in setup
-          if (state.ownerInviteStaffEmail.isNotEmpty) {
-            final staffInviteRef = businessRef
-                .collection('members')
-                .doc(state.ownerInviteStaffEmail.trim().toLowerCase());
-            transaction.set(staffInviteRef, {
-              'name': 'Staf Baru',
-              'email': state.ownerInviteStaffEmail.trim().toLowerCase(),
-              'role': 'cashier', // Default role for setup-invited employees
-              'division': 'Umum',
-              'permissions': ['add_transaction'],
-              'status': 'active',
-              'joined_at': now,
-              'updated_at': now,
-              'user_id': null,
-            });
-          }
-
-          // 5. Update user profile to setup finished
+          // 4. Update user profile to setup finished
           transaction.set(
               userRef,
               {
@@ -792,6 +877,41 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
         for (final cat in defaults) {
           batch.set(categoriesCollection.doc(), cat.toFirestore());
         }
+
+        if (state.ownerInviteStaffEmail.isNotEmpty && !isPersonal) {
+          final staffEmail = state.ownerInviteStaffEmail.trim().toLowerCase();
+          final staffInviteDocRef = businessRef.collection('invites').doc();
+          batch.set(staffInviteDocRef, {
+            'name': 'Staf Baru',
+            'email': staffEmail,
+            'role': 'cashier',
+            'division': 'Umum',
+            'permissions': ['add_transaction'],
+            'permission_keys': cashierPermissions,
+            'status': 'active',
+            'invite_code': staffInviteDocRef.id,
+            'expires_at': Timestamp.fromDate(
+              DateTime.now().add(const Duration(days: 7)),
+            ),
+            'created_by_user_id': user.uid,
+            'created_at': FieldValue.serverTimestamp(),
+            'updated_at': FieldValue.serverTimestamp(),
+            'user_id': null,
+          });
+
+          batch.set(businessRef.collection('members').doc(staffEmail), {
+            'name': 'Staf Baru',
+            'email': staffEmail,
+            'role': 'cashier',
+            'division': 'Umum',
+            'permissions': ['add_transaction'],
+            'permission_keys': cashierPermissions,
+            'status': 'active',
+            'joined_at': FieldValue.serverTimestamp(),
+            'updated_at': FieldValue.serverTimestamp(),
+            'user_id': null,
+          });
+        }
         await batch.commit();
 
         // 6. Save locally in SharedPrefs
@@ -811,11 +931,17 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
         final userPhoto =
             userDoc.data()?['avatar_url'] as String? ?? user.photoURL;
 
-        final inviteRef = _firestore
-            .collection('businesses')
-            .doc(businessId)
-            .collection('members')
-            .doc(userEmail.toLowerCase());
+        final inviteRef = state.validatedInviteId.isEmpty
+            ? _firestore
+                .collection('businesses')
+                .doc(businessId)
+                .collection('members')
+                .doc(userEmail.toLowerCase())
+            : _firestore
+                .collection('businesses')
+                .doc(businessId)
+                .collection('invites')
+                .doc(state.validatedInviteId);
         final memberRef = _firestore
             .collection('businesses')
             .doc(businessId)
@@ -828,6 +954,10 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             throw StateError('Undangan tidak ditemukan.');
           }
           final inviteData = inviteSnapshot.data() ?? const <String, dynamic>{};
+          final inviteStatus = inviteData['status'] as String? ?? 'active';
+          if (inviteStatus != 'active') {
+            throw StateError('Undangan tidak aktif.');
+          }
           final invitedUserId = inviteData['user_id'] as String?;
           if (invitedUserId != null && invitedUserId != user.uid) {
             throw StateError('Undangan ini sudah digunakan oleh akun lain.');
@@ -844,12 +974,17 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
             'user_id': user.uid,
             'name': state.staffNickname,
             'email': userEmail.toLowerCase(),
+            if (state.validatedInviteId.isNotEmpty)
+              'invite_id': state.validatedInviteId,
             'phone': state.staffPhone.isEmpty ? null : state.staffPhone,
             'photo_url': userPhoto,
             'role': inviteData['role'] ?? state.validatedRole,
             'division': inviteData['division'] ?? state.validatedDivision,
             'permissions': List<String>.from(
-                inviteData['permissions'] ?? state.validatedPermissions),
+              inviteData['permission_keys'] ??
+                  inviteData['permissions'] ??
+                  state.validatedPermissions,
+            ),
             'status': 'active',
             'joined_at': now,
             'updated_at': now,
@@ -887,48 +1022,42 @@ class SmartSetupBloc extends Bloc<SmartSetupEvent, SmartSetupState> {
   }
 
   List<String> _recommendFeatures() {
-    final features = <String>[
-      'dashboard',
-      'transactions',
-      'wallets',
-      'analytics',
-      'notifications',
-      'settings'
-    ];
+    return SmartSetupPolicy.recommendFeatures(
+      businessField: state.businessField,
+      businessSize: state.businessSize,
+      fnbNeedsRawInventory: state.fnbNeedsRawInventory,
+      fnbHasMenu: state.fnbHasMenu,
+      fnbHasCashier: state.fnbHasCashier,
+      fnbNeedsDailyReport: state.fnbNeedsDailyReport,
+      retailNeedsInventory: state.retailNeedsInventory,
+      retailHasPhysicalProducts: state.retailHasPhysicalProducts,
+      retailHasBarcode: state.retailHasBarcode,
+      serviceNeedsBooking: state.serviceNeedsBooking,
+      serviceNeedsInvoice: state.serviceNeedsInvoice,
+      olsNeedsAdminFee: state.olsNeedsAdminFee,
+      olsNeedsShippingCost: state.olsNeedsShippingCost,
+    );
+  }
 
-    // Recommendations based on business size
-    if (state.businessSize != 'solo') {
-      features.add('employees');
+  String _inviteErrorMessage(
+    InviteValidationResult result,
+    String currentUserEmail,
+  ) {
+    switch (result) {
+      case InviteValidationResult.emailMismatch:
+        return 'Email undangan tidak cocok dengan akun Anda ($currentUserEmail).';
+      case InviteValidationResult.expired:
+        return 'Masa berlaku undangan Anda telah kedaluwarsa.';
+      case InviteValidationResult.alreadyUsed:
+        return 'Undangan ini sudah digunakan.';
+      case InviteValidationResult.removed:
+        return 'Undangan untuk email Anda sudah dihapus.';
+      case InviteValidationResult.suspended:
+        return 'Akses undangan Anda ditangguhkan.';
+      case InviteValidationResult.inactive:
+        return 'Akses undangan Anda tidak aktif.';
+      case InviteValidationResult.valid:
+        return '';
     }
-    if (state.businessSize == 'small' ||
-        state.businessSize == 'medium' ||
-        state.businessSize == 'growing' ||
-        state.businessSize == 'enterprise') {
-      features.add('approval');
-      features.add('reports');
-    }
-
-    // Recommendations based on fields
-    if (state.businessField == 'f_and_b') {
-      features.add('catalog');
-      if (state.fnbNeedsRawInventory) {
-        features.add('inventory');
-      }
-    } else if (state.businessField == 'retail') {
-      features.add('catalog');
-      if (state.retailNeedsInventory) {
-        features.add('inventory');
-      }
-    } else if (state.businessField == 'jasa') {
-      features.add('schedule');
-      if (state.serviceNeedsInvoice) {
-        features.add('reports');
-      }
-    } else if (state.businessField == 'online_shop') {
-      features.add('catalog');
-      features.add('inventory');
-    }
-
-    return features.toSet().toList(); // unique items
   }
 }

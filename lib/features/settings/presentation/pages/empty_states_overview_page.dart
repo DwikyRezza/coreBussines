@@ -24,7 +24,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: Theme.of(context).colorScheme.primary,
-              child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 18),
+              child: const Icon(Icons.person_outline_rounded,
+                  color: Colors.white, size: 18),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
@@ -38,7 +39,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.notifications_none_rounded,
+                color: Theme.of(context).colorScheme.primary),
             onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -72,7 +74,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
             _EmptyStateCard(
               icon: Icons.receipt_long_rounded,
               title: 'Belum ada transaksi',
-              description: 'Riwayat transaksi Anda akan muncul di sini. Mulai aktivitas baru untuk melihatnya.',
+              description:
+                  'Riwayat transaksi Anda akan muncul di sini. Mulai aktivitas baru untuk melihatnya.',
               buttonText: 'Buat Transaksi Baru',
               isButtonSolid: true,
               onPressed: () => context.push(AppRoutes.addTransaction),
@@ -83,7 +86,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
             _EmptyStateCard(
               icon: Icons.bar_chart_rounded,
               title: 'Data Analisis Kosong',
-              description: 'Kumpulkan data lebih banyak untuk melihat tren dan analisis performa Anda.',
+              description:
+                  'Kumpulkan data lebih banyak untuk melihat tren dan analisis performa Anda.',
               buttonText: null, // No button
             ),
             const SizedBox(height: 16),
@@ -92,7 +96,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
             _EmptyStateCard(
               icon: Icons.calendar_month_rounded,
               title: 'Jadwal Kosong',
-              description: 'Tidak ada jadwal aktif saat ini. Rencanakan sesi Anda berikutnya.',
+              description:
+                  'Tidak ada jadwal aktif saat ini. Rencanakan sesi Anda berikutnya.',
               buttonText: 'Tambah Jadwal',
               isButtonSolid: true,
               onPressed: () => context.push(AppRoutes.addSchedule),
@@ -103,7 +108,8 @@ class EmptyStatesOverviewPage extends StatelessWidget {
             _EmptyStateCard(
               icon: Icons.storefront_rounded,
               title: 'Belum ada Bisnis',
-              description: 'Daftarkan bisnis atau cabang baru untuk mulai mengelolanya dari sini.',
+              description:
+                  'Daftarkan bisnis atau cabang baru untuk mulai mengelolanya dari sini.',
               buttonText: 'Daftar Bisnis',
               isButtonSolid: false,
               onPressed: () => context.push(AppRoutes.businessPortfolio),
@@ -141,7 +147,12 @@ class _EmptyStateCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
       ),
       child: Column(
         children: [
@@ -151,7 +162,8 @@ class _EmptyStateCard extends StatelessWidget {
               color: Color(0xFFF1F5F9), // Light greyish blue
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Theme.of(context).colorScheme.outline, size: 32),
+            child: Icon(icon,
+                color: Theme.of(context).colorScheme.outline, size: 32),
           ),
           const SizedBox(height: 24),
           Text(
@@ -176,15 +188,21 @@ class _EmptyStateCard extends StatelessWidget {
             ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isButtonSolid ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+                backgroundColor: isButtonSolid
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.outlineVariant,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
               ),
               child: Text(
                 buttonText!,
                 style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: isButtonSolid ? Colors.white : Theme.of(context).colorScheme.primary,
+                  color: isButtonSolid
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

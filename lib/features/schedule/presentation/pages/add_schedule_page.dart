@@ -39,7 +39,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       _noteController.text = widget.existingSchedule!.note;
       _selectedDate = widget.existingSchedule!.dateTime;
       _selectedTime = TimeOfDay.fromDateTime(widget.existingSchedule!.dateTime);
-      
+
       final rem = widget.existingSchedule!.reminderMinutes;
       if (rem == 5) {
         _selectedReminderIndex = 0;
@@ -70,15 +70,17 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)), // Past 1 year
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)), // Future 10 years
+      firstDate:
+          DateTime.now().subtract(const Duration(days: 365)), // Past 1 year
+      lastDate:
+          DateTime.now().add(const Duration(days: 365 * 10)), // Future 10 years
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-              onPrimary: Colors.white,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                  onPrimary: Colors.white,
+                ),
           ),
           child: child!,
         );
@@ -99,9 +101,9 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-              onPrimary: Colors.white,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                  onPrimary: Colors.white,
+                ),
           ),
           child: child!,
         );
@@ -142,7 +144,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     if (_selectedReminderIndex == 2) reminderMinutes = 60;
 
     final schedule = ScheduleModel(
-      id: widget.existingSchedule?.id ?? 'sch_${DateTime.now().millisecondsSinceEpoch}',
+      id: widget.existingSchedule?.id ??
+          'sch_${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       dateTime: scheduleDateTime,
       reminderMinutes: reminderMinutes,
@@ -154,7 +157,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     // Trigger Native and Local Notifications
     final isUpdate = widget.existingSchedule != null;
-    final notifTitle = isUpdate ? 'Jadwal Diperbarui' : 'Jadwal Baru Ditambahkan';
+    final notifTitle =
+        isUpdate ? 'Jadwal Diperbarui' : 'Jadwal Baru Ditambahkan';
     final notifBody = isUpdate
         ? 'Jadwal "${title}" berhasil diperbarui untuk ${DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(scheduleDateTime)} pukul ${scheduleDateTime.hour.toString().padLeft(2, '0')}:${scheduleDateTime.minute.toString().padLeft(2, '0')}.'
         : 'Aktivitas "${title}" berhasil dijadwalkan pada ${DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(scheduleDateTime)} pukul ${scheduleDateTime.hour.toString().padLeft(2, '0')}:${scheduleDateTime.minute.toString().padLeft(2, '0')}.';
@@ -170,14 +174,15 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       ),
     );
 
-    await sl<NotificationService>().showInstantNotification(notifTitle, notifBody);
+    await sl<NotificationService>()
+        .showInstantNotification(notifTitle, notifBody);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            widget.existingSchedule != null 
-                ? 'Jadwal berhasil diperbarui!' 
+            widget.existingSchedule != null
+                ? 'Jadwal berhasil diperbarui!'
                 : 'Jadwal baru berhasil disimpan!',
             style: const TextStyle(color: Colors.white),
           ),
@@ -191,7 +196,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const CoreAppBar(),
@@ -202,7 +207,9 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
           children: [
             const SizedBox(height: AppSpacing.md),
             Text(
-              widget.existingSchedule != null ? 'Ubah Jadwal' : 'Buat Jadwal Baru',
+              widget.existingSchedule != null
+                  ? 'Ubah Jadwal'
+                  : 'Buat Jadwal Baru',
               style: AppTypography.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: Theme.of(context).colorScheme.onSurface,
@@ -221,11 +228,16 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
+                color: isDark
+                    ? Theme.of(context).colorScheme.surface
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(isDark ? 0.2 : 0.03),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .shadow
+                        .withOpacity(isDark ? 0.2 : 0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -245,7 +257,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _titleController,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Misal: Rapat Evaluasi, Stok Opname',
                       hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(
@@ -257,15 +270,20 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -284,9 +302,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   TextField(
                     readOnly: true,
                     onTap: () => _selectDate(context),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
-                      hintText: DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(_selectedDate),
+                      hintText: DateFormat('EEEE, dd MMMM yyyy', 'id_ID')
+                          .format(_selectedDate),
                       hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -296,15 +316,20 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                     ),
                   ),
@@ -322,7 +347,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   TextField(
                     readOnly: true,
                     onTap: () => _selectTime(context),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: _selectedTime.format(context),
                       hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(
@@ -334,15 +360,20 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                     ),
                   ),
@@ -363,7 +394,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                         child: _ReminderToggle(
                           label: '5 Menit',
                           isSelected: _selectedReminderIndex == 0,
-                          onTap: () => setState(() => _selectedReminderIndex = 0),
+                          onTap: () =>
+                              setState(() => _selectedReminderIndex = 0),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -371,7 +403,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                         child: _ReminderToggle(
                           label: '10 Menit',
                           isSelected: _selectedReminderIndex == 1,
-                          onTap: () => setState(() => _selectedReminderIndex = 1),
+                          onTap: () =>
+                              setState(() => _selectedReminderIndex = 1),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -379,7 +412,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                         child: _ReminderToggle(
                           label: '1 Jam',
                           isSelected: _selectedReminderIndex == 2,
-                          onTap: () => setState(() => _selectedReminderIndex = 2),
+                          onTap: () =>
+                              setState(() => _selectedReminderIndex = 2),
                         ),
                       ),
                     ],
@@ -398,23 +432,30 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   TextField(
                     controller: _noteController,
                     maxLines: 4,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
-                      hintText: 'Catatan target, lokasi, agenda rapat, atau detail aktivitas bisnis...',
+                      hintText:
+                          'Catatan target, lokasi, agenda rapat, atau detail aktivitas bisnis...',
                       hintStyle: AppTypography.textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                        borderSide: BorderSide(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                     ),
                   ),
@@ -425,16 +466,21 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     onPressed: _saveSchedule,
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
-                      backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primary, // Deep Blue
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.save_outlined, color: Colors.white, size: 20),
+                        const Icon(Icons.save_outlined,
+                            color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          widget.existingSchedule != null ? 'Perbarui Jadwal' : 'Simpan Jadwal',
+                          widget.existingSchedule != null
+                              ? 'Perbarui Jadwal'
+                              : 'Simpan Jadwal',
                           style: AppTypography.textTheme.labelLarge?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -468,18 +514,20 @@ class _ReminderToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.primary 
-              : (isDark ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.white),
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : (isDark
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : Colors.white),
           border: Border.all(
-            color: isSelected 
-                ? Theme.of(context).colorScheme.primary 
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -488,8 +536,8 @@ class _ReminderToggle extends StatelessWidget {
           child: Text(
             label,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: isSelected 
-                  ? Colors.white 
+              color: isSelected
+                  ? Colors.white
                   : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),

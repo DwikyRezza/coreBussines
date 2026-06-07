@@ -29,7 +29,9 @@ class ScheduleLocalDataSourceImpl implements ScheduleLocalDataSource {
     }
     try {
       final list = jsonDecode(raw) as List<dynamic>;
-      return list.map((e) => ScheduleModel.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => ScheduleModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       return [];
     }

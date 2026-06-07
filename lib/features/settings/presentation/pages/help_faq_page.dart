@@ -16,19 +16,23 @@ class HelpFaqPage extends StatelessWidget {
         children: const [
           _FaqItem(
             question: 'Bagaimana cara menambah transaksi?',
-            answer: 'Tekan tombol + di bagian bawah, lalu pilih pemasukan atau pengeluaran.',
+            answer:
+                'Tekan tombol + di bagian bawah, lalu pilih pemasukan atau pengeluaran.',
           ),
           _FaqItem(
             question: 'Bagaimana scan struk bekerja?',
-            answer: 'Ambil foto struk dengan jelas. AI akan membaca nama toko, total, kategori, dan catatan barang.',
+            answer:
+                'Ambil foto struk dengan jelas. AI akan membaca nama toko, total, kategori, dan catatan barang.',
           ),
           _FaqItem(
             question: 'Apakah data saya tersimpan online?',
-            answer: 'Ya. Data akun, dompet, dan transaksi tersinkron ke Firebase Cloud Firestore.',
+            answer:
+                'Ya. Data akun, dompet, dan transaksi tersinkron ke Firebase Cloud Firestore.',
           ),
           _FaqItem(
             question: 'Bagaimana cara keluar akun?',
-            answer: 'Buka Pengaturan, lalu tekan tombol Keluar di bagian bawah halaman.',
+            answer:
+                'Buka Pengaturan, lalu tekan tombol Keluar di bagian bawah halaman.',
           ),
         ],
       ),
@@ -55,7 +59,8 @@ class _FaqItem extends StatelessWidget {
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         title: Text(
           question,
-          style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          style: AppTypography.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700),
         ),
         children: [
           Align(

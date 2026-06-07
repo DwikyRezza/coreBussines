@@ -23,16 +23,20 @@ class SearchPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppSpacing.md),
-            
+
             // Search Input
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).colorScheme.primary), // Active blue border
+                border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary), // Active blue border
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -41,15 +45,20 @@ class SearchPage extends StatelessWidget {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search CoreBusiness...',
-                  hintStyle: AppTypography.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.outline),
-                  prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
+                  hintStyle: AppTypography.textTheme.bodyLarge
+                      ?.copyWith(color: Theme.of(context).colorScheme.outline),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: Theme.of(context).colorScheme.primary),
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.mic_none_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                    child: Icon(Icons.mic_none_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: 20),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -63,11 +72,20 @@ class SearchPage extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _FilterChip(label: 'Transactions', icon: Icons.receipt_long_rounded, isSelected: true),
+                  _FilterChip(
+                      label: 'Transactions',
+                      icon: Icons.receipt_long_rounded,
+                      isSelected: true),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Schedules', icon: Icons.calendar_month_rounded, isSelected: false),
+                  _FilterChip(
+                      label: 'Schedules',
+                      icon: Icons.calendar_month_rounded,
+                      isSelected: false),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Businesses', icon: Icons.storefront_rounded, isSelected: false),
+                  _FilterChip(
+                      label: 'Businesses',
+                      icon: Icons.storefront_rounded,
+                      isSelected: false),
                 ],
               ),
             ),
@@ -125,7 +143,8 @@ class SearchPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -154,22 +173,36 @@ class SearchPage extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 'Artha Mandiri Finansial',
-                                style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
+                                style: AppTypography.textTheme.titleMedium
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Row(
                               children: [
-                                const Icon(Icons.star_outline_rounded, color: Color(0xFFC53030), size: 14),
+                                const Icon(Icons.star_outline_rounded,
+                                    color: Color(0xFFC53030), size: 14),
                                 const SizedBox(width: 2),
-                                Text('4.9', style: AppTypography.textTheme.labelSmall?.copyWith(color: const Color(0xFFC53030), fontWeight: FontWeight.w600)),
+                                Text('4.9',
+                                    style: AppTypography.textTheme.labelSmall
+                                        ?.copyWith(
+                                            color: const Color(0xFFC53030),
+                                            fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('Layanan konsultasi manajemen & keuangan', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        Text('Layanan konsultasi manajemen & keuangan',
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -221,25 +254,34 @@ class _FilterChip extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
 
-  const _FilterChip({required this.label, required this.icon, required this.isSelected});
+  const _FilterChip(
+      {required this.label, required this.icon, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(icon,
+              size: 16,
+              color: isSelected
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Text(
             label,
             style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
@@ -259,14 +301,17 @@ class _RecentSearchChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest, // Light grey background
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest, // Light grey background
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.history_rounded, size: 16, color: Theme.of(context).colorScheme.outline),
+          Icon(Icons.history_rounded,
+              size: 16, color: Theme.of(context).colorScheme.outline),
           const SizedBox(width: 8),
           Text(
             label,
@@ -295,7 +340,8 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        style: AppTypography.textTheme.labelSmall
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }
@@ -341,9 +387,14 @@ class _SmallBusinessCard extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(height: 16),
-          Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
+          Text(title,
+              style: AppTypography.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 4),
-          Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(subtitle,
+              style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ],
       ),
     );

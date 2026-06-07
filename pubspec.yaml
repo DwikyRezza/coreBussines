@@ -47,7 +47,6 @@ dependencies:
   firebase_auth: ^5.1.0
   cloud_firestore: ^5.1.0
   firebase_storage: ^12.1.0
-  flutter_dotenv: ^6.0.1
   image_picker: ^1.2.2
   google_generative_ai: ^0.4.7
   flutter_local_notifications: ^17.2.2
@@ -73,7 +72,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - .env
     - assets/images/
     - assets/icons/
     - assets/lottie/

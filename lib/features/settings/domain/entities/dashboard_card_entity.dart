@@ -23,16 +23,24 @@ class DashboardCardEntity extends Equatable {
   });
 
   DashboardCardEntity copyWith({
-    String? id, String? title, String? subtitle, String? iconName,
-    bool? isEnabled, int? sortOrder,
+    String? id,
+    String? title,
+    String? subtitle,
+    String? iconName,
+    bool? isEnabled,
+    int? sortOrder,
   }) {
     return DashboardCardEntity(
-      id: id ?? this.id, title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle, iconName: iconName ?? this.iconName,
-      isEnabled: isEnabled ?? this.isEnabled, sortOrder: sortOrder ?? this.sortOrder,
+      id: id ?? this.id,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      iconName: iconName ?? this.iconName,
+      isEnabled: isEnabled ?? this.isEnabled,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, subtitle, iconName, isEnabled, sortOrder];
+  List<Object?> get props =>
+      [id, title, subtitle, iconName, isEnabled, sortOrder];
 }

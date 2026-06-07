@@ -168,7 +168,8 @@ class SecurityVerificationHelper {
                     final val = pinController.text.trim();
                     if (val.length < 4 || val.length > 6) {
                       setDialogState(() {
-                        error = 'PIN harus terdiri dari 4 sampai 6 digit angka.';
+                        error =
+                            'PIN harus terdiri dari 4 sampai 6 digit angka.';
                       });
                       return;
                     }
@@ -250,8 +251,7 @@ class _SecurityVerificationDialogState
     });
 
     try {
-      final success =
-          await sl<AppLockRepository>().authenticateWithBiometric();
+      final success = await sl<AppLockRepository>().authenticateWithBiometric();
       if (!mounted) return;
       if (success) {
         Navigator.pop(context, true);
@@ -536,9 +536,8 @@ class _SecurityVerificationDialogState
                             )
                           else
                             IconButton(
-                              onPressed: _enteredPin.length >= 4
-                                  ? _verifyPin
-                                  : null,
+                              onPressed:
+                                  _enteredPin.length >= 4 ? _verifyPin : null,
                               iconSize: 32,
                               icon: Icon(
                                 Icons.check_circle_rounded,

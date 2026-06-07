@@ -93,7 +93,7 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                     // Apply client-side filters
                     final filteredDocs = docs.where((doc) {
                       final data = doc.data();
-                      
+
                       // 1. Filter Target Type
                       if (_selectedTargetType != 'all') {
                         final type = data['targetType'] as String? ?? '';
@@ -102,7 +102,8 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
 
                       // 2. Filter Staff
                       if (_selectedStaffName != null) {
-                        final performedBy = data['performedByName'] as String? ?? '';
+                        final performedBy =
+                            data['performedByName'] as String? ?? '';
                         if (performedBy != _selectedStaffName) return false;
                       }
 
@@ -113,13 +114,16 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                         final createdAt = createdAtStamp.toDate();
                         final now = DateTime.now();
                         if (_selectedDateRange == 'today') {
-                          final todayStart = DateTime(now.year, now.month, now.day);
+                          final todayStart =
+                              DateTime(now.year, now.month, now.day);
                           if (createdAt.isBefore(todayStart)) return false;
                         } else if (_selectedDateRange == 'week') {
-                          final weekStart = now.subtract(const Duration(days: 7));
+                          final weekStart =
+                              now.subtract(const Duration(days: 7));
                           if (createdAt.isBefore(weekStart)) return false;
                         } else if (_selectedDateRange == 'month') {
-                          final monthStart = now.subtract(const Duration(days: 30));
+                          final monthStart =
+                              now.subtract(const Duration(days: 30));
                           if (createdAt.isBefore(monthStart)) return false;
                         }
                       }
@@ -169,30 +173,34 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                 _FilterChip(
                   label: 'Semua Target',
                   selected: _selectedTargetType == 'all',
-                  onSelected: (val) => setState(() => _selectedTargetType = 'all'),
+                  onSelected: (val) =>
+                      setState(() => _selectedTargetType = 'all'),
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Transaksi',
                   selected: _selectedTargetType == 'transaction',
-                  onSelected: (val) => setState(() => _selectedTargetType == 'transaction'),
+                  onSelected: (val) =>
+                      setState(() => _selectedTargetType == 'transaction'),
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Karyawan',
                   selected: _selectedTargetType == 'employee',
-                  onSelected: (val) => setState(() => _selectedTargetType == 'employee'),
+                  onSelected: (val) =>
+                      setState(() => _selectedTargetType == 'employee'),
                 ),
                 const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Dompet',
                   selected: _selectedTargetType == 'wallet',
-                  onSelected: (val) => setState(() => _selectedTargetType == 'wallet'),
+                  onSelected: (val) =>
+                      setState(() => _selectedTargetType == 'wallet'),
                 ),
               ],
             ),
           ),
-          
+
           // Staff and Date Row
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -221,7 +229,8 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                       return DropdownButtonFormField<String?>(
                         value: _selectedStaffName,
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           isDense: true,
                           labelText: 'Pilih Staff',
                           labelStyle: AppTypography.textTheme.bodySmall,
@@ -230,10 +239,13 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                           ),
                         ),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text('Semua Staff')),
-                          ...staffNames.map((name) => DropdownMenuItem(value: name, child: Text(name))),
+                          const DropdownMenuItem(
+                              value: null, child: Text('Semua Staff')),
+                          ...staffNames.map((name) =>
+                              DropdownMenuItem(value: name, child: Text(name))),
                         ],
-                        onChanged: (val) => setState(() => _selectedStaffName = val),
+                        onChanged: (val) =>
+                            setState(() => _selectedStaffName = val),
                       );
                     },
                   ),
@@ -244,7 +256,8 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                   child: DropdownButtonFormField<String>(
                     value: _selectedDateRange,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                       labelText: 'Periode Waktu',
                       labelStyle: AppTypography.textTheme.bodySmall,
@@ -253,10 +266,13 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                       ),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'all', child: Text('Semua Waktu')),
+                      DropdownMenuItem(
+                          value: 'all', child: Text('Semua Waktu')),
                       DropdownMenuItem(value: 'today', child: Text('Hari Ini')),
-                      DropdownMenuItem(value: 'week', child: Text('7 Hari Terakhir')),
-                      DropdownMenuItem(value: 'month', child: Text('30 Hari Terakhir')),
+                      DropdownMenuItem(
+                          value: 'week', child: Text('7 Hari Terakhir')),
+                      DropdownMenuItem(
+                          value: 'month', child: Text('30 Hari Terakhir')),
                     ],
                     onChanged: (val) {
                       if (val != null) {
@@ -273,7 +289,8 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
     );
   }
 
-  Widget _buildLogCard(BuildContext context, ColorScheme colors, Map<String, dynamic> data, String docId) {
+  Widget _buildLogCard(BuildContext context, ColorScheme colors,
+      Map<String, dynamic> data, String docId) {
     final description = data['description'] as String? ?? '';
     final performedByName = data['performedByName'] as String? ?? 'Seseorang';
     final performedByRole = data['performedByRole'] as String? ?? '';
@@ -371,13 +388,17 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isFilterEmpty ? Icons.filter_list_off_rounded : Icons.history_toggle_off_rounded,
+              isFilterEmpty
+                  ? Icons.filter_list_off_rounded
+                  : Icons.history_toggle_off_rounded,
               size: 72,
               color: colors.outline.withAlpha(128),
             ),
             const SizedBox(height: 16),
             Text(
-              isFilterEmpty ? 'Tidak ada hasil filter' : 'Belum ada aktivitas tercatat',
+              isFilterEmpty
+                  ? 'Tidak ada hasil filter'
+                  : 'Belum ada aktivitas tercatat',
               style: AppTypography.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

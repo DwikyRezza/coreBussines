@@ -17,6 +17,86 @@ service cloud.firestore {
         get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid)).data.role == 'owner';
     }
 
+    function memberData(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid)).data;
+    }
+
+    function isActiveBusinessMember(businessId) {
+      return isBusinessMember(businessId) &&
+        memberData(businessId).status in ['active', 'used'];
+    }
+
+    function hasPermission(businessId, permission) {
+      return isBusinessOwner(businessId) ||
+        (
+          isActiveBusinessMember(businessId) &&
+          (
+            (
+              memberData(businessId).permissions is list &&
+              permission in memberData(businessId).permissions
+            ) ||
+            roleHasPermission(memberData(businessId).role, permission)
+          )
+        );
+    }
+
+    function roleHasPermission(role, permission) {
+      return (
+        role == 'admin' &&
+        permission in [
+          'canCreateTransaction',
+          'canEditTransaction',
+          'canViewAllTransactions',
+          'canViewWalletBalance',
+          'canManageEmployees',
+          'canInviteEmployees',
+          'canManageInventory',
+          'canManageCatalog',
+          'canViewAnalytics',
+          'canExportReport'
+        ]
+      ) || (
+        role == 'finance' &&
+        permission in [
+          'canCreateTransaction',
+          'canEditTransaction',
+          'canViewAllTransactions',
+          'canViewWalletBalance',
+          'canViewAnalytics',
+          'canExportReport'
+        ]
+      ) || (
+        role in ['cashier', 'sales', 'secretary'] &&
+        permission in [
+          'canCreateTransaction',
+          'canViewOwnTransactions',
+          'canUploadReceipt',
+          'canViewLimitedDashboard'
+        ]
+      ) || (
+        role in ['inventory', 'inventory staff'] &&
+        permission in [
+          'canManageInventory',
+          'canViewReports'
+        ]
+      ) || (
+        role == 'manager' &&
+        permission in [
+          'canAccessDivisionData',
+          'canApproveTransaction',
+          'canRejectTransaction',
+          'canViewAnalytics',
+          'canViewStaffPerformance'
+        ]
+      ) || (
+        role in ['viewer', 'auditor'] &&
+        permission in [
+          'canViewReports',
+          'canViewAuditLog'
+        ]
+      );
+    }
+
     function hasPendingInvite(businessId) {
       return signedIn() &&
         request.resource.data.user_id == request.auth.uid &&
@@ -25,6 +105,32 @@ service cloud.firestore {
         get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.user_id == null &&
         get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.status == 'active' &&
         get(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.resource.data.email)).data.role == request.resource.data.role;
+    }
+
+    function hasValidInviteDocument(businessId) {
+      return signedIn() &&
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.invite_id is string &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/invites/$(request.resource.data.invite_id)) &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/invites/$(request.resource.data.invite_id)).data.email == request.auth.token.email &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/invites/$(request.resource.data.invite_id)).data.status == 'active' &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/invites/$(request.resource.data.invite_id)).data.role == request.resource.data.role;
+    }
+
+    function transactionCreatorIsRequester() {
+      return request.resource.data.createdByUserId == request.auth.uid ||
+        request.resource.data.created_by_user_id == request.auth.uid;
+    }
+
+    function transactionBusinessMatches(businessId) {
+      return request.resource.data.businessId == businessId ||
+        request.resource.data.business_id == businessId;
+    }
+
+    function preservesOwnerRole() {
+      return resource.data.role != 'owner' ||
+        request.resource.data.role == 'owner';
     }
 
     match /users/{userId} {
@@ -38,20 +144,28 @@ service cloud.firestore {
       allow update, delete: if isBusinessOwner(businessId);
 
       match /members/{memberId} {
-        allow read: if isBusinessMember(businessId);
+        allow read: if isActiveBusinessMember(businessId);
         allow create: if signedIn() &&
           (
-            isBusinessOwner(businessId) ||
+            ((isBusinessOwner(businessId) || hasPermission(businessId, 'canInviteEmployees')) && request.resource.data.role != 'owner') ||
             (
               memberId == request.auth.uid &&
               (
                 (!exists(/databases/$(database)/documents/businesses/$(businessId)) && request.resource.data.role == 'owner') ||
                 (exists(/databases/$(database)/documents/businesses/$(businessId)) && get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid) ||
-                hasPendingInvite(businessId)
+                hasPendingInvite(businessId) ||
+                hasValidInviteDocument(businessId)
               )
             )
           );
-        allow update: if isBusinessOwner(businessId) ||
+        allow update: if (
+            (isBusinessOwner(businessId) || hasPermission(businessId, 'canManageEmployees')) &&
+            preservesOwnerRole() &&
+            (
+              resource.data.role == 'owner' ||
+              request.resource.data.role != 'owner'
+            )
+          ) ||
           (
             resource.data.email == request.auth.token.email &&
             resource.data.user_id == null &&
@@ -59,55 +173,99 @@ service cloud.firestore {
             request.resource.data.status == 'used' &&
             request.resource.data.role == resource.data.role
           );
+        allow delete: if isBusinessOwner(businessId) &&
+          resource.data.role != 'owner';
+      }
+
+      match /invites/{inviteId} {
+        allow read: if isBusinessOwner(businessId) ||
+          hasPermission(businessId, 'canInviteEmployees') ||
+          (
+            signedIn() &&
+            resource.data.email == request.auth.token.email
+          );
+        allow create: if (isBusinessOwner(businessId) || hasPermission(businessId, 'canInviteEmployees')) &&
+          request.resource.data.email is string &&
+          request.resource.data.role != 'owner' &&
+          request.resource.data.status == 'active';
+        allow update: if isBusinessOwner(businessId) ||
+          hasPermission(businessId, 'canInviteEmployees') ||
+          (
+            signedIn() &&
+            resource.data.email == request.auth.token.email &&
+            resource.data.status == 'active' &&
+            request.resource.data.email == resource.data.email &&
+            request.resource.data.role == resource.data.role &&
+            request.resource.data.status == 'used' &&
+            request.resource.data.user_id == request.auth.uid
+          );
         allow delete: if isBusinessOwner(businessId);
       }
 
       match /wallets/{walletId} {
-        allow read: if isBusinessMember(businessId);
-        allow create: if isBusinessMember(businessId) ||
+        allow read: if isActiveBusinessMember(businessId) &&
+          (hasPermission(businessId, 'canViewWalletBalance') || hasPermission(businessId, 'canManageWallet'));
+        allow create: if hasPermission(businessId, 'canManageWallet') ||
           (
             !exists(/databases/$(database)/documents/businesses/$(businessId)) &&
             signedIn()
           );
-        allow update: if isBusinessMember(businessId);
+        allow update: if hasPermission(businessId, 'canManageWallet') ||
+          (
+            isActiveBusinessMember(businessId) &&
+            request.resource.data.diff(resource.data).changedKeys().hasOnly(['balance', 'updated_at', 'updatedAt'])
+          );
         allow delete: if isBusinessOwner(businessId);
       }
 
       match /categories/{categoryId} {
-        allow read: if isBusinessMember(businessId);
-        allow write: if isBusinessOwner(businessId);
+        allow read: if isActiveBusinessMember(businessId);
+        allow write: if isBusinessOwner(businessId) ||
+          hasPermission(businessId, 'canManageBusinessSettings');
       }
 
       match /transactions/{transactionId} {
-        allow read: if isBusinessMember(businessId);
-        allow create: if isBusinessMember(businessId) &&
-          request.resource.data.createdByUserId == request.auth.uid &&
-          request.resource.data.businessId == businessId;
-        allow update: if isBusinessMember(businessId) &&
-          resource.data.createdByUserId == request.resource.data.createdByUserId;
-        allow delete: if isBusinessMember(businessId);
+        allow read: if isActiveBusinessMember(businessId) &&
+          (
+            hasPermission(businessId, 'canViewAllTransactions') ||
+            resource.data.createdByUserId == request.auth.uid ||
+            resource.data.created_by_user_id == request.auth.uid
+          );
+        allow create: if hasPermission(businessId, 'canCreateTransaction') &&
+          transactionCreatorIsRequester() &&
+          transactionBusinessMatches(businessId);
+        allow update: if hasPermission(businessId, 'canEditTransaction') &&
+          (
+            resource.data.createdByUserId == request.resource.data.createdByUserId ||
+            resource.data.created_by_user_id == request.resource.data.created_by_user_id
+          );
+        allow delete: if hasPermission(businessId, 'canDeleteTransaction');
       }
 
       match /notifications/{notificationId} {
         // Hanya target user yang bisa baca notifikasi miliknya
-        allow read: if isBusinessMember(businessId) &&
+        allow read: if isActiveBusinessMember(businessId) &&
           resource.data.targetUserId == request.auth.uid;
 
         // Setiap member bisnis bisa membuat notifikasi untuk member lain di bisnis
         // yang sama (misal: Owner mengirim notifikasi ke Staff)
-        allow create: if isBusinessMember(businessId);
+        allow create: if isActiveBusinessMember(businessId);
 
         // Hanya target user yang bisa update/delete (misal: mark as read)
-        allow update, delete: if isBusinessMember(businessId) &&
+        allow update, delete: if isActiveBusinessMember(businessId) &&
           resource.data.targetUserId == request.auth.uid;
       }
 
       match /activity_logs/{logId} {
         // Hanya Owner yang bisa membaca audit log
-        allow read: if isBusinessOwner(businessId);
+        allow read: if isBusinessOwner(businessId) ||
+          hasPermission(businessId, 'canViewAuditLog');
         // Semua member bisa mencatat aktivitas, tapi harus atas nama diri sendiri
-        allow create: if isBusinessMember(businessId) &&
-          request.resource.data.performedByUserId == request.auth.uid;
+        allow create: if isActiveBusinessMember(businessId) &&
+          (
+            request.resource.data.performedByUserId == request.auth.uid ||
+            request.resource.data.performed_by_user_id == request.auth.uid
+          );
         // Log tidak boleh diubah atau dihapus (immutable audit trail)
         allow update, delete: if false;
       }

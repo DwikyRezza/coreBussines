@@ -116,7 +116,7 @@ class TransactionInput extends Equatable {
     this.source = 'manual',
   });
 
-  bool get requiresReceipt => source == 'manual';
+  bool get requiresReceipt => false;
 
   @override
   List<Object?> get props => [
@@ -204,7 +204,8 @@ class TransactionCategory extends Equatable {
     };
   }
 
-  factory TransactionCategory.fromFirestore(Map<String, dynamic> data, String docId) {
+  factory TransactionCategory.fromFirestore(
+      Map<String, dynamic> data, String docId) {
     return TransactionCategory(
       id: docId,
       name: data['name'] as String? ?? '',

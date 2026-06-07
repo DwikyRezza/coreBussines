@@ -21,7 +21,7 @@ abstract class AppFormatter {
   static String currency(double amount, {bool showSign = false}) {
     final symbol = _currencySymbol;
     final locale = symbol.contains('\$') ? 'en_US' : 'id_ID';
-    
+
     final formatter = NumberFormat.currency(
       locale: locale,
       symbol: symbol,
@@ -38,10 +38,12 @@ abstract class AppFormatter {
     final sign = amount >= 0 ? '+' : '-';
     final symbol = _currencySymbol;
     final isUsd = symbol.contains('\$');
-    
+
     if (abs >= 1000000) {
       final val = abs / 1000000;
-      final formattedVal = isUsd ? val.toStringAsFixed(1) : val.toStringAsFixed(1).replaceAll('.', ',');
+      final formattedVal = isUsd
+          ? val.toStringAsFixed(1)
+          : val.toStringAsFixed(1).replaceAll('.', ',');
       final suffix = isUsd ? 'M' : 'jt';
       return '$sign$symbol$formattedVal$suffix';
     } else if (abs >= 1000) {

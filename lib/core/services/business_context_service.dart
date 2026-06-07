@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+import '../security/permission_policy.dart';
 import '../storage/local_storage_service.dart';
 
 class BusinessContext {
@@ -10,6 +11,8 @@ class BusinessContext {
   final String userEmail;
   final String? userPhotoUrl;
   final String role;
+  final String memberStatus;
+  final List<String> permissions;
 
   const BusinessContext({
     required this.businessId,
@@ -17,11 +20,16 @@ class BusinessContext {
     required this.userName,
     required this.userEmail,
     required this.role,
+    this.memberStatus = 'active',
+    this.permissions = const <String>[],
     this.userPhotoUrl,
   });
 
   bool get isOwner => role == 'owner';
   bool get isStaff => role == 'staff' || role == 'karyawan';
+  bool hasPermission(String permission) {
+    return PermissionPolicy.hasPermission(permissions, permission);
+  }
 }
 
 class BusinessContextService {
@@ -78,6 +86,11 @@ class BusinessContextService {
     final photoUrl = (userData['avatar_url'] as String?) ?? user.photoURL;
 
     String role = 'owner';
+    String memberStatus = 'active';
+    List<String> permissions = PermissionPolicy.resolvePermissions(
+      role: role,
+      explicitPermissions: const <String>[],
+    );
     if (!memberSnapshot.exists) {
       final businessSnapshot =
           await _firestore.collection('businesses').doc(businessId).get();
@@ -91,6 +104,7 @@ class BusinessContextService {
           'email': email,
           'photo_url': photoUrl,
           'role': 'owner',
+          'permissions': permissions,
           'status': 'active',
           'joined_at': FieldValue.serverTimestamp(),
           'updated_at': FieldValue.serverTimestamp(),
@@ -134,6 +148,7 @@ class BusinessContextService {
             'email': email,
             'photo_url': photoUrl,
             'role': 'owner',
+            'permissions': permissions,
             'status': 'active',
             'joined_at': FieldValue.serverTimestamp(),
             'updated_at': FieldValue.serverTimestamp(),
@@ -156,6 +171,12 @@ class BusinessContextService {
       }
 
       role = memberSnapshot.data()?['role'] as String? ?? 'staff';
+      memberStatus = status;
+      permissions = PermissionPolicy.resolvePermissions(
+        role: role,
+        explicitPermissions:
+            List<String>.from(memberSnapshot.data()?['permissions'] ?? []),
+      );
       await memberRef.set({
         'name': name,
         'email': email,
@@ -164,6 +185,12 @@ class BusinessContextService {
       }, SetOptions(merge: true));
     }
 
+    await _localStorage.setActiveMemberAccess(
+      role: role,
+      status: memberStatus,
+      permissions: permissions,
+    );
+
     return BusinessContext(
       businessId: businessId,
       userId: user.uid,
@@ -171,6 +198,8 @@ class BusinessContextService {
       userEmail: email,
       userPhotoUrl: photoUrl,
       role: role,
+      memberStatus: memberStatus,
+      permissions: permissions,
     );
   }
 
@@ -196,6 +225,18 @@ class BusinessContextService {
         }
       }
       final role = snapshot.data()?['role'] as String? ?? context.role;
+      final permissions = PermissionPolicy.resolvePermissions(
+        role: role,
+        explicitPermissions:
+            List<String>.from(snapshot.data()?['permissions'] ?? []),
+      );
+      final memberStatus =
+          snapshot.data()?['status'] as String? ?? context.memberStatus;
+      await _localStorage.setActiveMemberAccess(
+        role: role,
+        status: memberStatus,
+        permissions: permissions,
+      );
       yield BusinessContext(
         businessId: context.businessId,
         userId: context.userId,
@@ -203,6 +244,8 @@ class BusinessContextService {
         userEmail: context.userEmail,
         userPhotoUrl: context.userPhotoUrl,
         role: role,
+        memberStatus: memberStatus,
+        permissions: permissions,
       );
     }
   }

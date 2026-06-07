@@ -43,7 +43,9 @@ class BusinessScorePage extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFE3F2FD), width: 8), // Inner track
+                      border: Border.all(
+                          color: const Color(0xFFE3F2FD),
+                          width: 8), // Inner track
                     ),
                   ),
                   SizedBox(
@@ -52,7 +54,9 @@ class BusinessScorePage extends StatelessWidget {
                     child: CircularProgressIndicator(
                       value: 0.82,
                       strokeWidth: 8,
-                      color: Theme.of(context).colorScheme.primary, // Outer progress
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary, // Outer progress
                       backgroundColor: Colors.transparent,
                     ),
                   ),
@@ -81,9 +85,12 @@ class BusinessScorePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.trending_up_rounded, color: Theme.of(context).colorScheme.onSurface, size: 16),
+                Icon(Icons.trending_up_rounded,
+                    color: Theme.of(context).colorScheme.onSurface, size: 16),
                 const SizedBox(width: 8),
-                Text('Sehat & Bertumbuh', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                Text('Sehat & Bertumbuh',
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface)),
               ],
             ),
             const SizedBox(height: 32),
@@ -96,7 +103,8 @@ class BusinessScorePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -107,15 +115,22 @@ class BusinessScorePage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.psychology_outlined, color: Theme.of(context).colorScheme.primary, size: 24),
+                      Icon(Icons.psychology_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24),
                       const SizedBox(width: 8),
-                      Text('Evaluasi AI', style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
+                      Text('Evaluasi AI',
+                          style: AppTypography.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface)),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Kesehatan bisnis Anda dalam kondisi prima. Likuiditas terjaga dengan baik, memungkinkan ekspansi operasional. Disarankan untuk mulai mengalokasikan 15% dari surplus bulan ini ke instrumen investasi jangka pendek untuk memaksimalkan idle cash.',
-                    style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.5),
                   ),
                 ],
               ),
@@ -170,7 +185,8 @@ class BusinessScorePage extends StatelessWidget {
             // Key Performance Indicators
             Text(
               'Indikator Kinerja Utama',
-              style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: AppTypography.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: AppSpacing.md),
             Container(
@@ -179,7 +195,8 @@ class BusinessScorePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -193,14 +210,18 @@ class BusinessScorePage extends StatelessWidget {
                     trend: '12%',
                     isPositiveTrend: true,
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _KpiRow(
                     title: 'Biaya Operasional',
                     amount: 'Rp 18.500.000',
                     trend: '3%',
                     isPositiveTrend: false,
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _KpiRow(
                     title: 'Arus Kas Masuk',
                     amount: 'Rp 60.200.000',
@@ -258,7 +279,8 @@ class _MetricCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                decoration:
+                    BoxDecoration(color: iconBg, shape: BoxShape.circle),
                 child: Icon(icon, color: iconColor, size: 20),
               ),
               Container(
@@ -267,14 +289,22 @@ class _MetricCard extends StatelessWidget {
                   color: const Color(0xFFE3F2FD),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(score, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                child: Text(score,
+                    style: AppTypography.textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600)),
               ),
             ],
           ),
           const Spacer(),
-          Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(title,
+              style: AppTypography.textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text(value, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
+          Text(value,
+              style: AppTypography.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface)),
         ],
       ),
     );
@@ -304,29 +334,42 @@ class _KpiRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+              Text(title,
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(amount, style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text(amount,
+                  style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isPositiveTrend ? const Color(0xFFF0FFF4) : const Color(0xFFFFF5F5),
+              color: isPositiveTrend
+                  ? const Color(0xFFF0FFF4)
+                  : const Color(0xFFFFF5F5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
-                  isPositiveTrend ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                  color: isPositiveTrend ? const Color(0xFF38A169) : const Color(0xFFE53E3E),
+                  isPositiveTrend
+                      ? Icons.arrow_upward_rounded
+                      : Icons.arrow_downward_rounded,
+                  color: isPositiveTrend
+                      ? const Color(0xFF38A169)
+                      : const Color(0xFFE53E3E),
                   size: 14,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   trend,
                   style: AppTypography.textTheme.labelSmall?.copyWith(
-                    color: isPositiveTrend ? const Color(0xFF38A169) : const Color(0xFFE53E3E),
+                    color: isPositiveTrend
+                        ? const Color(0xFF38A169)
+                        : const Color(0xFFE53E3E),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

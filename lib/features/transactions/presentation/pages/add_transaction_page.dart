@@ -10,7 +10,6 @@
 // - Auto-refresh Home on success
 // ============================================================
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,8 +29,6 @@ import '../../domain/repositories/transaction_repository.dart';
 import '../bloc/transaction_bloc.dart';
 import 'package:dartz/dartz.dart' hide State;
 import '../../../../core/error/failures.dart';
-
-
 
 class AddTransactionPage extends StatefulWidget {
   final int initialType;
@@ -76,7 +73,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   bool _firstTimeCategoryLoad = true;
   List<TransactionCategory> _currentCategories = [];
-  
+
   final Map<String, IconData> _iconList = {
     'food': Icons.restaurant_rounded,
     'transport': Icons.directions_car_rounded,
@@ -199,9 +196,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       );
       return;
     }
-    if (widget.isManualReceipt && (_receiptImagePath == null || _receiptImagePath!.isEmpty)) {
+    if (widget.isManualReceipt &&
+        (_receiptImagePath == null || _receiptImagePath!.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bukti pembayaran wajib dilampirkan untuk input manual.')),
+        const SnackBar(
+            content:
+                Text('Bukti pembayaran wajib dilampirkan untuk input manual.')),
       );
       return;
     }
@@ -308,38 +308,55 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           if (widget.isManualReceipt) ...[
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primaryContainer.withAlpha(76),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer
+                                    .withAlpha(76),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.primary.withAlpha(51),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withAlpha(51),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.receipt_long_rounded,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     size: 22,
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Mode Input Manual',
-                                          style: AppTypography.textTheme.labelLarge?.copyWith(
+                                          style: AppTypography
+                                              .textTheme.labelLarge
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).colorScheme.primary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           'Foto bukti pembayaran wajib dilampirkan.',
-                                          style: AppTypography.textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          style: AppTypography
+                                              .textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -378,7 +395,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
-                           // ── Category ─────────────────────────────────
+                          // ── Category ─────────────────────────────────
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -390,18 +407,22 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               IconButton(
                                 icon: const Icon(Icons.settings_outlined),
                                 tooltip: 'Kelola Kategori',
-                                onPressed: () => context.push(AppRoutes.categoryManagement),
+                                onPressed: () =>
+                                    context.push(AppRoutes.categoryManagement),
                               ),
                             ],
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          StreamBuilder<Either<Failure, List<TransactionCategory>>>(
+                          StreamBuilder<
+                              Either<Failure, List<TransactionCategory>>>(
                             stream: _repository.watchCategories(),
                             builder: (context, snapshot) {
                               if (snapshot.hasError) {
                                 return Text(
                                   'Gagal memuat kategori: ${snapshot.error}',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.error),
                                 );
                               }
                               if (!snapshot.hasData) {
@@ -416,29 +437,39 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               return snapshot.data!.fold(
                                 (failure) => Text(
                                   'Gagal memuat kategori: ${failure.message}',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.error),
                                 ),
                                 (allCategories) {
                                   final isCurrentIncome = _transactionType == 1;
                                   final categories = allCategories
-                                      .where((c) => c.isIncome == isCurrentIncome)
+                                      .where(
+                                          (c) => c.isIncome == isCurrentIncome)
                                       .toList();
 
                                   if (categories.isEmpty) {
-                                    return const Text('Tidak ada kategori tersedia.');
+                                    return const Text(
+                                        'Tidak ada kategori tersedia.');
                                   }
 
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
                                     if (mounted) {
                                       _currentCategories = categories;
-                                      if (_selectedCategoryIndex >= categories.length) {
+                                      if (_selectedCategoryIndex >=
+                                          categories.length) {
                                         setState(() {
                                           _selectedCategoryIndex = 0;
                                         });
                                       }
-                                      if (widget.initialCategory != null && _firstTimeCategoryLoad) {
+                                      if (widget.initialCategory != null &&
+                                          _firstTimeCategoryLoad) {
                                         final idx = categories.indexWhere(
-                                          (c) => c.name.toLowerCase() == widget.initialCategory!.toLowerCase(),
+                                          (c) =>
+                                              c.name.toLowerCase() ==
+                                              widget.initialCategory!
+                                                  .toLowerCase(),
                                         );
                                         if (idx != -1) {
                                           setState(() {
@@ -453,14 +484,17 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   return Wrap(
                                     spacing: 8,
                                     runSpacing: 10,
-                                    children: List.generate(categories.length, (i) {
+                                    children:
+                                        List.generate(categories.length, (i) {
                                       final cat = categories[i];
-                                      final icon = _iconList[cat.iconKey] ?? Icons.category_rounded;
+                                      final icon = _iconList[cat.iconKey] ??
+                                          Icons.category_rounded;
                                       return _CategoryChip(
                                         icon: icon,
                                         label: cat.name,
                                         isSelected: _selectedCategoryIndex == i,
-                                        onTap: () => setState(() => _selectedCategoryIndex = i),
+                                        onTap: () => setState(
+                                            () => _selectedCategoryIndex = i),
                                       );
                                     }),
                                   );
@@ -491,8 +525,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   _selectedWalletId == null) {
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
-                                  if (!mounted || _selectedWalletId != null)
+                                  if (!mounted || _selectedWalletId != null) {
                                     return;
+                                  }
                                   setState(() {
                                     _selectedWalletId = wallets.first.id;
                                     _selectedWalletName = wallets.first.name;
@@ -597,16 +632,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             hint: 'Tambahkan deskripsi transaksi di sini...',
                             maxLines: 4,
                           ),
-                          const SizedBox(height: AppSpacing.xl),
 
-                          // ── Attachment Card ─────────────────────────
-                          _ReceiptPickerCard(
-                            imagePath: _receiptImagePath,
-                            onCamera: () => _pickReceipt(ImageSource.camera),
-                            onGallery: () => _pickReceipt(ImageSource.gallery),
-                            onRemove: () =>
-                                setState(() => _receiptImagePath = null),
-                          ),
                           const SizedBox(height: AppSpacing.xl),
 
                           // ── Recurring Toggle ─────────────────────────
@@ -1060,22 +1086,38 @@ class _ReceiptPickerCard extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(imagePath!),
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
+                      child: FutureBuilder<Uint8List>(
+                        future: XFile(imagePath!).readAsBytes(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const SizedBox(
+                              width: 56,
+                              height: 56,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          }
+                          return Image.memory(
+                            snapshot.data!,
                             width: 56,
                             height: 56,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            child: Icon(
-                              Icons.receipt_long,
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 56,
+                                height: 56,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                child: Icon(
+                                  Icons.receipt_long,
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

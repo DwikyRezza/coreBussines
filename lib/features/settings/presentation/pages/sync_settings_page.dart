@@ -54,17 +54,27 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.cloud_done_outlined, color: Theme.of(context).colorScheme.primary, size: 40),
+                    child: Icon(Icons.cloud_done_outlined,
+                        color: Theme.of(context).colorScheme.primary, size: 40),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -85,23 +95,31 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                   ElevatedButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Data terbaru sudah tersinkron ke cloud')),
+                        const SnackBar(
+                            content:
+                                Text('Data terbaru sudah tersinkron ke cloud')),
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color(0xFFE3F2FD),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.cloud_upload_outlined, color: Theme.of(context).colorScheme.primary, size: 18),
+                        Icon(Icons.cloud_upload_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 18),
                         const SizedBox(width: 8),
                         Text(
                           'Cadangkan Sekarang',
-                          style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                          style: AppTypography.textTheme.labelLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -120,13 +138,21 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Toggles
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
@@ -137,7 +163,9 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                     value: _autoSync,
                     onChanged: (val) => setState(() => _autoSync = val),
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsToggle(
                     icon: Icons.wifi_rounded,
                     title: 'Hanya melalui Wi-Fi',
@@ -156,7 +184,15 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
@@ -165,19 +201,35 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.cloud_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                        child: Icon(Icons.cloud_outlined,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            size: 20),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Penyimpanan Cloud', style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                            Text('Penyimpanan Cloud',
+                                style: AppTypography.textTheme.titleMedium
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface)),
                             const SizedBox(height: 4),
-                            Text('Terkoneksi ke akun Utama', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                            Text('Terkoneksi ke akun Utama',
+                                style: AppTypography.textTheme.bodyMedium
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline)),
                           ],
                         ),
                       ),
@@ -188,8 +240,10 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: 0.05, // 45MB / 5GB approx
-                      backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.outlineVariant,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary),
                       minHeight: 8,
                     ),
                   ),
@@ -197,8 +251,13 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('45MB digunakan', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
-                      Text('5GB total', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                      Text('45MB digunakan',
+                          style: AppTypography.textTheme.labelMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600)),
+                      Text('5GB total',
+                          style: AppTypography.textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline)),
                     ],
                   ),
                 ],
@@ -239,16 +298,23 @@ class _SettingsToggle extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+            child: Icon(icon,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                Text(title,
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                Text(subtitle,
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.outline)),
               ],
             ),
           ),
@@ -256,7 +322,8 @@ class _SettingsToggle extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: Colors.white,
-            activeTrackColor: Theme.of(context).colorScheme.primary, // Deep blue
+            activeTrackColor:
+                Theme.of(context).colorScheme.primary, // Deep blue
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
           ),

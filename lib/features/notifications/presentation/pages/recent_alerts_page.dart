@@ -178,7 +178,8 @@ class _RecentAlertsPageState extends State<RecentAlertsPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline_rounded, size: 64, color: colors.error),
+                    Icon(Icons.error_outline_rounded,
+                        size: 64, color: colors.error),
                     const SizedBox(height: 16),
                     Text(
                       'Gagal memuat notifikasi',

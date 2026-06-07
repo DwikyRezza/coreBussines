@@ -26,7 +26,8 @@ class _WalletsPageState extends State<WalletsPage> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _localStorage = sl<LocalStorageService>();
-  final _fmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final _fmt =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   bool _isLoading = true;
   double _totalNetWorth = 0;
@@ -55,9 +56,10 @@ class _WalletsPageState extends State<WalletsPage> {
 
       String? businessId = _localStorage.activeBusinessId;
       if (businessId == null) {
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
-        businessId =
-            userDoc.data()?['active_business_id'] as String? ?? 'business_${user.uid}';
+        final userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        businessId = userDoc.data()?['active_business_id'] as String? ??
+            'business_${user.uid}';
         await _localStorage.setActiveBusinessId(businessId);
       }
 
@@ -154,7 +156,8 @@ class _WalletsPageState extends State<WalletsPage> {
               onRefresh: _loadWallets,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pagePadding),
                 child: Column(
                   children: [
                     const SizedBox(height: AppSpacing.xl),
@@ -184,15 +187,23 @@ class _WalletsPageState extends State<WalletsPage> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.add, color: Colors.white, size: 18),
+                              const Icon(Icons.add,
+                                  color: Colors.white, size: 18),
                               const SizedBox(width: 8),
-                              Text('Tambah Dana', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                              Text('Tambah Dana',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -200,16 +211,26 @@ class _WalletsPageState extends State<WalletsPage> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                             backgroundColor: const Color(0xFFE3F2FD),
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.swap_horiz_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
+                              Icon(Icons.swap_horiz_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 18),
                               const SizedBox(width: 8),
-                              Text('Transfer', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                              Text('Transfer',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -249,11 +270,18 @@ class _WalletsPageState extends State<WalletsPage> {
                         child: Column(
                           children: [
                             Icon(Icons.account_balance_wallet_outlined,
-                                size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4)),
+                                size: 48,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.4)),
                             const SizedBox(height: 12),
                             Text('Belum ada dompet',
                                 style: AppTypography.textTheme.bodyMedium
-                                    ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant)),
                           ],
                         ),
                       )
@@ -327,14 +355,19 @@ class _WalletCard extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                    decoration:
+                        BoxDecoration(color: iconBg, shape: BoxShape.circle),
                     child: Icon(icon, color: iconColor, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text(title,
+                      style: AppTypography.textTheme.titleMedium?.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
-              Icon(Icons.more_horiz_rounded, color: Theme.of(context).colorScheme.outline),
+              Icon(Icons.more_horiz_rounded,
+                  color: Theme.of(context).colorScheme.outline),
             ],
           ),
           const SizedBox(height: 24),
@@ -348,9 +381,15 @@ class _WalletCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Container(width: 8, height: 8, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle)),
+              Container(
+                  width: 8,
+                  height: 8,
+                  decoration:
+                      BoxDecoration(color: dotColor, shape: BoxShape.circle)),
               const SizedBox(width: 8),
-              Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+              Text(subtitle,
+                  style: AppTypography.textTheme.bodyMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.outline)),
             ],
           ),
         ],

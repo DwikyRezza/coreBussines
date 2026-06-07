@@ -8,6 +8,7 @@
 // ============================================================
 
 import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -73,9 +74,12 @@ Future<void> initDependencies() async {
   // ─── External Dependencies ────────────────────────────────
   sl.registerLazySingleton<GoogleSignIn>(
     () => GoogleSignIn(
-      serverClientId: AppConfig.googleWebClientId.isEmpty
-          ? null
-          : AppConfig.googleWebClientId,
+      clientId: kIsWeb && AppConfig.googleWebClientId.isNotEmpty
+          ? AppConfig.googleWebClientId
+          : null,
+      serverClientId: !kIsWeb && AppConfig.googleWebClientId.isNotEmpty
+          ? AppConfig.googleWebClientId
+          : null,
       scopes: ['email', 'profile'],
     ),
   );

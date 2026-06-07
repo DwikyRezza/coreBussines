@@ -3,6 +3,7 @@
 // lib/features/notifications/data/services/notification_service.dart
 // ============================================================
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -10,6 +11,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
+    if (kIsWeb) return;
     // Android Settings (uses the standard launcher icon)
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -22,7 +24,8 @@ class NotificationService {
       requestSoundPermission: true,
     );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
     );
@@ -39,6 +42,7 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
+    if (kIsWeb) return;
     // Request permission for Android
     final androidImplementation =
         _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
@@ -61,11 +65,13 @@ class NotificationService {
   }
 
   Future<void> showInstantNotification(String title, String body) async {
+    if (kIsWeb) return;
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
       'corebusiness_channel_id',
       'CoreBusiness Alerts',
-      channelDescription: 'Pemberitahuan instan aktivitas aplikasi CoreBusiness',
+      channelDescription:
+          'Pemberitahuan instan aktivitas aplikasi CoreBusiness',
       importance: Importance.max,
       priority: Priority.high,
       ticker: 'ticker',
@@ -73,7 +79,8 @@ class NotificationService {
       enableVibration: true,
     );
 
-    const DarwinNotificationDetails iosNotificationDetails = DarwinNotificationDetails(
+    const DarwinNotificationDetails iosNotificationDetails =
+        DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
@@ -86,7 +93,7 @@ class NotificationService {
 
     // Generate a unique ID using the current millisecond timestamp
     final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    
+
     await _flutterLocalNotificationsPlugin.show(
       id,
       title,

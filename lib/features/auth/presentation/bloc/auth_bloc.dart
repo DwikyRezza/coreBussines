@@ -34,7 +34,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     emit(const AuthLoading());
 
-    final result = await _signInWithGoogle(SignInWithGoogleParams(isRegister: event.isRegister));
+    final result = await _signInWithGoogle(
+        SignInWithGoogleParams(isRegister: event.isRegister));
     result.fold(
       (failure) => emit(AuthFailureState(failure.message)),
       (user) => emit(AuthAuthenticated(user)),

@@ -34,7 +34,8 @@ class _DashboardCustomizeView extends StatelessWidget {
       appBar: AppBar(
         title: Text('Atur Dashboard',
             style: AppTypography.textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w700,
             )),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -58,15 +59,16 @@ class _DashboardCustomizeView extends StatelessWidget {
       body: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
+            return Center(
+                child: CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.primary));
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.pagePadding, AppSpacing.base,
-                    AppSpacing.pagePadding, AppSpacing.xl),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding,
+                    AppSpacing.base, AppSpacing.pagePadding, AppSpacing.xl),
                 child: Text(
                   'Pilih dan atur urutan kartu yang tampil di beranda.',
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
@@ -77,12 +79,14 @@ class _DashboardCustomizeView extends StatelessWidget {
               ),
               Expanded(
                 child: ReorderableListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   itemCount: state.dashboardCards.length,
                   onReorder: (oldIndex, newIndex) {
                     context.read<SettingsBloc>().add(
                           DashboardCardReordered(
-                            oldIndex: oldIndex, newIndex: newIndex,
+                            oldIndex: oldIndex,
+                            newIndex: newIndex,
                           ),
                         );
                   },
@@ -91,7 +95,8 @@ class _DashboardCustomizeView extends StatelessWidget {
                     return _DashboardCardTile(
                       key: ValueKey(card.id),
                       card: card,
-                      onToggle: () => context.read<SettingsBloc>()
+                      onToggle: () => context
+                          .read<SettingsBloc>()
                           .add(DashboardCardToggled(card.id)),
                     );
                   },
@@ -109,7 +114,8 @@ class _DashboardCustomizeView extends StatelessWidget {
 class _DashboardCardTile extends StatelessWidget {
   final DashboardCardEntity card;
   final VoidCallback onToggle;
-  const _DashboardCardTile({super.key, required this.card, required this.onToggle});
+  const _DashboardCardTile(
+      {super.key, required this.card, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -118,16 +124,20 @@ class _DashboardCardTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+        border: Border.all(
+            color:
+                Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.base, vertical: AppSpacing.md,
+          horizontal: AppSpacing.base,
+          vertical: AppSpacing.md,
         ),
         child: Row(children: [
           // Icon
           Container(
-            width: 44, height: 44,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: _iconBackground(context, card.iconName),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -139,7 +149,8 @@ class _DashboardCardTile extends StatelessWidget {
 
           // Title + subtitle
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(card.title,
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
@@ -172,34 +183,52 @@ class _DashboardCardTile extends StatelessWidget {
 
   Color _iconBackground(BuildContext context, String name) {
     switch (name) {
-      case 'wallet': return Theme.of(context).colorScheme.primaryContainer;
-      case 'bolt': return Theme.of(context).colorScheme.primaryContainer;
-      case 'chart': return const Color(0xFFFFEDD5);
-      case 'ai': return Theme.of(context).colorScheme.primaryContainer;
-      case 'history': return Theme.of(context).colorScheme.surfaceContainer;
-      default: return Theme.of(context).colorScheme.surfaceContainer;
+      case 'wallet':
+        return Theme.of(context).colorScheme.primaryContainer;
+      case 'bolt':
+        return Theme.of(context).colorScheme.primaryContainer;
+      case 'chart':
+        return const Color(0xFFFFEDD5);
+      case 'ai':
+        return Theme.of(context).colorScheme.primaryContainer;
+      case 'history':
+        return Theme.of(context).colorScheme.surfaceContainer;
+      default:
+        return Theme.of(context).colorScheme.surfaceContainer;
     }
   }
 
   Color _iconColor(BuildContext context, String name) {
     switch (name) {
-      case 'wallet': return AppColors.primary;
-      case 'bolt': return AppColors.primary;
-      case 'chart': return const Color(0xFFE65100);
-      case 'ai': return AppColors.primary;
-      case 'history': return Theme.of(context).colorScheme.onSurfaceVariant;
-      default: return Theme.of(context).colorScheme.onSurfaceVariant;
+      case 'wallet':
+        return AppColors.primary;
+      case 'bolt':
+        return AppColors.primary;
+      case 'chart':
+        return const Color(0xFFE65100);
+      case 'ai':
+        return AppColors.primary;
+      case 'history':
+        return Theme.of(context).colorScheme.onSurfaceVariant;
+      default:
+        return Theme.of(context).colorScheme.onSurfaceVariant;
     }
   }
 
   IconData _iconData(String name) {
     switch (name) {
-      case 'wallet': return Icons.account_balance_wallet_outlined;
-      case 'bolt': return Icons.bolt_rounded;
-      case 'chart': return Icons.bar_chart_rounded;
-      case 'ai': return Icons.auto_awesome_outlined;
-      case 'history': return Icons.history_rounded;
-      default: return Icons.widgets_outlined;
+      case 'wallet':
+        return Icons.account_balance_wallet_outlined;
+      case 'bolt':
+        return Icons.bolt_rounded;
+      case 'chart':
+        return Icons.bar_chart_rounded;
+      case 'ai':
+        return Icons.auto_awesome_outlined;
+      case 'history':
+        return Icons.history_rounded;
+      default:
+        return Icons.widgets_outlined;
     }
   }
 }

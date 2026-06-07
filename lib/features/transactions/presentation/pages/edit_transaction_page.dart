@@ -44,7 +44,8 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.primary),
+          icon: Icon(Icons.arrow_back_rounded,
+              color: Theme.of(context).colorScheme.primary),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -114,8 +115,10 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Kategori',
-                            style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -132,7 +135,8 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(Icons.restaurant_rounded,
-                                    color: Theme.of(context).colorScheme.error, size: 20),
+                                    color: Theme.of(context).colorScheme.error,
+                                    size: 20),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -153,20 +157,27 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                                 ),
                               ),
                               Icon(Icons.keyboard_arrow_down_rounded,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
                             ],
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         Text('Judul Transaksi',
-                            style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant),
                           ),
                           child: TextField(
                             controller: _titleController,
@@ -198,13 +209,15 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Dompet',
                                   style: AppTypography.textTheme.bodyMedium
                                       ?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(
-                                      Icons.account_balance_wallet_outlined,
-                                      color: Theme.of(context).colorScheme.primary,
+                                  Icon(Icons.account_balance_wallet_outlined,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                       size: 18),
                                   const SizedBox(width: 8),
                                   Text('Wallet: Cash',
@@ -217,7 +230,9 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Saldo: Rp 1.200.000',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                             ],
                           ),
                         ),
@@ -236,12 +251,16 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('Tanggal',
                                   style: AppTypography.textTheme.bodyMedium
                                       ?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
                                   Icon(Icons.calendar_today_outlined,
-                                      color: Theme.of(context).colorScheme.primary, size: 18),
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      size: 18),
                                   const SizedBox(width: 8),
                                   Text('24 Mei 2024',
                                       style: AppTypography.textTheme.labelMedium
@@ -253,7 +272,9 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('12:45 WIB',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                             ],
                           ),
                         ),
@@ -273,14 +294,19 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Catatan (Opsional)',
-                            style: AppTypography.textTheme.bodyMedium
-                                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant)),
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant),
                           ),
                           child: TextField(
                             controller: _notesController,
@@ -309,11 +335,14 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            color:
+                                Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(Icons.receipt_long,
-                              color: Theme.of(context).colorScheme.outlineVariant), // Mock image
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outlineVariant), // Mock image
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -326,12 +355,15 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                               Text('receipt_lunch_2405.jpg',
                                   style: AppTypography.textTheme.bodySmall
                                       ?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                             ],
                           ),
                         ),
                         Icon(Icons.edit_rounded,
-                            color: Theme.of(context).colorScheme.primary, size: 20),
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 20),
                       ],
                     ),
                   ),

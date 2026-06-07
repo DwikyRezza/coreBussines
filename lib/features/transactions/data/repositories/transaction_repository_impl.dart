@@ -168,7 +168,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addCategory(TransactionCategory category) async {
+  Future<Either<Failure, void>> addCategory(
+      TransactionCategory category) async {
     try {
       await remoteDataSource.addCategory(category);
       return const Right(null);

@@ -29,7 +29,8 @@ class AboutPage extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.bar_chart_rounded, color: Theme.of(context).colorScheme.primary, size: 34),
+                  child: Icon(Icons.bar_chart_rounded,
+                      color: Theme.of(context).colorScheme.primary, size: 34),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -58,7 +59,8 @@ class AboutPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const _InfoTile(title: 'Backend', value: 'Firebase Auth & Cloud Firestore'),
+          const _InfoTile(
+              title: 'Backend', value: 'Firebase Auth & Cloud Firestore'),
           const _InfoTile(title: 'AI Receipt Scanner', value: 'Gemini API'),
           const _InfoTile(title: 'Platform', value: 'Flutter Android'),
         ],
@@ -84,7 +86,8 @@ class _InfoTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: AppTypography.textTheme.bodyMedium)),
+          Expanded(
+              child: Text(title, style: AppTypography.textTheme.bodyMedium)),
           const SizedBox(width: 12),
           Flexible(
             child: Text(

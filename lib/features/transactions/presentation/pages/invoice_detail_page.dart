@@ -46,7 +46,8 @@ class InvoiceDetailPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -60,7 +61,8 @@ class InvoiceDetailPage extends StatelessWidget {
                     height: 6,
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary, // Deep Blue
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(8)),
                     ),
                   ),
                   Padding(
@@ -78,15 +80,21 @@ class InvoiceDetailPage extends StatelessWidget {
                               children: [
                                 Text(
                                   'CoreBusiness',
-                                  style: AppTypography.textTheme.headlineSmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                                  style: AppTypography.textTheme.headlineSmall
+                                      ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Jl. Sudirman Kav. 50\nJakarta Selatan, 12190',
-                                  style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  style: AppTypography.textTheme.bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
                                 ),
                               ],
                             ),
@@ -95,8 +103,10 @@ class InvoiceDetailPage extends StatelessWidget {
                               children: [
                                 Text(
                                   'INVOICE',
-                                  style: AppTypography.textTheme.titleMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                  style: AppTypography.textTheme.titleMedium
+                                      ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.2,
                                   ),
@@ -104,35 +114,52 @@ class InvoiceDetailPage extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   '#INV-2023-1042',
-                                  style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  style: AppTypography.textTheme.bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '24 Okt 2023',
-                                  style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  style: AppTypography.textTheme.bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant),
                                 ),
                               ],
                             ),
                           ],
                         ),
                         const SizedBox(height: 32),
-                        Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                        Divider(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 24),
 
                         // Billed To
                         Text(
                           'DITAGIHKAN KEPADA',
-                          style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline, letterSpacing: 1.0),
+                          style: AppTypography.textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                              letterSpacing: 1.0),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Budi Santoso',
-                          style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
+                          style: AppTypography.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'budi.santoso@example.com',
-                          style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          style: AppTypography.textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                         ),
                         const SizedBox(height: 32),
 
@@ -140,34 +167,57 @@ class InvoiceDetailPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest, // Very light blue
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest, // Very light blue
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Total Pembayaran', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                              Text('Total Pembayaran',
+                                  style: AppTypography.textTheme.bodyMedium
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                               const SizedBox(height: 8),
                               Text(
                                 'Rp 3.500.000',
-                                style: AppTypography.textTheme.displaySmall?.copyWith(
+                                style: AppTypography.textTheme.displaySmall
+                                    ?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.check_circle_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
+                                    Icon(Icons.check_circle_outline_rounded,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        size: 16),
                                     const SizedBox(width: 4),
-                                    Text('Lunas', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                                    Text('Lunas',
+                                        style: AppTypography
+                                            .textTheme.labelMedium
+                                            ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                                fontWeight: FontWeight.w600)),
                                   ],
                                 ),
                               ),
@@ -180,12 +230,24 @@ class InvoiceDetailPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Deskripsi', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                            Text('Jumlah', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('Deskripsi',
+                                style: AppTypography.textTheme.labelMedium
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant)),
+                            Text('Jumlah',
+                                style: AppTypography.textTheme.labelMedium
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant)),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                        Divider(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 16),
 
                         // Line Items
@@ -201,19 +263,33 @@ class InvoiceDetailPage extends StatelessWidget {
                           amount: 'Rp 500.000',
                         ),
                         const SizedBox(height: 24),
-                        Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                        Divider(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 24),
 
                         // Totals
-                        _InvoiceTotalLine(label: 'Subtotal', amount: 'Rp 3.500.000'),
+                        _InvoiceTotalLine(
+                            label: 'Subtotal', amount: 'Rp 3.500.000'),
                         const SizedBox(height: 12),
                         _InvoiceTotalLine(label: 'Pajak (0%)', amount: 'Rp 0'),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Total Keseluruhan', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
-                            Text('Rp 3.500.000', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
+                            Text('Total Keseluruhan',
+                                style: AppTypography.textTheme.titleMedium
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface)),
+                            Text('Rp 3.500.000',
+                                style: AppTypography.textTheme.titleMedium
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontWeight: FontWeight.w700)),
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -224,10 +300,17 @@ class InvoiceDetailPage extends StatelessWidget {
                             return Flex(
                               direction: Axis.horizontal,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate((constraints.constrainWidth() / 8).floor(), (index) {
+                              children: List.generate(
+                                  (constraints.constrainWidth() / 8).floor(),
+                                  (index) {
                                 return SizedBox(
-                                  width: 4, height: 1,
-                                  child: DecoratedBox(decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant)),
+                                  width: 4,
+                                  height: 1,
+                                  child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outlineVariant)),
                                 );
                               }),
                             );
@@ -240,19 +323,33 @@ class InvoiceDetailPage extends StatelessWidget {
                           child: Column(
                             children: [
                               Container(
-                                width: 80, height: 80,
+                                width: 80,
+                                height: 80,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                                  border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outlineVariant),
                                 ),
-                                child: Icon(Icons.qr_code_2_rounded, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                child: Icon(Icons.qr_code_2_rounded,
+                                    size: 48,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'Pindai kode QR untuk verifikasi\nkeaslian dokumen ini.',
                                 textAlign: TextAlign.center,
-                                style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
+                                style: AppTypography.textTheme.bodySmall
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline),
                               ),
                             ],
                           ),
@@ -284,7 +381,8 @@ class InvoiceDetailPage extends StatelessWidget {
                     await PdfReportService.generateInvoicePdf(
                       invoiceNumber: '#INV-2023-1042',
                       companyName: 'CoreBusiness',
-                      companyAddress: 'Jl. Sudirman Kav. 50\nJakarta Selatan, 12190',
+                      companyAddress:
+                          'Jl. Sudirman Kav. 50\nJakarta Selatan, 12190',
                       clientName: 'Budi Santoso',
                       clientEmail: 'budi.santoso@example.com',
                       date: '24 Okt 2023',
@@ -319,16 +417,23 @@ class InvoiceDetailPage extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
-                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest, // Light grey blue
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest, // Light grey blue
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.share_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+                    Icon(Icons.share_outlined,
+                        color: Theme.of(context).colorScheme.primary, size: 20),
                     const SizedBox(width: 8),
-                    Text('Bagikan', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                    Text('Bagikan',
+                        style: AppTypography.textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -347,7 +452,8 @@ class InvoiceDetailPage extends StatelessWidget {
                     await PdfReportService.generateInvoicePdf(
                       invoiceNumber: '#INV-2023-1042',
                       companyName: 'CoreBusiness',
-                      companyAddress: 'Jl. Sudirman Kav. 50\nJakarta Selatan, 12190',
+                      companyAddress:
+                          'Jl. Sudirman Kav. 50\nJakarta Selatan, 12190',
                       clientName: 'Budi Santoso',
                       clientEmail: 'budi.santoso@example.com',
                       date: '24 Okt 2023',
@@ -382,15 +488,20 @@ class InvoiceDetailPage extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
-                  backgroundColor: Theme.of(context).colorScheme.primary, // Deep blue
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primary, // Deep blue
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.download_rounded, color: Colors.white, size: 20),
+                    const Icon(Icons.download_rounded,
+                        color: Colors.white, size: 20),
                     const SizedBox(width: 8),
-                    Text('Unduh PDF', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text('Unduh PDF',
+                        style: AppTypography.textTheme.labelLarge?.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
@@ -408,7 +519,8 @@ class _InvoiceLineItem extends StatelessWidget {
   final String subtitle;
   final String amount;
 
-  const _InvoiceLineItem({required this.title, required this.subtitle, required this.amount});
+  const _InvoiceLineItem(
+      {required this.title, required this.subtitle, required this.amount});
 
   @override
   Widget build(BuildContext context) {
@@ -420,13 +532,20 @@ class _InvoiceLineItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+              Text(title,
+                  style: AppTypography.textTheme.titleSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(subtitle, style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              Text(subtitle,
+                  style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ),
         ),
-        Text(amount, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+        Text(amount,
+            style: AppTypography.textTheme.bodyMedium
+                ?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
       ],
     );
   }
@@ -443,8 +562,12 @@ class _InvoiceTotalLine extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        Text(amount, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Text(label,
+            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Text(amount,
+            style: AppTypography.textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }

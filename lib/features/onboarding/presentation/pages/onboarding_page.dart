@@ -86,7 +86,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               ? IconButton(
                                   icon: Icon(
                                     Icons.arrow_back_rounded,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                   onPressed: () {
                                     context
@@ -105,7 +106,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             },
                             child: Text(
                               'Lewati',
-                              style: AppTypography.textTheme.labelLarge?.copyWith(
+                              style:
+                                  AppTypography.textTheme.labelLarge?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -153,7 +155,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             Text(
                               state.slides[state.currentPage].title,
                               textAlign: TextAlign.center,
-                              style: AppTypography.textTheme.headlineMedium?.copyWith(
+                              style: AppTypography.textTheme.headlineMedium
+                                  ?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w800,
                                 height: 1.2,
@@ -163,8 +166,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             Text(
                               state.slides[state.currentPage].subtitle,
                               textAlign: TextAlign.center,
-                              style: AppTypography.textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              style:
+                                  AppTypography.textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                                 height: 1.5,
                               ),
                             ),
@@ -178,15 +184,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                       .add(const OnboardingNextPage());
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
                                   minimumSize: const Size.fromHeight(56),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                                    borderRadius: BorderRadius.circular(
+                                        AppSpacing.radiusXl),
                                   ),
                                 ),
                                 child: Text(
-                                  state.isLastPage ? 'Mulai Sekarang' : 'Lanjut',
-                                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                                  state.isLastPage
+                                      ? 'Mulai Sekarang'
+                                      : 'Lanjut',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                   ),

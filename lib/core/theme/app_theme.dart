@@ -35,16 +35,16 @@ abstract class AppTheme {
       // AppBar
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.onBackground,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: AppTypography.textTheme.titleLarge?.copyWith(
-          color: AppColors.primary,
+          color: AppColors.onBackground,
           fontWeight: FontWeight.w700,
-          fontSize: 22,
+          fontSize: 20,
         ),
-        iconTheme: const IconThemeData(color: AppColors.primary),
+        iconTheme: const IconThemeData(color: AppColors.onBackground),
       ),
 
       // Card
@@ -65,7 +65,7 @@ abstract class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: AppTypography.textTheme.labelLarge?.copyWith(
             fontSize: 16,
@@ -81,7 +81,7 @@ abstract class AppTheme {
           side: const BorderSide(color: AppColors.outline),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: AppTypography.textTheme.labelLarge?.copyWith(
             fontSize: 16,
@@ -104,7 +104,8 @@ abstract class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceContainer,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -244,7 +245,7 @@ abstract class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: textTheme.labelLarge?.copyWith(
             fontSize: 16,
@@ -260,7 +261,7 @@ abstract class AppTheme {
           side: const BorderSide(color: outlineVariant),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: textTheme.labelLarge?.copyWith(
             fontSize: 16,
@@ -283,7 +284,8 @@ abstract class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceContainer,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

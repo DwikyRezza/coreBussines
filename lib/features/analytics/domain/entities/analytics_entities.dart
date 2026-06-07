@@ -36,7 +36,8 @@ class DailyFlow extends Equatable {
   });
 
   @override
-  List<Object?> get props => [date, dayLabel, transactionCount, netAmount, isSurplus];
+  List<Object?> get props =>
+      [date, dayLabel, transactionCount, netAmount, isSurplus];
 }
 
 class CashFlowSummary extends Equatable {
@@ -60,6 +61,12 @@ class CashFlowSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalBalance, totalIncome, totalExpense, changeAmount, changePercent, trendPoints, dailyFlows
+        totalBalance,
+        totalIncome,
+        totalExpense,
+        changeAmount,
+        changePercent,
+        trendPoints,
+        dailyFlows
       ];
 }

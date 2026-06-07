@@ -26,7 +26,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
     if (jsonString != null) {
       final List<dynamic> jsonList = jsonDecode(jsonString);
       return jsonList
-          .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
+          .map((json) =>
+              NotificationModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } else {
       // Seed initial data with core business notifications (no gym-related whey proteins!)
@@ -35,7 +36,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
         NotificationModel(
           id: 'seed-1',
           title: 'Peringatan Stok Menipis',
-          body: 'Stok Kertas HVS A4 80gr menipis. Sisa 4 rim di gudang inventaris.',
+          body:
+              'Stok Kertas HVS A4 80gr menipis. Sisa 4 rim di gudang inventaris.',
           timestamp: now.subtract(const Duration(hours: 1)),
           type: 'alert',
           isRead: false,
@@ -43,7 +45,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
         NotificationModel(
           id: 'seed-2',
           title: 'Laporan Keuangan Selesai',
-          body: 'Laporan Keuangan Bulanan (Laba Rugi & Neraca) berhasil diekspor ke format PDF.',
+          body:
+              'Laporan Keuangan Bulanan (Laba Rugi & Neraca) berhasil diekspor ke format PDF.',
           timestamp: now.subtract(const Duration(hours: 3)),
           type: 'success',
           isRead: false,
@@ -51,7 +54,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
         NotificationModel(
           id: 'seed-3',
           title: 'Agenda Rapat Tim',
-          body: 'Rapat koordinasi bulanan penyelarasan keuangan dan logistik bisnis akan dimulai dalam 30 menit.',
+          body:
+              'Rapat koordinasi bulanan penyelarasan keuangan dan logistik bisnis akan dimulai dalam 30 menit.',
           timestamp: now.subtract(const Duration(hours: 5)),
           type: 'info',
           isRead: true,
@@ -59,7 +63,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
         NotificationModel(
           id: 'seed-4',
           title: 'Analisis Kinerja Omzet',
-          body: 'Omzet penjualan kotor meningkat 4.2% minggu ini dibandingkan minggu sebelumnya.',
+          body:
+              'Omzet penjualan kotor meningkat 4.2% minggu ini dibandingkan minggu sebelumnya.',
           timestamp: now.subtract(const Duration(days: 1)),
           type: 'success',
           isRead: true,
@@ -67,7 +72,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
         NotificationModel(
           id: 'seed-5',
           title: 'Audit Mesin Kasir Selesai',
-          body: 'Pembersihan dan kalibrasi printer struk kasir utama telah berhasil diselesaikan.',
+          body:
+              'Pembersihan dan kalibrasi printer struk kasir utama telah berhasil diselesaikan.',
           timestamp: now.subtract(const Duration(days: 1, hours: 4)),
           type: 'info',
           isRead: true,
@@ -81,7 +87,7 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
   @override
   Future<void> saveNotification(NotificationModel notification) async {
     final list = await getNotifications();
-    
+
     // Insert new notification at the top of the list
     final updatedList = [notification, ...list];
     await _saveList(updatedList);
@@ -90,7 +96,8 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
   @override
   Future<void> markAllAsRead() async {
     final list = await getNotifications();
-    final updatedList = list.map((item) => item.copyWith(isRead: true)).toList();
+    final updatedList =
+        list.map((item) => item.copyWith(isRead: true)).toList();
     await _saveList(updatedList);
   }
 

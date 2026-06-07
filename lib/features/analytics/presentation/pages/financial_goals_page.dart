@@ -50,7 +50,8 @@ class FinancialGoalsPage extends StatelessWidget {
               targetAmount: 'Rp 50.000.000',
               progress: 0.85,
               progressColor: Theme.of(context).colorScheme.primary,
-              progressBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              progressBgColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
               statusPill: 'On Track',
               statusIcon: Icons.check_circle_outline_rounded,
               statusColor: Theme.of(context).colorScheme.primary,
@@ -72,7 +73,8 @@ class FinancialGoalsPage extends StatelessWidget {
               targetAmount: '10M',
               progress: 0.80,
               progressColor: Theme.of(context).colorScheme.primary,
-              progressBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              progressBgColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
               rightFooter: '80% of target',
             ),
             const SizedBox(height: 16),
@@ -85,7 +87,8 @@ class FinancialGoalsPage extends StatelessWidget {
               iconBgColor: const Color(0xFFFED7D7),
               iconColor: const Color(0xFFC53030),
               currentAmount: 'Rp 16.500.000',
-              currentAmountColor: const Color(0xFFC53030), // Red text for over limit
+              currentAmountColor:
+                  const Color(0xFFC53030), // Red text for over limit
               targetAmount: '15M',
               progress: 1.0,
               progressColor: const Color(0xFFC53030),
@@ -159,8 +162,15 @@ class _GoalCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: hasBorder ? Border.all(color: borderColor ?? Colors.transparent) : null,
-        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        border: hasBorder
+            ? Border.all(color: borderColor ?? Colors.transparent)
+            : null,
+        boxShadow: [
+          BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,23 +183,30 @@ class _GoalCard extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                        color: iconBgColor, shape: BoxShape.circle),
                     child: Icon(icon, color: iconColor, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                      Text(title,
+                          style: AppTypography.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(height: 4),
-                      Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                      Text(subtitle,
+                          style: AppTypography.textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline)),
                     ],
                   ),
                 ],
               ),
               if (statusPill != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: statusBgColor,
                     borderRadius: BorderRadius.circular(16),
@@ -200,7 +217,9 @@ class _GoalCard extends StatelessWidget {
                         Icon(statusIcon, color: statusColor, size: 14),
                         const SizedBox(width: 4),
                       ],
-                      Text(statusPill!, style: AppTypography.textTheme.labelSmall?.copyWith(color: statusColor, fontWeight: FontWeight.w600)),
+                      Text(statusPill!,
+                          style: AppTypography.textTheme.labelSmall?.copyWith(
+                              color: statusColor, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -214,14 +233,17 @@ class _GoalCard extends StatelessWidget {
                 currentAmount,
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: currentAmountColor ?? Theme.of(context).colorScheme.onSurface,
+                  color: currentAmountColor ??
+                      Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text(
-                  hasBorder ? '/ $targetAmount' : 'Rp $targetAmount', // Logic for formatting based on screenshot difference
+                  hasBorder
+                      ? '/ $targetAmount'
+                      : 'Rp $targetAmount', // Logic for formatting based on screenshot difference
                   style: AppTypography.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -245,11 +267,16 @@ class _GoalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (leftFooter != null)
-                Text(leftFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: leftFooterColor ?? Theme.of(context).colorScheme.outline))
+                Text(leftFooter!,
+                    style: AppTypography.textTheme.labelSmall?.copyWith(
+                        color: leftFooterColor ??
+                            Theme.of(context).colorScheme.outline))
               else
                 const SizedBox(),
               if (rightFooter != null)
-                Text(rightFooter!, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline))
+                Text(rightFooter!,
+                    style: AppTypography.textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline))
               else
                 const SizedBox(),
             ],

@@ -15,10 +15,12 @@ class ScanReceiptResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Very light gray/blue matching screenshot
+      backgroundColor: Theme.of(context)
+          .scaffoldBackgroundColor, // Very light gray/blue matching screenshot
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.close_rounded,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -37,7 +39,7 @@ class ScanReceiptResultPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Receipt Image Mock
             Container(
               width: 100,
@@ -47,13 +49,15 @@ class ScanReceiptResultPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
                 image: const DecorationImage(
-                  image: NetworkImage('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80'), // Mock receipt image
+                  image: NetworkImage(
+                      'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80'), // Mock receipt image
                   fit: BoxFit.cover,
                 ),
               ),
@@ -62,7 +66,8 @@ class ScanReceiptResultPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 16),
+                Icon(Icons.check_circle_outline_rounded,
+                    color: Theme.of(context).colorScheme.primary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   'Data berhasil diekstrak',
@@ -84,7 +89,7 @@ class ScanReceiptResultPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            
+
             _EditableField(
               label: 'Merchant',
               value: 'Starbucks',
@@ -128,12 +133,15 @@ class ScanReceiptResultPage extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(56),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Konfirmasi & Simpan', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+              Text('Konfirmasi & Simpan',
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w600)),
               const SizedBox(width: 8),
               const Icon(Icons.check_rounded, color: Colors.white, size: 20),
             ],
@@ -204,15 +212,17 @@ class _EditableField extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: valueStyle ?? AppTypography.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  style: valueStyle ??
+                      AppTypography.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.outline, size: 20),
+          Icon(Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.outline, size: 20),
         ],
       ),
     );

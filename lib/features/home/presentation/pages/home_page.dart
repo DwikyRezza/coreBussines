@@ -404,32 +404,17 @@ class _HomeContent extends StatelessWidget {
         label: 'Tambah\nTransaksi',
         onTap: () => context.push('${AppRoutes.addTransaction}?type=expense'),
       ));
-      actions.add(_QuickActionCustomItem(
-        icon: Icons.qr_code_scanner_rounded,
-        label: 'Scan\nStruk',
-        onTap: () => context.push(AppRoutes.scanReceiptIntro),
-      ));
     } else if (role == 'inventory') {
       actions.add(_QuickActionCustomItem(
         icon: Icons.warehouse_outlined,
         label: 'Stok\nOverview',
         onTap: () => context.push(AppRoutes.inventoryOverview),
       ));
-      actions.add(_QuickActionCustomItem(
-        icon: Icons.qr_code_scanner_rounded,
-        label: 'Scan\nStruk Masuk',
-        onTap: () => context.push(AppRoutes.scanReceiptIntro),
-      ));
     } else if (role == 'sales') {
       actions.add(_QuickActionCustomItem(
         icon: Icons.add_circle_outline_rounded,
         label: 'Tambah\nPenjualan',
         onTap: () => context.push('${AppRoutes.addTransaction}?type=income'),
-      ));
-      actions.add(_QuickActionCustomItem(
-        icon: Icons.qr_code_scanner_rounded,
-        label: 'Scan\nStruk',
-        onTap: () => context.push(AppRoutes.scanReceiptIntro),
       ));
     } else {
       // Owner, Admin, Finance, Secretary, Manager
@@ -442,11 +427,6 @@ class _HomeContent extends StatelessWidget {
         icon: Icons.remove_circle_outline_rounded,
         label: 'Tambah\nPengeluaran',
         onTap: () => context.push('${AppRoutes.addTransaction}?type=expense'),
-      ));
-      actions.add(_QuickActionCustomItem(
-        icon: Icons.qr_code_scanner_rounded,
-        label: 'Scan\nStruk',
-        onTap: () => context.push(AppRoutes.scanReceiptIntro),
       ));
       actions.add(_QuickActionCustomItem(
         icon: Icons.calendar_month_rounded,
@@ -587,7 +567,7 @@ class _HomeAppBar extends StatelessWidget {
                 Text(
                   state.summary.userName,
                   style: AppTypography.textTheme.titleMedium?.copyWith(
-                    color: colors.primary,
+                    color: colors.onSurface,
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                   ),

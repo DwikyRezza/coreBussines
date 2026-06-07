@@ -253,7 +253,8 @@ class HomeRemoteDataSourceImpl implements HomeDataSource {
           final walletBalance = walletSnapshot.docs.fold<double>(
             0,
             (runningTotal, doc) =>
-                runningTotal + ((doc.data()['balance'] as num?)?.toDouble() ?? 0),
+                runningTotal +
+                ((doc.data()['balance'] as num?)?.toDouble() ?? 0),
           );
           final fallbackBalance = totalIncome - totalExpense;
           final monthlyChange = monthIncome - monthExpense;

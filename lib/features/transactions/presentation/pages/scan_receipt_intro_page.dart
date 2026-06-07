@@ -41,7 +41,7 @@ class _ScanReceiptView extends StatelessWidget {
     final bloc = context.read<TransactionBloc>();
     final picker = ImagePicker();
     final photo = await picker.pickImage(source: source);
-    
+
     if (photo != null) {
       await limiter.recordScan();
       bloc.add(TransactionScanRequested(photo));
@@ -113,8 +113,10 @@ class _ScanReceiptView extends StatelessWidget {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Premium aktif. Scan tanpa batas sudah terbuka.'),
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          content: Text(
+                              'Premium aktif. Scan tanpa batas sudah terbuka.'),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                         ),
                       );
                     }
@@ -159,7 +161,8 @@ class _ScanReceiptView extends StatelessWidget {
                       label: 'Input Manual',
                       textColor: Colors.white,
                       onPressed: () {
-                        context.push('${AppRoutes.addTransaction}?imagePath=${Uri.encodeComponent(photoPath)}');
+                        context.push(
+                            '${AppRoutes.addTransaction}?imagePath=${Uri.encodeComponent(photoPath)}');
                       },
                     )
                   : null,
@@ -174,7 +177,8 @@ class _ScanReceiptView extends StatelessWidget {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             leading: IconButton(
-              icon: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurface),
+              icon: Icon(Icons.close_rounded,
+                  color: Theme.of(context).colorScheme.onSurface),
               onPressed: () => context.pop(),
             ),
             backgroundColor: Colors.transparent,
@@ -184,7 +188,8 @@ class _ScanReceiptView extends StatelessWidget {
             children: [
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -195,7 +200,9 @@ class _ScanReceiptView extends StatelessWidget {
                         width: 280,
                         height: 280,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest, // Light blue-grey background
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest, // Light blue-grey background
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -222,7 +229,10 @@ class _ScanReceiptView extends StatelessWidget {
                                   color: Theme.of(context).colorScheme.primary,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(0.5),
                                       blurRadius: 8,
                                       spreadRadius: 2,
                                     ),
@@ -250,7 +260,8 @@ class _ScanReceiptView extends StatelessWidget {
                           'Ambil foto struk fisik Anda untuk mencatat pengeluaran secara otomatis menggunakan AI.',
                           textAlign: TextAlign.center,
                           style: AppTypography.textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -259,36 +270,59 @@ class _ScanReceiptView extends StatelessWidget {
 
                       // Action Buttons
                       ElevatedButton(
-                        onPressed: isLoading ? null : () => _pickImage(context, ImageSource.camera),
+                        onPressed: isLoading
+                            ? null
+                            : () => _pickImage(context, ImageSource.camera),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: Theme.of(context).colorScheme.primary, // Deep Blue
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary, // Deep Blue
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20),
+                            const Icon(Icons.camera_alt_outlined,
+                                color: Colors.white, size: 20),
                             const SizedBox(width: 12),
-                            Text('Buka Kamera', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                            Text('Buka Kamera',
+                                style: AppTypography.textTheme.labelLarge
+                                    ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: isLoading ? null : () => _pickImage(context, ImageSource.gallery),
+                        onPressed: isLoading
+                            ? null
+                            : () => _pickImage(context, ImageSource.gallery),
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          backgroundColor: Theme.of(context).colorScheme.outlineVariant, // Light grey
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .outlineVariant, // Light grey
                           elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.photo_library_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+                            Icon(Icons.photo_library_outlined,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 20),
                             const SizedBox(width: 12),
-                            Text('Unggah dari Galeri', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                            Text('Unggah dari Galeri',
+                                style: AppTypography.textTheme.labelLarge
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -297,7 +331,8 @@ class _ScanReceiptView extends StatelessWidget {
                         onPressed: isLoading
                             ? null
                             : () {
-                                context.push('${AppRoutes.addTransaction}?isManualReceipt=true');
+                                context.push(
+                                    '${AppRoutes.addTransaction}?isManualReceipt=true');
                               },
                         child: Text(
                           'Input Struk Manual',
@@ -313,7 +348,7 @@ class _ScanReceiptView extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Loading Overlay
               if (isLoading)
                 Container(
@@ -328,11 +363,13 @@ class _ScanReceiptView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                          CircularProgressIndicator(
+                              color: Theme.of(context).colorScheme.primary),
                           const SizedBox(height: 16),
                           Text(
                             'AI sedang membaca struk...',
-                            style: AppTypography.textTheme.labelMedium?.copyWith(
+                            style:
+                                AppTypography.textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),

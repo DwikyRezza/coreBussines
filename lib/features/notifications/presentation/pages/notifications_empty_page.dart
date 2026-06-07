@@ -27,7 +27,8 @@ class NotificationsEmptyPage extends StatelessWidget {
                 color: Color(0xFFFED7D7), // Light red
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 16), // Mock avatar replacement
+              child: const Icon(Icons.receipt_long_rounded,
+                  color: Colors.white, size: 16), // Mock avatar replacement
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
@@ -41,7 +42,8 @@ class NotificationsEmptyPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.notifications_none_rounded,
+                color: Theme.of(context).colorScheme.primary),
             onPressed: () => context.push(AppRoutes.alerts),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -51,7 +53,8 @@ class NotificationsEmptyPage extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -63,7 +66,10 @@ class NotificationsEmptyPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.05),
                       blurRadius: 40,
                       spreadRadius: 10,
                     ),
@@ -100,11 +106,13 @@ class NotificationsEmptyPage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifikasi sudah diperbarui')),
+                    const SnackBar(
+                        content: Text('Notifikasi sudah diperbarui')),
                   );
                 },
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 child: Text(
                   'Muat Ulang',

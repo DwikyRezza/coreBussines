@@ -162,7 +162,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            Icon(Icons.fingerprint_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
+            Icon(Icons.fingerprint_rounded,
+                color: Theme.of(context).colorScheme.primary, size: 28),
             const SizedBox(width: 12),
             const Text('Biometrik Belum Aktif'),
           ],
@@ -184,15 +185,21 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const _BulletPoint(text: 'Buka menu Pengaturan Keamanan di HP Anda'),
-            const _BulletPoint(text: 'Daftarkan sidik jari (fingerprint) atau wajah (face unlock) baru Anda'),
-            const _BulletPoint(text: 'Kembali ke aplikasi CoreBusiness untuk mengaktifkan fitur ini'),
+            const _BulletPoint(
+                text: 'Buka menu Pengaturan Keamanan di HP Anda'),
+            const _BulletPoint(
+                text:
+                    'Daftarkan sidik jari (fingerprint) atau wajah (face unlock) baru Anda'),
+            const _BulletPoint(
+                text:
+                    'Kembali ke aplikasi CoreBusiness untuk mengaktifkan fitur ini'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Mengerti', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text('Mengerti',
+                style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -325,8 +332,13 @@ class _BulletPoint extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('• ', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 13, height: 1.3))),
+          Text('• ',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary)),
+          Expanded(
+              child: Text(text,
+                  style: const TextStyle(fontSize: 13, height: 1.3))),
         ],
       ),
     );

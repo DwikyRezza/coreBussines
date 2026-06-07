@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/security/permission_policy.dart';
 import '../../../../core/services/business_context_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -48,6 +49,35 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
       default:
         return key;
     }
+  }
+
+  List<String> _resolvePermissionKeys(
+    String role,
+    List<String> selectedPermissions,
+  ) {
+    final mapped = selectedPermissions.map((permission) {
+      switch (permission) {
+        case 'manage_members':
+          return PermissionKeys.canManageEmployees;
+        case 'add_transaction':
+          return PermissionKeys.canCreateTransaction;
+        case 'delete_transaction':
+          return PermissionKeys.canDeleteTransaction;
+        case 'manage_inventory':
+          return PermissionKeys.canManageInventory;
+        case 'view_analytics':
+          return PermissionKeys.canViewAnalytics;
+        case 'manage_wallets':
+          return PermissionKeys.canManageWallet;
+        default:
+          return permission;
+      }
+    }).toList();
+
+    return PermissionPolicy.resolvePermissions(
+      role: role,
+      explicitPermissions: mapped,
+    );
   }
 
   void _showInviteDialog(BuildContext context, String businessId) {
@@ -311,6 +341,10 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                                     division.isEmpty ? 'Umum' : division,
                                 'branch': branch.isEmpty ? null : branch,
                                 'permissions': selectedPermissions,
+                                'permission_keys': _resolvePermissionKeys(
+                                  selectedRole,
+                                  selectedPermissions,
+                                ),
                                 'status': 'active',
                                 'start_work_date': selectedDate != null
                                     ? Timestamp.fromDate(selectedDate!)
@@ -667,6 +701,10 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                                 'role': selectedRole,
                                 'status': selectedStatus,
                                 'permissions': selectedPermissions,
+                                'permission_keys': _resolvePermissionKeys(
+                                  selectedRole,
+                                  selectedPermissions,
+                                ),
                                 'start_work_date': selectedDate != null
                                     ? Timestamp.fromDate(selectedDate!)
                                     : null,

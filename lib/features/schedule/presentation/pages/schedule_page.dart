@@ -65,15 +65,17 @@ class _SchedulePageState extends State<SchedulePage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)), // Past 2 years
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)), // Future 10 years
+      firstDate: DateTime.now()
+          .subtract(const Duration(days: 365 * 2)), // Past 2 years
+      lastDate:
+          DateTime.now().add(const Duration(days: 365 * 10)), // Future 10 years
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-              onPrimary: Colors.white,
-            ),
+                  primary: Theme.of(context).colorScheme.primary,
+                  onPrimary: Colors.white,
+                ),
           ),
           child: child!,
         );
@@ -98,11 +100,14 @@ class _SchedulePageState extends State<SchedulePage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text(
           'Hapus Jadwal',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Apakah Anda yakin ingin menghapus jadwal ini?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -133,7 +138,8 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> _navigateToAddOrEdit([ScheduleModel? schedule]) async {
-    final result = await context.push<bool>(AppRoutes.addSchedule, extra: schedule);
+    final result =
+        await context.push<bool>(AppRoutes.addSchedule, extra: schedule);
     if (result == true) {
       _loadSchedules();
     }
@@ -143,7 +149,8 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final schedules = _filteredSchedules;
-    final formattedDateTitle = DateFormat('MMMM yyyy', 'id_ID').format(_selectedDate);
+    final formattedDateTitle =
+        DateFormat('MMMM yyyy', 'id_ID').format(_selectedDate);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -156,10 +163,11 @@ class _SchedulePageState extends State<SchedulePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
-              
+
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pagePadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -177,7 +185,8 @@ class _SchedulePageState extends State<SchedulePage> {
                         const SizedBox(height: 4),
                         Text(
                           'Jadwal Bisnis',
-                          style: AppTypography.textTheme.headlineMedium?.copyWith(
+                          style:
+                              AppTypography.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -189,12 +198,14 @@ class _SchedulePageState extends State<SchedulePage> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.calendar_month_outlined, 
-                          color: Theme.of(context).colorScheme.primary, 
+                          Icons.calendar_month_outlined,
+                          color: Theme.of(context).colorScheme.primary,
                           size: 20,
                         ),
                       ),
@@ -209,7 +220,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 height: 80,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   itemCount: _dateList.length,
                   itemBuilder: (context, index) {
                     final date = _dateList[index];
@@ -248,12 +260,14 @@ class _SchedulePageState extends State<SchedulePage> {
                   : schedules.isEmpty
                       ? _buildEmptyState(context)
                       : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.pagePadding),
                           child: ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: schedules.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 16),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 16),
                             itemBuilder: (context, index) {
                               final item = schedules[index];
                               return _TimelineCard(
@@ -277,14 +291,18 @@ class _SchedulePageState extends State<SchedulePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: 24),
+        margin: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.pagePadding, vertical: 24),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
           color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.shadow.withOpacity(isDark ? 0.2 : 0.03),
+              color: Theme.of(context)
+                  .colorScheme
+                  .shadow
+                  .withOpacity(isDark ? 0.2 : 0.03),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -296,7 +314,10 @@ class _SchedulePageState extends State<SchedulePage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -330,7 +351,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               icon: const Icon(Icons.add, size: 18),
               label: const Text('Buat Jadwal Baru'),
@@ -358,18 +380,28 @@ class _DateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 60,
         decoration: BoxDecoration(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.primary 
-              : (isDark ? Theme.of(context).colorScheme.surfaceContainerHighest : const Color(0xFFF1F5F9)),
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : (isDark
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : const Color(0xFFF1F5F9)),
           borderRadius: BorderRadius.circular(16),
           boxShadow: isSelected
-              ? [BoxShadow(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))]
+              ? [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4))
+                ]
               : [],
         ),
         child: Column(
@@ -378,7 +410,9 @@ class _DateCard extends StatelessWidget {
             Text(
               day,
               style: AppTypography.textTheme.labelMedium?.copyWith(
-                color: isSelected ? Colors.white.withOpacity(0.8) : Theme.of(context).colorScheme.outline,
+                color: isSelected
+                    ? Colors.white.withOpacity(0.8)
+                    : Theme.of(context).colorScheme.outline,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -386,7 +420,9 @@ class _DateCard extends StatelessWidget {
             Text(
               date,
               style: AppTypography.textTheme.headlineSmall?.copyWith(
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -425,8 +461,8 @@ class _TimelineCard extends StatelessWidget {
 
     if (isCompleted) {
       statusText = 'Completed';
-      statusBg = isDark 
-          ? Theme.of(context).colorScheme.surfaceContainerHighest 
+      statusBg = isDark
+          ? Theme.of(context).colorScheme.surfaceContainerHighest
           : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3);
       statusTextCol = Theme.of(context).colorScheme.outline;
       borderCol = Theme.of(context).colorScheme.outlineVariant;
@@ -446,7 +482,10 @@ class _TimelineCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(isDark ? 0.2 : 0.05),
+            color: Theme.of(context)
+                .colorScheme
+                .shadow
+                .withOpacity(isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -461,7 +500,9 @@ class _TimelineCard extends StatelessWidget {
               width: 4,
               decoration: BoxDecoration(
                 color: borderCol,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    bottomLeft: Radius.circular(16)),
               ),
             ),
             // Time column
@@ -480,7 +521,10 @@ class _TimelineCard extends StatelessWidget {
               ),
             ),
             // Divider
-            VerticalDivider(color: Theme.of(context).colorScheme.outlineVariant, width: 1, thickness: 1),
+            VerticalDivider(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                width: 1,
+                thickness: 1),
             // Content
             Expanded(
               child: Padding(
@@ -495,10 +539,15 @@ class _TimelineCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             schedule.title,
-                            style: AppTypography.textTheme.titleMedium?.copyWith(
+                            style:
+                                AppTypography.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: isStrikethrough ? Theme.of(context).colorScheme.outline : Theme.of(context).colorScheme.onSurface,
-                              decoration: isStrikethrough ? TextDecoration.lineThrough : null,
+                              color: isStrikethrough
+                                  ? Theme.of(context).colorScheme.outline
+                                  : Theme.of(context).colorScheme.onSurface,
+                              decoration: isStrikethrough
+                                  ? TextDecoration.lineThrough
+                                  : null,
                             ),
                           ),
                         ),
@@ -509,14 +558,16 @@ class _TimelineCard extends StatelessWidget {
                             GestureDetector(
                               onTap: onToggle,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: statusBg,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   statusText,
-                                  style: AppTypography.textTheme.labelSmall?.copyWith(
+                                  style: AppTypography.textTheme.labelSmall
+                                      ?.copyWith(
                                     color: statusTextCol,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -526,7 +577,10 @@ class _TimelineCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             IconButton(
                               icon: const Icon(Icons.delete_outline, size: 18),
-                              color: Theme.of(context).colorScheme.error.withOpacity(0.8),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .error
+                                  .withOpacity(0.8),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               onPressed: onDelete,
@@ -537,7 +591,9 @@ class _TimelineCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      schedule.note.isNotEmpty ? schedule.note : 'Tidak ada catatan tambahan.',
+                      schedule.note.isNotEmpty
+                          ? schedule.note
+                          : 'Tidak ada catatan tambahan.',
                       style: AppTypography.textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -547,11 +603,16 @@ class _TimelineCard extends StatelessWidget {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
                           elevation: 0,
-                          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: BorderSide(
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
                         ),
                         icon: const Icon(Icons.refresh_rounded, size: 16),
                         label: const Text('Reschedule'),
@@ -562,11 +623,16 @@ class _TimelineCard extends StatelessWidget {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
                           elevation: 0,
-                          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: BorderSide(
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
                         ),
                         icon: const Icon(Icons.edit_outlined, size: 16),
                         label: const Text('Ubah'),

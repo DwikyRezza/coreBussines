@@ -77,12 +77,16 @@ class _ReportExportPageState extends State<ReportExportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Light background matching screenshot
+      backgroundColor: Theme.of(context)
+          .scaffoldBackgroundColor, // Light background matching screenshot
       appBar: AppBar(
         leading: TextButton.icon(
           onPressed: () => context.pop(),
-          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-          label: Text('Kembali', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          icon: Icon(Icons.arrow_back_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+          label: Text('Kembali',
+              style: AppTypography.textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         leadingWidth: 100,
         backgroundColor: Colors.transparent,
@@ -112,7 +116,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
             const SizedBox(height: AppSpacing.xl),
 
             // Rentang Waktu
-            Text('Rentang Waktu', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text('Rentang Waktu',
+                style: AppTypography.textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.sm),
             GestureDetector(
               onTap: () async {
@@ -130,15 +136,18 @@ class _ReportExportPageState extends State<ReportExportPage> {
                 }
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_month_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+                    Icon(Icons.calendar_month_outlined,
+                        color: Theme.of(context).colorScheme.primary, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -149,7 +158,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
                         ),
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(Icons.chevron_right_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ],
                 ),
               ),
@@ -157,7 +167,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
             const SizedBox(height: AppSpacing.xl),
 
             // Format Dokumen
-            Text('Format Dokumen', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text('Format Dokumen',
+                style: AppTypography.textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
@@ -170,7 +182,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _selectedFormat == 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+                          color: _selectedFormat == 0
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outlineVariant,
                           width: _selectedFormat == 0 ? 2 : 1,
                         ),
                       ),
@@ -181,13 +195,31 @@ class _ReportExportPageState extends State<ReportExportPage> {
                             Positioned(
                               top: -12,
                               right: 8,
-                              child: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary, size: 20),
+                              child: Icon(Icons.check_circle,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 20),
                             ),
                           Column(
                             children: [
-                              Icon(Icons.picture_as_pdf_rounded, color: _selectedFormat == 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant, size: 36),
+                              Icon(Icons.picture_as_pdf_rounded,
+                                  color: _selectedFormat == 0
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                  size: 36),
                               const SizedBox(height: 12),
-                              Text('PDF', style: AppTypography.textTheme.labelLarge?.copyWith(color: _selectedFormat == 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                              Text('PDF',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
+                                          color: _selectedFormat == 0
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                          fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ],
@@ -205,7 +237,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _selectedFormat == 1 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+                          color: _selectedFormat == 1
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outlineVariant,
                           width: _selectedFormat == 1 ? 2 : 1,
                         ),
                       ),
@@ -216,13 +250,31 @@ class _ReportExportPageState extends State<ReportExportPage> {
                             Positioned(
                               top: -12,
                               right: 8,
-                              child: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary, size: 20),
+                              child: Icon(Icons.check_circle,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 20),
                             ),
                           Column(
                             children: [
-                              Icon(Icons.table_chart_rounded, color: _selectedFormat == 1 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant, size: 36),
+                              Icon(Icons.table_chart_rounded,
+                                  color: _selectedFormat == 1
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                  size: 36),
                               const SizedBox(height: 12),
-                              Text('Excel', style: AppTypography.textTheme.labelLarge?.copyWith(color: _selectedFormat == 1 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                              Text('Excel',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
+                                          color: _selectedFormat == 1
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                          fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ],
@@ -238,8 +290,12 @@ class _ReportExportPageState extends State<ReportExportPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Pratinjau Layout', style: AppTypography.textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                Text('Perbesar', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+                Text('Pratinjau Layout',
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text('Perbesar',
+                    style: AppTypography.textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary)),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -247,7 +303,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outlineVariant, // Grey background
+                color: Theme.of(context)
+                    .colorScheme
+                    .outlineVariant, // Grey background
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Stack(
@@ -259,7 +317,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
                     height: 180,
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(8)),
                     ),
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -269,21 +328,58 @@ class _ReportExportPageState extends State<ReportExportPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(width: 80, height: 10, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline, borderRadius: BorderRadius.circular(4))),
-                            Container(width: 40, height: 10, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outline, borderRadius: BorderRadius.circular(4))),
+                            Container(
+                                width: 80,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                    borderRadius: BorderRadius.circular(4))),
+                            Container(
+                                width: 40,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                    borderRadius: BorderRadius.circular(4))),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Container(width: 60, height: 6, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(4))),
+                        Container(
+                            width: 60,
+                            height: 6,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant,
+                                borderRadius: BorderRadius.circular(4))),
                         const SizedBox(height: 16),
-                        Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                        Divider(
+                            color:
+                                Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 16),
                         // Mock Cards
                         Row(
                           children: [
-                            Expanded(child: Container(height: 30, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(4)))),
+                            Expanded(
+                                child: Container(
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        borderRadius:
+                                            BorderRadius.circular(4)))),
                             const SizedBox(width: 8),
-                            Expanded(child: Container(height: 30, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(4)))),
+                            Expanded(
+                                child: Container(
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        borderRadius:
+                                            BorderRadius.circular(4)))),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -291,18 +387,35 @@ class _ReportExportPageState extends State<ReportExportPage> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Container(width: 20, height: 20, color: const Color(0xFF4299E1)),
-                                Container(width: 20, height: 40, color: const Color(0xFF3182CE)),
-                                Container(width: 20, height: 70, color: const Color(0xFF2B6CB0)),
-                                Container(width: 20, height: 30, color: const Color(0xFF4299E1)),
-                                Container(width: 20, height: 60, color: const Color(0xFF3182CE)),
+                                Container(
+                                    width: 20,
+                                    height: 20,
+                                    color: const Color(0xFF4299E1)),
+                                Container(
+                                    width: 20,
+                                    height: 40,
+                                    color: const Color(0xFF3182CE)),
+                                Container(
+                                    width: 20,
+                                    height: 70,
+                                    color: const Color(0xFF2B6CB0)),
+                                Container(
+                                    width: 20,
+                                    height: 30,
+                                    color: const Color(0xFF4299E1)),
+                                Container(
+                                    width: 20,
+                                    height: 60,
+                                    color: const Color(0xFF3182CE)),
                               ],
                             ),
                           ),
@@ -324,7 +437,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
             if (_selectedFormat == 1) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Ekspor ke Excel sedang dikembangkan. Gunakan PDF untuk saat ini.'),
+                  content: Text(
+                      'Ekspor ke Excel sedang dikembangkan. Gunakan PDF untuk saat ini.'),
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -333,7 +447,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
 
             if (_isLoading) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sedang memuat data transaksi...')),
+                const SnackBar(
+                    content: Text('Sedang memuat data transaksi...')),
               );
               return;
             }
@@ -352,9 +467,11 @@ class _ReportExportPageState extends State<ReportExportPage> {
               );
 
               // Trigger Native and Local Notifications
-              final monthName = DateFormat('MMMM yyyy', 'id_ID').format(_selectedMonth);
+              final monthName =
+                  DateFormat('MMMM yyyy', 'id_ID').format(_selectedMonth);
               final notifTitle = 'Ekspor Laporan Selesai';
-              final notifBody = 'Laporan Keuangan Bulanan periode $monthName berhasil diekspor ke format PDF.';
+              final notifBody =
+                  'Laporan Keuangan Bulanan periode $monthName berhasil diekspor ke format PDF.';
 
               await sl<NotificationLocalDataSource>().saveNotification(
                 NotificationModel(
@@ -367,7 +484,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
                 ),
               );
 
-              await sl<NotificationService>().showInstantNotification(notifTitle, notifBody);
+              await sl<NotificationService>()
+                  .showInstantNotification(notifTitle, notifBody);
 
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -394,7 +512,8 @@ class _ReportExportPageState extends State<ReportExportPage> {
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(56),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             elevation: 4,
           ),
           child: Row(
@@ -402,7 +521,9 @@ class _ReportExportPageState extends State<ReportExportPage> {
             children: [
               const Icon(Icons.download_rounded, color: Colors.white, size: 20),
               const SizedBox(width: 8),
-              Text('Unduh Laporan', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+              Text('Unduh Laporan',
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

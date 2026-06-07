@@ -45,7 +45,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -92,12 +93,14 @@ class SmartAiInsightsPage extends StatelessWidget {
                                 color: Color(0xFFFED7D7), // Light red
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFC53030), size: 16),
+                              child: const Icon(Icons.warning_amber_rounded,
+                                  color: Color(0xFFC53030), size: 16),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Peringatan Pengeluaran',
-                              style: AppTypography.textTheme.labelMedium?.copyWith(
+                              style:
+                                  AppTypography.textTheme.labelMedium?.copyWith(
                                 color: const Color(0xFFC53030),
                                 fontWeight: FontWeight.w700,
                               ),
@@ -116,7 +119,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                         Text(
                           'Dibandingkan rata-rata bulanan Anda. Total pengeluaran mencapai Rp 2.450.000 dalam kategori ini.',
                           style: AppTypography.textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -124,24 +128,35 @@ class SmartAiInsightsPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest, // Very light gray/blue
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest, // Very light gray/blue
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.lightbulb_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 20),
+                              Icon(Icons.lightbulb_outline_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 20),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Rekomendasi AI', style: AppTypography.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700)),
+                                    Text('Rekomendasi AI',
+                                        style: AppTypography
+                                            .textTheme.labelMedium
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w700)),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Kurangi pemesanan makanan online akhir pekan ini untuk kembali ke target anggaran mingguan Anda.',
-                                      style: AppTypography.textTheme.bodyMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      style: AppTypography.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                         height: 1.4,
                                       ),
                                     ),
@@ -167,7 +182,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -184,7 +200,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.savings_rounded, color: Colors.white, size: 16),
+                        child: const Icon(Icons.savings_rounded,
+                            color: Colors.white, size: 16),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -223,7 +240,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                       ),
                       Container(
                         height: 8,
-                        width: MediaQuery.of(context).size.width * 0.7, // 85% approx relative to padding
+                        width: MediaQuery.of(context).size.width *
+                            0.7, // 85% approx relative to padding
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(4),
@@ -254,7 +272,8 @@ class SmartAiInsightsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -268,10 +287,15 @@ class SmartAiInsightsPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
+                        child: Icon(Icons.auto_awesome,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            size: 16),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -320,7 +344,8 @@ class SmartAiInsightsPage extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(56),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
             elevation: 4,
           ),
           child: Row(
@@ -328,7 +353,9 @@ class SmartAiInsightsPage extends StatelessWidget {
             children: [
               const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
               const SizedBox(width: 8),
-              Text('Sesuaikan Target Anggaran', style: AppTypography.textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+              Text('Sesuaikan Target Anggaran',
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

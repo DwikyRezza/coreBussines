@@ -3,11 +3,13 @@
 // lib/core/shell/app_shell.dart
 // ============================================================
 
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../di/service_locator.dart';
+import '../security/permission_policy.dart';
 import '../services/business_context_service.dart';
 import '../theme/app_typography.dart';
 import '../router/app_router.dart';
@@ -38,9 +40,10 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   BusinessContext? _cachedContext;
   bool _isLoadingContext = true;
+  StreamSubscription<BusinessContext>? _contextSubscription;
 
-  List<_TabItem> _getTabsForRole(String role) {
-    final cleanRole = role.toLowerCase();
+  List<_TabItem> _getTabsForContext(BusinessContext context) {
+    final permissions = context.permissions;
     final List<_TabItem> tabs = [
       const _TabItem(
         route: AppRoutes.home,
@@ -56,8 +59,7 @@ class _AppShellState extends State<AppShell> {
       ),
     ];
 
-    // Sembunyikan menu Analisis untuk Kasir, Inventory Staff, dan Sales
-    if (cleanRole != 'cashier' && cleanRole != 'inventory' && cleanRole != 'sales') {
+    if (permissions.contains(PermissionKeys.canViewAnalytics)) {
       tabs.add(
         const _TabItem(
           route: AppRoutes.analytics,
@@ -82,7 +84,8 @@ class _AppShellState extends State<AppShell> {
 
   int _locationToIndex(String location, List<_TabItem> tabs) {
     for (int i = 0; i < tabs.length; i++) {
-      if (location == tabs[i].route || location.startsWith('${tabs[i].route}/')) {
+      if (location == tabs[i].route ||
+          location.startsWith('${tabs[i].route}/')) {
         return i;
       }
     }
@@ -92,24 +95,30 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    _loadContext();
+    _subscribeContext();
   }
 
-  Future<void> _loadContext() async {
-    if (!mounted) return;
-    try {
-      final ctx = await sl<BusinessContextService>().getCurrentContext();
-      if (mounted) {
+  void _subscribeContext() {
+    _contextSubscription =
+        sl<BusinessContextService>().watchCurrentContext().listen(
+      (ctx) {
+        if (!mounted) return;
         setState(() {
           _cachedContext = ctx;
           _isLoadingContext = false;
         });
-      }
-    } catch (_) {
-      if (mounted) {
+      },
+      onError: (_) {
+        if (!mounted) return;
         setState(() => _isLoadingContext = false);
-      }
-    }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _contextSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -121,13 +130,12 @@ class _AppShellState extends State<AppShell> {
     }
 
     final businessContext = _cachedContext!;
-    final role = businessContext.role;
-    final cleanRole = role.toLowerCase();
-    final tabs = _getTabsForRole(role);
+    final tabs = _getTabsForContext(businessContext);
     final currentIndex = _locationToIndex(location, tabs);
 
-    // Jangan tampilkan FAB untuk Viewer dan Auditor (Read-only)
-    final showFab = cleanRole != 'viewer' && cleanRole != 'auditor';
+    final showFab = businessContext.hasPermission(
+      PermissionKeys.canCreateTransaction,
+    );
 
     return Scaffold(
       body: widget.child,
@@ -138,12 +146,10 @@ class _AppShellState extends State<AppShell> {
           context.go(tabs[index].route);
         },
       ),
-      floatingActionButton: showFab
-          ? _ExpandableFAB(role: role)
-          : null,
-      floatingActionButtonLocation: showFab
-          ? FloatingActionButtonLocation.centerDocked
-          : null,
+      floatingActionButton:
+          showFab ? _ExpandableFAB(contextData: businessContext) : null,
+      floatingActionButtonLocation:
+          showFab ? FloatingActionButtonLocation.centerDocked : null,
     );
   }
 }
@@ -181,13 +187,16 @@ class _AppBottomNavBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(tabs.length + (showFabSpace ? 1 : 0), (index) {
+            children:
+                List.generate(tabs.length + (showFabSpace ? 1 : 0), (index) {
               // Jika ini adalah posisi tengah, beri gap untuk FAB
               if (showFabSpace && index == tabs.length ~/ 2) {
                 return const SizedBox(width: 56);
               }
 
-              final tabIndex = (showFabSpace && index > tabs.length ~/ 2) ? index - 1 : index;
+              final tabIndex = (showFabSpace && index > tabs.length ~/ 2)
+                  ? index - 1
+                  : index;
               final tab = tabs[tabIndex];
 
               return _NavItem(
@@ -256,8 +265,8 @@ class _NavItem extends StatelessWidget {
 }
 
 class _ExpandableFAB extends StatefulWidget {
-  final String role;
-  const _ExpandableFAB({required this.role});
+  final BusinessContext contextData;
+  const _ExpandableFAB({required this.contextData});
 
   @override
   State<_ExpandableFAB> createState() => _ExpandableFABState();
@@ -309,7 +318,10 @@ class _ExpandableFABState extends State<_ExpandableFAB>
   }
 
   OverlayEntry _createOverlayEntry() {
-    final cleanRole = widget.role.toLowerCase();
+    final cleanRole = widget.contextData.role.toLowerCase();
+    final canUploadReceipt = widget.contextData.hasPermission(
+      PermissionKeys.canUploadReceipt,
+    );
 
     return OverlayEntry(
       builder: (context) {
@@ -339,17 +351,18 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                   },
                 ),
                 const SizedBox(width: 14),
-                _buildActionItem(
-                  context: context,
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Scan Struk',
-                  width: actionWidth,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  onTap: () {
-                    _toggle();
-                    context.push(AppRoutes.scanReceiptIntro);
-                  },
-                ),
+                if (canUploadReceipt)
+                  _buildActionItem(
+                    context: context,
+                    icon: Icons.receipt_long_rounded,
+                    label: 'Scan Struk',
+                    width: actionWidth,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    onTap: () {
+                      _toggle();
+                      context.push(AppRoutes.scanReceiptIntro);
+                    },
+                  ),
               ],
             ),
           );
@@ -391,17 +404,18 @@ class _ExpandableFABState extends State<_ExpandableFAB>
                   },
                 ),
                 const SizedBox(width: 14),
-                _buildActionItem(
-                  context: context,
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Scan Struk',
-                  width: actionWidth,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  onTap: () {
-                    _toggle();
-                    context.push(AppRoutes.scanReceiptIntro);
-                  },
-                ),
+                if (canUploadReceipt)
+                  _buildActionItem(
+                    context: context,
+                    icon: Icons.receipt_long_rounded,
+                    label: 'Scan Struk',
+                    width: actionWidth,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    onTap: () {
+                      _toggle();
+                      context.push(AppRoutes.scanReceiptIntro);
+                    },
+                  ),
               ],
             ),
           );
@@ -442,17 +456,18 @@ class _ExpandableFABState extends State<_ExpandableFAB>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildActionItem(
-                  context: context,
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Scan Struk',
-                  width: actionWidth,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  onTap: () {
-                    _toggle();
-                    context.push(AppRoutes.scanReceiptIntro);
-                  },
-                ),
+                if (canUploadReceipt)
+                  _buildActionItem(
+                    context: context,
+                    icon: Icons.receipt_long_rounded,
+                    label: 'Scan Struk',
+                    width: actionWidth,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    onTap: () {
+                      _toggle();
+                      context.push(AppRoutes.scanReceiptIntro);
+                    },
+                  ),
                 const SizedBox(width: 14),
                 _buildActionItem(
                   context: context,
@@ -560,7 +575,8 @@ class _ExpandableFABState extends State<_ExpandableFAB>
             SizedBox(
               width: width,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: cs.surface.withOpacity(0.94),
                   borderRadius: BorderRadius.circular(999),

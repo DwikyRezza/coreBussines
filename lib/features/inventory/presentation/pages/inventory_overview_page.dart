@@ -48,20 +48,44 @@ class InventoryOverviewPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                      boxShadow: [
+                        BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .shadow
+                                .withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4))
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.inventory_2_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
+                            Icon(Icons.inventory_2_outlined,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                size: 18),
                             const SizedBox(width: 8),
-                            Expanded(child: Text('Total Active SKUs', style: AppTypography.textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))),
+                            Expanded(
+                                child: Text('Total Active SKUs',
+                                    style: AppTypography.textTheme.titleSmall
+                                        ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant))),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text('1,248', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
+                        Text('1,248',
+                            style: AppTypography.textTheme.headlineMedium
+                                ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface)),
                       ],
                     ),
                   ),
@@ -73,20 +97,37 @@ class InventoryOverviewPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFFED7D7), // Light Red
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                      boxShadow: [
+                        BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .shadow
+                                .withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4))
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFC53030), size: 18),
+                            const Icon(Icons.warning_amber_rounded,
+                                color: Color(0xFFC53030), size: 18),
                             const SizedBox(width: 8),
-                            Expanded(child: Text('Low Stock Alerts', style: AppTypography.textTheme.titleSmall?.copyWith(color: const Color(0xFFC53030)))),
+                            Expanded(
+                                child: Text('Low Stock Alerts',
+                                    style: AppTypography.textTheme.titleSmall
+                                        ?.copyWith(
+                                            color: const Color(0xFFC53030)))),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text('12', style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFFC53030))),
+                        Text('12',
+                            style: AppTypography.textTheme.headlineMedium
+                                ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFFC53030))),
                       ],
                     ),
                   ),
@@ -99,12 +140,19 @@ class InventoryOverviewPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Current Stock', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
+                Text('Current Stock',
+                    style: AppTypography.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context).colorScheme.onSurface)),
                 Row(
                   children: [
-                    Icon(Icons.filter_list_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
+                    Icon(Icons.filter_list_rounded,
+                        color: Theme.of(context).colorScheme.primary, size: 18),
                     const SizedBox(width: 4),
-                    Text('Filter', style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                    Text('Filter',
+                        style: AppTypography.textTheme.labelMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -160,10 +208,15 @@ class InventoryOverviewPage extends StatelessWidget {
               onPressed: () {},
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(56),
-                side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('View All Inventory', style: AppTypography.textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+              child: Text('View All Inventory',
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 100), // Bottom padding
           ],
@@ -208,10 +261,15 @@ class _StockItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isCritical ? const Color(0xFFC53030) : Colors.transparent, width: isCritical ? 1 : 0),
+        border: Border.all(
+            color: isCritical ? const Color(0xFFC53030) : Colors.transparent,
+            width: isCritical ? 1 : 0),
         boxShadow: [
           if (!isCritical)
-            BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(
+                color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4)),
         ],
       ),
       child: IntrinsicHeight(
@@ -223,7 +281,9 @@ class _StockItemCard extends StatelessWidget {
                 width: 4,
                 decoration: const BoxDecoration(
                   color: Color(0xFFC53030),
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16)),
                 ),
               ),
             Expanded(
@@ -238,25 +298,45 @@ class _StockItemCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 24),
+                          child: Icon(icon,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              size: 24),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                              Text(title,
+                                  style: AppTypography.textTheme.titleMedium
+                                      ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface)),
                               const SizedBox(height: 4),
-                              Text('SKU: $sku', style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                              Text('SKU: $sku',
+                                  style: AppTypography.textTheme.bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline)),
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  Icon(statusIcon, color: statusColor, size: 14),
+                                  Icon(statusIcon,
+                                      color: statusColor, size: 14),
                                   const SizedBox(width: 4),
-                                  Text(statusText, style: AppTypography.textTheme.labelSmall?.copyWith(color: statusColor)),
+                                  Text(statusText,
+                                      style: AppTypography.textTheme.labelSmall
+                                          ?.copyWith(color: statusColor)),
                                 ],
                               ),
                             ],
@@ -265,7 +345,8 @@ class _StockItemCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                    Divider(
+                        color: Theme.of(context).colorScheme.outlineVariant),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,12 +355,24 @@ class _StockItemCard extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(unitsLeft, style: AppTypography.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
-                            Text('Units Left', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
+                            Text(unitsLeft,
+                                style: AppTypography.textTheme.headlineMedium
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface)),
+                            Text('Units Left',
+                                style: AppTypography.textTheme.labelSmall
+                                    ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline)),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: pillBg,
                             borderRadius: BorderRadius.circular(16),
@@ -290,7 +383,11 @@ class _StockItemCard extends StatelessWidget {
                                 Icon(pillIcon, color: pillColor, size: 14),
                                 const SizedBox(width: 4),
                               ],
-                              Text(pillText, style: AppTypography.textTheme.labelSmall?.copyWith(color: pillColor, fontWeight: FontWeight.w600)),
+                              Text(pillText,
+                                  style: AppTypography.textTheme.labelSmall
+                                      ?.copyWith(
+                                          color: pillColor,
+                                          fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),

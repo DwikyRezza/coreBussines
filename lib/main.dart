@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/config/app_config.dart';
 import 'core/di/service_locator.dart';
@@ -32,10 +32,21 @@ Future<void> main() async {
     ),
   );
 
-  await dotenv.load(fileName: ".env");
-  AppConfig.validate();
-
-  await Firebase.initializeApp();
+  if (kIsWeb) {
+    AppConfig.validateForWeb();
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: AppConfig.firebaseApiKey,
+        appId: AppConfig.firebaseAppId,
+        messagingSenderId: AppConfig.firebaseMessagingSenderId,
+        projectId: AppConfig.firebaseProjectId,
+        authDomain: AppConfig.firebaseAuthDomain,
+        storageBucket: AppConfig.firebaseStorageBucket,
+      ),
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
 
   await initDependencies();
   runApp(const CoreBusinessApp());

@@ -3,8 +3,6 @@
 // lib/features/settings/presentation/pages/edit_profile_page.dart
 // ============================================================
 
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_storage/firebase_storage.dart';
@@ -72,8 +70,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
     if (image == null) return;
 
-    final file = File(image.path);
-    final length = await file.length();
+    final bytes = await image.readAsBytes();
+    final length = bytes.length;
     if (length > 5 * 1024 * 1024) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,7 +94,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final ref = FirebaseStorage.instance
           .ref()
           .child('users/${firebaseUser.uid}/profile.$safeExtension');
-      await ref.putFile(file, SettableMetadata(contentType: contentType));
+      await ref.putData(bytes, SettableMetadata(contentType: contentType));
       final url = await ref.getDownloadURL();
 
       await firebaseUser.updatePhotoURL(url);

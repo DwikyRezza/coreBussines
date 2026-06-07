@@ -4,6 +4,7 @@
 // ============================================================
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,9 +35,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         _firestore = firestore,
         _googleSignIn = googleSignIn ??
             GoogleSignIn(
-              serverClientId: AppConfig.googleWebClientId.isEmpty
-                  ? null
-                  : AppConfig.googleWebClientId,
+              clientId: kIsWeb && AppConfig.googleWebClientId.isNotEmpty
+                  ? AppConfig.googleWebClientId
+                  : null,
+              serverClientId: !kIsWeb && AppConfig.googleWebClientId.isNotEmpty
+                  ? AppConfig.googleWebClientId
+                  : null,
               scopes: ['email', 'profile'],
             ),
         _prefs = prefs;
@@ -119,6 +123,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await _googleSignIn.signOut();
       await _auth.signOut();
       await _prefs.remove(_activeBusinessIdKey);
+      await _prefs.remove('active_member_role');
+      await _prefs.remove('active_member_status');
+      await _prefs.remove('active_member_permissions');
     } catch (e) {
       rethrow;
     }

@@ -4,7 +4,6 @@
 // ============================================================
 
 import 'dart:async';
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
 import 'exceptions.dart';
@@ -25,27 +24,24 @@ class ErrorMapper {
       );
     }
 
-    if (error is SocketException) {
-      return const NetworkFailure(
-        message: 'Koneksi internet terputus atau tidak stabil. Silakan periksa jaringan Anda.',
-      );
-    }
-
     if (error is TimeoutException) {
       return const ServerFailure(
-        message: 'Waktu pemrosesan habis (timeout). Silakan coba beberapa saat lagi.',
+        message:
+            'Waktu pemrosesan habis (timeout). Silakan coba beberapa saat lagi.',
       );
     }
 
     if (error is FormatException) {
       return const UnexpectedFailure(
-        message: 'Gagal memproses data dari server. Silakan coba beberapa saat lagi.',
+        message:
+            'Gagal memproses data dari server. Silakan coba beberapa saat lagi.',
       );
     }
 
     if (error is StateError) {
       return const UnexpectedFailure(
-        message: 'Terjadi kesalahan sistem internal. Silakan muat ulang aplikasi.',
+        message:
+            'Terjadi kesalahan sistem internal. Silakan muat ulang aplikasi.',
       );
     }
 
@@ -62,13 +58,15 @@ class ErrorMapper {
 
     if (error is NetworkException) {
       return const NetworkFailure(
-        message: 'Koneksi internet terputus atau tidak stabil. Silakan periksa jaringan Anda.',
+        message:
+            'Koneksi internet terputus atau tidak stabil. Silakan periksa jaringan Anda.',
       );
     }
 
     if (error is CacheException) {
       return const CacheFailure(
-        message: 'Gagal membaca atau menyimpan data pada penyimpanan lokal perangkat Anda.',
+        message:
+            'Gagal membaca atau menyimpan data pada penyimpanan lokal perangkat Anda.',
       );
     }
 
@@ -85,23 +83,28 @@ class ErrorMapper {
         errorString.contains('xmlhttprequest') ||
         errorString.contains('handshake_status')) {
       return const NetworkFailure(
-        message: 'Koneksi internet terputus atau tidak stabil. Silakan periksa jaringan Anda.',
+        message:
+            'Koneksi internet terputus atau tidak stabil. Silakan periksa jaringan Anda.',
       );
     }
 
-    if (errorString.contains('timeout') || errorString.contains('deadline-exceeded')) {
+    if (errorString.contains('timeout') ||
+        errorString.contains('deadline-exceeded')) {
       return const ServerFailure(
-        message: 'Waktu pemrosesan habis (timeout). Silakan coba beberapa saat lagi.',
+        message:
+            'Waktu pemrosesan habis (timeout). Silakan coba beberapa saat lagi.',
       );
     }
 
-    if (errorString.contains('permission-denied') || errorString.contains('permission denied')) {
+    if (errorString.contains('permission-denied') ||
+        errorString.contains('permission denied')) {
       return const ServerFailure(
         message: 'Anda tidak memiliki izin untuk mengakses data ini.',
       );
     }
 
-    if (errorString.contains('dibatalkan oleh pengguna') || errorString.contains('sign-in canceled')) {
+    if (errorString.contains('dibatalkan oleh pengguna') ||
+        errorString.contains('sign-in canceled')) {
       return const AuthFailure(
         message: 'Proses masuk dibatalkan oleh pengguna.',
       );
@@ -109,13 +112,15 @@ class ErrorMapper {
 
     if (errorString.contains('belum terdaftar')) {
       return const AuthFailure(
-        message: 'Akun ini belum terdaftar. Silakan daftar dahulu dengan akun Google tersebut.',
+        message:
+            'Akun ini belum terdaftar. Silakan daftar dahulu dengan akun Google tersebut.',
       );
     }
 
     if (errorString.contains('sudah pernah dibuat')) {
       return const AuthFailure(
-        message: 'Akun ini sudah pernah dibuat. Silakan masuk melalui menu Login dengan akun yang sama.',
+        message:
+            'Akun ini sudah pernah dibuat. Silakan masuk melalui menu Login dengan akun yang sama.',
       );
     }
 
@@ -127,12 +132,14 @@ class ErrorMapper {
 
     // Default Fallback
     return const UnexpectedFailure(
-      message: 'Terjadi kesalahan yang tidak terduga. Silakan coba beberapa saat lagi.',
+      message:
+          'Terjadi kesalahan yang tidak terduga. Silakan coba beberapa saat lagi.',
     );
   }
 
   /// Maps specific Firebase Authentication Error codes to friendly Indonesian messages.
-  static String _mapFirebaseAuthException(firebase_auth.FirebaseAuthException exception) {
+  static String _mapFirebaseAuthException(
+      firebase_auth.FirebaseAuthException exception) {
     switch (exception.code) {
       case 'invalid-credential':
       case 'wrong-password':
@@ -159,7 +166,8 @@ class ErrorMapper {
         // Try parsing message or fallback to clean generic text
         if (exception.message != null && exception.message!.isNotEmpty) {
           final msgLower = exception.message!.toLowerCase();
-          if (msgLower.contains('sign-in canceled') || msgLower.contains('user cancel')) {
+          if (msgLower.contains('sign-in canceled') ||
+              msgLower.contains('user cancel')) {
             return 'Proses masuk dibatalkan oleh pengguna.';
           }
         }

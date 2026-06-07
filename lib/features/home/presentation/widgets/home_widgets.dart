@@ -226,7 +226,10 @@ class _QuickActionButton extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outlineVariant
+                      .withOpacity(0.5),
                 ),
               ),
               child: Icon(
@@ -267,7 +270,9 @@ class HomeInsightCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+        border: Border.all(
+            color:
+                Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,7 +392,9 @@ class TransactionTile extends StatelessWidget {
                 showSign: true,
               ),
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: transaction.isIncome ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                color: transaction.isIncome
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -520,7 +527,8 @@ class _SkeletonBoxState extends State<SkeletonBox>
             width: widget.width,
             height: widget.height,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.4),
+              color:
+                  Theme.of(context).colorScheme.outlineVariant.withOpacity(0.4),
               borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,13 +8,14 @@ import '../../../../core/config/app_config.dart';
 
 class AiReceiptScanner {
   GenerativeModel? _model;
+  final Dio _dio;
 
-  AiReceiptScanner();
+  AiReceiptScanner({Dio? dio}) : _dio = dio ?? Dio();
 
   GenerativeModel _getModel() {
     final apiKey = AppConfig.geminiApiKey;
     if (apiKey.isEmpty) {
-      throw Exception('GEMINI_API_KEY belum dikonfigurasi di file .env');
+      throw Exception('GEMINI_API_KEY belum dikonfigurasi untuk build native.');
     }
     return _model ??= GenerativeModel(
       model: 'gemini-2.0-flash',
@@ -30,6 +32,12 @@ class AiReceiptScanner {
 
       // Detect MIME type from file extension
       final mimeType = _detectMimeType(photo.path);
+      if (kIsWeb) {
+        return _scanThroughServer(
+          imageBytes: imageBytes,
+          mimeType: mimeType,
+        );
+      }
 
       final prompt = TextPart('''
 Kamu adalah asisten akuntansi cerdas. Ekstrak data dari foto struk belanja ini.
@@ -52,7 +60,8 @@ Balas hanya JSON valid tanpa markdown dengan format:
 
       final text = response.text;
       if (text == null || text.trim().isEmpty) {
-        throw Exception('AI tidak dapat membaca struk. Pastikan foto struk jelas dan tidak buram.');
+        throw Exception(
+            'AI tidak dapat membaca struk. Pastikan foto struk jelas dan tidak buram.');
       }
 
       debugPrint('[AiReceiptScanner] Raw response: $text');
@@ -62,31 +71,69 @@ Balas hanya JSON valid tanpa markdown dengan format:
 
       // Validate required fields
       if (!parsed.containsKey('title') || !parsed.containsKey('amount')) {
-        throw Exception('AI gagal mengekstrak data utama dari struk. Coba foto ulang dengan pencahayaan yang lebih baik.');
+        throw Exception(
+            'AI gagal mengekstrak data utama dari struk. Coba foto ulang dengan pencahayaan yang lebih baik.');
       }
 
       return parsed;
     } on InvalidApiKey catch (e) {
       debugPrint('[AiReceiptScanner] InvalidApiKey: $e');
-      throw Exception('API Key Gemini tidak valid. Periksa konfigurasi GEMINI_API_KEY di file .env.');
+      throw Exception('API Key Gemini tidak valid.');
     } on ServerException catch (e) {
       debugPrint('[AiReceiptScanner] ServerException: $e');
-      throw Exception('Server AI sedang bermasalah. Silakan coba beberapa saat lagi.');
+      throw Exception(
+          'Server AI sedang bermasalah. Silakan coba beberapa saat lagi.');
     } on UnsupportedUserLocation catch (e) {
       debugPrint('[AiReceiptScanner] UnsupportedUserLocation: $e');
-      throw Exception('Layanan AI tidak tersedia di lokasi Anda. Coba gunakan VPN.');
+      throw Exception(
+          'Layanan AI tidak tersedia di lokasi Anda. Coba gunakan VPN.');
     } on GenerativeAIException catch (e) {
       debugPrint('[AiReceiptScanner] GenerativeAIException: $e');
       throw Exception('Gagal memproses struk dengan AI: ${e.message}');
-    } on SocketException catch (_) {
-      throw Exception('Tidak ada koneksi internet. Pastikan perangkat terhubung ke jaringan.');
+    } on DioException catch (e) {
+      debugPrint('[AiReceiptScanner] DioException: $e');
+      throw Exception(
+        'Layanan scan struk tidak dapat dihubungi. Silakan coba kembali.',
+      );
     } on FormatException catch (e) {
       debugPrint('[AiReceiptScanner] FormatException: $e');
-      throw Exception('AI memberikan respons yang tidak valid. Silakan coba foto ulang struk Anda.');
+      throw Exception(
+          'AI memberikan respons yang tidak valid. Silakan coba foto ulang struk Anda.');
     } catch (e) {
       debugPrint('[AiReceiptScanner] Unexpected error: $e');
       rethrow;
     }
+  }
+
+  Future<Map<String, dynamic>> _scanThroughServer({
+    required Uint8List imageBytes,
+    required String mimeType,
+  }) async {
+    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Sesi login berakhir. Silakan login kembali.');
+    }
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      AppConfig.receiptScanApiUrl,
+      data: <String, dynamic>{
+        'imageBase64': base64Encode(imageBytes),
+        'mimeType': mimeType,
+      },
+      options: Options(
+        headers: <String, String>{'Authorization': 'Bearer $idToken'},
+        contentType: Headers.jsonContentType,
+        responseType: ResponseType.json,
+        sendTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
+      ),
+    );
+
+    final data = response.data;
+    if (data == null || data['title'] == null || data['amount'] == null) {
+      throw const FormatException('Respons scan struk tidak valid.');
+    }
+    return data;
   }
 
   String _detectMimeType(String path) {

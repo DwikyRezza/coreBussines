@@ -141,7 +141,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       onTap: _pickMonth,
                       borderRadius: BorderRadius.circular(24),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(24),
@@ -155,7 +156,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 monthLabel,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTypography.textTheme.labelMedium?.copyWith(
+                                style: AppTypography.textTheme.labelMedium
+                                    ?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                   height: 1.15,
                                   fontWeight: FontWeight.w700,
@@ -164,7 +166,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             ),
                             const SizedBox(width: 8),
                             Icon(Icons.keyboard_arrow_down_rounded,
-                                color: Theme.of(context).colorScheme.primary, size: 20),
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 20),
                           ],
                         ),
                       ),
@@ -235,66 +238,69 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _InsightCard(
-                    monthLabel: DateFormat('MMMM', 'id_ID').format(_selectedMonth),
+                    monthLabel:
+                        DateFormat('MMMM', 'id_ID').format(_selectedMonth),
                     income: _totalIncome,
                     expense: _totalExpense,
-                    topCategory:
-                        _expenseByCategory.isEmpty ? null : _expenseByCategory.keys.first,
+                    topCategory: _expenseByCategory.isEmpty
+                        ? null
+                        : _expenseByCategory.keys.first,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   ElevatedButton(
                     onPressed: () async {
-                    try {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Laporan PDF sedang disiapkan...'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      
-                      await PdfReportService.generateMonthlyReport(
-                        transactions: _transactions,
-                        month: _selectedMonth,
-                      );
-                    } catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Gagal membuat laporan PDF. Silakan periksa izin penyimpanan atau coba lagi nanti.',
+                      try {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Laporan PDF sedang disiapkan...'),
+                            duration: Duration(seconds: 2),
                           ),
-                          backgroundColor: Colors.redAccent,
+                        );
+
+                        await PdfReportService.generateMonthlyReport(
+                          transactions: _transactions,
+                          month: _selectedMonth,
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Gagal membuat laporan PDF. Silakan periksa izin penyimpanan atau coba lagi nanti.',
+                            ),
+                            backgroundColor: Colors.redAccent,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(56),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.picture_as_pdf_outlined,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Unduh Laporan PDF',
+                          style: AppTypography.textTheme.labelLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(56),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.picture_as_pdf_outlined,
-                          color: Colors.white, size: 20),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Unduh Laporan PDF',
-                        style: AppTypography.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
+                const SizedBox(height: 100),
               ],
-              const SizedBox(height: 100),
-            ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -360,8 +366,10 @@ class _CategoryBreakdown extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('Total',
-                        style: AppTypography.textTheme.labelSmall
-                            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        style: AppTypography.textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant)),
                     Text('100%',
                         style: AppTypography.textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800)),
@@ -379,9 +387,11 @@ class _CategoryBreakdown extends StatelessWidget {
                   _LegendItem(
                     color: colors[i % colors.length],
                     label: entries[i].key,
-                    value: '${((entries[i].value / totalExpense) * 100).round()}%',
+                    value:
+                        '${((entries[i].value / totalExpense) * 100).round()}%',
                   ),
-                  if (i != entries.length - 1) SizedBox(height: isTablet ? 16 : 12),
+                  if (i != entries.length - 1)
+                    SizedBox(height: isTablet ? 16 : 12),
                 ],
               ],
             ),
@@ -419,7 +429,8 @@ class _InsightCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary, size: 24),
+            Icon(Icons.auto_awesome,
+                color: Theme.of(context).colorScheme.primary, size: 24),
             const SizedBox(width: 8),
             Text(
               'AI Insight',
@@ -433,9 +444,13 @@ class _InsightCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
+            border: Border.all(
+                color: Theme.of(context).colorScheme.primaryContainer),
           ),
           child: Text(
             message,
@@ -551,14 +566,17 @@ class _SummaryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Icon(
                     Icons.trending_up_rounded,
-                    color: isPositiveTrend ? const Color(0xFF4CAF50) : Theme.of(context).colorScheme.error,
+                    color: isPositiveTrend
+                        ? const Color(0xFF4CAF50)
+                        : Theme.of(context).colorScheme.error,
                     size: 16,
                   ),
                   Text(
                     trend,
                     style: AppTypography.textTheme.labelMedium?.copyWith(
-                      color:
-                          isPositiveTrend ? const Color(0xFF4CAF50) : Theme.of(context).colorScheme.error,
+                      color: isPositiveTrend
+                          ? const Color(0xFF4CAF50)
+                          : Theme.of(context).colorScheme.error,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

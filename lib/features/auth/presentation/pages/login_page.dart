@@ -30,12 +30,13 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: AppSpacing.xxl),
-              
+
               // Top Image / Illustration (Mock of the business analytics on phone)
               Container(
                 height: 260,
@@ -45,7 +46,10 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.08),
                       blurRadius: 24,
                       offset: const Offset(0, 12),
                     ),
@@ -58,7 +62,9 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 2),
+                      border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                          width: 2),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +79,8 @@ class _LoginPageState extends State<LoginPage> {
                           height: 16,
                           width: 80,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            color:
+                                Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -82,9 +89,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // App Logo & Title
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,10 +113,12 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               const SizedBox(height: AppSpacing.base),
-              
+
               // Welcome Text
               Text(
-                _isRegisterMode ? 'Buat Akun\nCoreBusiness' : 'Selamat Datang di\nCoreBusiness',
+                _isRegisterMode
+                    ? 'Buat Akun\nCoreBusiness'
+                    : 'Selamat Datang di\nCoreBusiness',
                 textAlign: TextAlign.center,
                 style: AppTypography.textTheme.headlineMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
@@ -130,9 +139,9 @@ class _LoginPageState extends State<LoginPage> {
                   height: 1.5,
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.xxl),
-              
+
               // Login Button
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
@@ -155,14 +164,16 @@ class _LoginPageState extends State<LoginPage> {
                           ? null
                           : () {
                               context.read<AuthBloc>().add(
-                                AuthGoogleSignInRequested(isRegister: _isRegisterMode),
-                              );
+                                    AuthGoogleSignInRequested(
+                                        isRegister: _isRegisterMode),
+                                  );
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         minimumSize: const Size.fromHeight(56),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                         elevation: 0,
                       ),
@@ -170,7 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                           ? const SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
                             )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -189,8 +201,11 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 const SizedBox(width: AppSpacing.sm),
                                 Text(
-                                  _isRegisterMode ? 'Daftar dengan Google' : 'Masuk dengan Google',
-                                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                                  _isRegisterMode
+                                      ? 'Daftar dengan Google'
+                                      : 'Masuk dengan Google',
+                                  style: AppTypography.textTheme.labelLarge
+                                      ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -201,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 },
               ),
-              
+
               const SizedBox(height: AppSpacing.xl),
 
               // Mode Toggle
@@ -262,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: AppSpacing.xl),
             ],
           ),

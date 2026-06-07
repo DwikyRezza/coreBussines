@@ -41,7 +41,9 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
             CircleAvatar(
               radius: 16,
               backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-              child: Icon(Icons.person_outline_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
+              child: Icon(Icons.person_outline_rounded,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 18),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
@@ -55,7 +57,8 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none_rounded, color: Theme.of(context).colorScheme.primary),
+            icon: Icon(Icons.notifications_none_rounded,
+                color: Theme.of(context).colorScheme.primary),
             onPressed: () {},
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -69,24 +72,31 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
 
           // Search Input
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).colorScheme.primary), // Active search border
+                border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary), // Active search border
               ),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: Theme.of(context).colorScheme.primary),
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
                       color: Color(0xFFF1F5F9),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.close_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
+                    child: Icon(Icons.close_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: 16),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -98,7 +108,8 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
 
           // Active Filters
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
             child: Row(
               children: [
                 _ActiveFilterChip(label: 'Bulan Ini'),
@@ -134,14 +145,18 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          const Icon(Icons.search_rounded, size: 56, color: Color(0xFF63B3ED)),
+                          const Icon(Icons.search_rounded,
+                              size: 56, color: Color(0xFF63B3ED)),
                           Positioned(
                             bottom: 12,
                             right: 12,
                             child: Container(
                               padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(color: Color(0xFF63B3ED), shape: BoxShape.circle),
-                              child: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
+                              decoration: const BoxDecoration(
+                                  color: Color(0xFF63B3ED),
+                                  shape: BoxShape.circle),
+                              child: const Icon(Icons.close_rounded,
+                                  size: 16, color: Colors.white),
                             ),
                           ),
                         ],
@@ -167,16 +182,20 @@ class _SearchEmptyPageState extends State<SearchEmptyPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Clear Filter Button
                   TextButton.icon(
                     onPressed: () {},
                     style: TextButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.outlineVariant,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.outlineVariant,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    icon: Icon(Icons.filter_list_off_rounded, color: Theme.of(context).colorScheme.primary),
+                    icon: Icon(Icons.filter_list_off_rounded,
+                        color: Theme.of(context).colorScheme.primary),
                     label: Text(
                       'Hapus Filter',
                       style: AppTypography.textTheme.labelLarge?.copyWith(
@@ -212,9 +231,12 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.primary)),
+          Text(label,
+              style: AppTypography.textTheme.labelSmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
           const SizedBox(width: 4),
-          Icon(Icons.close_rounded, size: 14, color: Theme.of(context).colorScheme.primary),
+          Icon(Icons.close_rounded,
+              size: 14, color: Theme.of(context).colorScheme.primary),
         ],
       ),
     );

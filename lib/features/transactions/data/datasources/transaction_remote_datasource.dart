@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/transaction_detail_model.dart';
 import '../../domain/entities/transaction_entities.dart';
 import '../../../home/data/models/home_models.dart';
@@ -402,8 +401,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       if (!freshSnapshot.exists || freshSnapshot.data() == null) return;
 
       final freshData = freshSnapshot.data()!;
-      final freshIsIncome =
-          freshData['is_income'] as bool? ?? (freshData['type'] as String?) == 'income';
+      final freshIsIncome = freshData['is_income'] as bool? ??
+          (freshData['type'] as String?) == 'income';
       final freshAmount = (freshData['amount'] as num?)?.toDouble() ?? 0.0;
       final amountDelta = freshIsIncome ? -freshAmount : freshAmount;
       final walletId = freshData['wallet_id'] as String? ??
@@ -426,7 +425,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           SetOptions(merge: true));
     });
 
-    final actionDesc = 'menghapus transaksi "$title" sebesar Rp ${amount.toInt()}';
+    final actionDesc =
+        'menghapus transaksi "$title" sebesar Rp ${amount.toInt()}';
     await ActivityLogger.log(
       action: 'delete_transaction',
       targetType: 'transaction',
@@ -484,23 +484,60 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   Stream<List<TransactionCategory>> watchCategories() async* {
     final businessId = await _getBusinessId();
     final ref = _categoriesRef(businessId);
-    
+
     yield* ref.snapshots().asyncMap((snapshot) async {
       if (snapshot.docs.isEmpty) {
         final defaults = [
-          const TransactionCategory(id: 'food', name: 'Makanan', iconKey: 'food', isIncome: false),
-          const TransactionCategory(id: 'transport', name: 'Transportasi', iconKey: 'transport', isIncome: false),
-          const TransactionCategory(id: 'shopping', name: 'Belanja', iconKey: 'shopping', isIncome: false),
-          const TransactionCategory(id: 'entertainment', name: 'Hiburan', iconKey: 'entertainment', isIncome: false),
-          const TransactionCategory(id: 'bill', name: 'Tagihan', iconKey: 'bill', isIncome: false),
-          const TransactionCategory(id: 'health', name: 'Kesehatan', iconKey: 'health', isIncome: false),
-          const TransactionCategory(id: 'education', name: 'Pendidikan', iconKey: 'education', isIncome: false),
-          const TransactionCategory(id: 'other', name: 'Lainnya', iconKey: 'other', isIncome: false),
-          const TransactionCategory(id: 'salary', name: 'Gaji', iconKey: 'income', isIncome: true),
-          const TransactionCategory(id: 'freelance', name: 'Freelance', iconKey: 'freelance', isIncome: true),
-          const TransactionCategory(id: 'investment', name: 'Investasi', iconKey: 'investment', isIncome: true),
-          const TransactionCategory(id: 'bonus', name: 'Bonus', iconKey: 'bonus', isIncome: true),
-          const TransactionCategory(id: 'other_income', name: 'Lainnya', iconKey: 'other', isIncome: true),
+          const TransactionCategory(
+              id: 'food', name: 'Makanan', iconKey: 'food', isIncome: false),
+          const TransactionCategory(
+              id: 'transport',
+              name: 'Transportasi',
+              iconKey: 'transport',
+              isIncome: false),
+          const TransactionCategory(
+              id: 'shopping',
+              name: 'Belanja',
+              iconKey: 'shopping',
+              isIncome: false),
+          const TransactionCategory(
+              id: 'entertainment',
+              name: 'Hiburan',
+              iconKey: 'entertainment',
+              isIncome: false),
+          const TransactionCategory(
+              id: 'bill', name: 'Tagihan', iconKey: 'bill', isIncome: false),
+          const TransactionCategory(
+              id: 'health',
+              name: 'Kesehatan',
+              iconKey: 'health',
+              isIncome: false),
+          const TransactionCategory(
+              id: 'education',
+              name: 'Pendidikan',
+              iconKey: 'education',
+              isIncome: false),
+          const TransactionCategory(
+              id: 'other', name: 'Lainnya', iconKey: 'other', isIncome: false),
+          const TransactionCategory(
+              id: 'salary', name: 'Gaji', iconKey: 'income', isIncome: true),
+          const TransactionCategory(
+              id: 'freelance',
+              name: 'Freelance',
+              iconKey: 'freelance',
+              isIncome: true),
+          const TransactionCategory(
+              id: 'investment',
+              name: 'Investasi',
+              iconKey: 'investment',
+              isIncome: true),
+          const TransactionCategory(
+              id: 'bonus', name: 'Bonus', iconKey: 'bonus', isIncome: true),
+          const TransactionCategory(
+              id: 'other_income',
+              name: 'Lainnya',
+              iconKey: 'other',
+              isIncome: true),
         ];
 
         final batch = _firestore.batch();
@@ -510,8 +547,10 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         }
         await batch.commit();
       }
-      
-      return snapshot.docs.map((doc) => TransactionCategory.fromFirestore(doc.data(), doc.id)).toList();
+
+      return snapshot.docs
+          .map((doc) => TransactionCategory.fromFirestore(doc.data(), doc.id))
+          .toList();
     });
   }
 
@@ -528,7 +567,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     await _categoriesRef(businessId).doc(categoryId).delete();
   }
 
-  Future<String> _uploadReceiptImage({
+  Future<String?> _uploadReceiptImage({
     required String businessId,
     required String transactionId,
     required String path,
@@ -536,25 +575,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    final file = File(path);
-    if (!await file.exists()) {
-      throw StateError('File bukti pembayaran tidak ditemukan.');
-    }
-
-    final extension = path.split('.').last.toLowerCase();
-    final safeExtension =
-        ['jpg', 'jpeg', 'png', 'webp'].contains(extension) ? extension : 'jpg';
-    final metadata = SettableMetadata(
-      contentType: safeExtension == 'png'
-          ? 'image/png'
-          : safeExtension == 'webp'
-              ? 'image/webp'
-              : 'image/jpeg',
-    );
-    final ref = _storage
-        .ref()
-        .child('businesses/$businessId/receipts/$transactionId.$safeExtension');
-    await ref.putFile(file, metadata);
-    return ref.getDownloadURL();
+    // Storage feature disabled to avoid subscription requirement
+    return null;
   }
 }

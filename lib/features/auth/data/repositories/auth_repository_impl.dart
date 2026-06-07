@@ -52,9 +52,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithGoogle({bool isRegister = false}) async {
+  Future<Either<Failure, UserEntity>> signInWithGoogle(
+      {bool isRegister = false}) async {
     try {
-      final user = await _remoteDataSource.signInWithGoogle(isRegister: isRegister);
+      final user =
+          await _remoteDataSource.signInWithGoogle(isRegister: isRegister);
       _cachedUser = user;
       _authController.add(user); // ← notify router & BLoC
       return Right(user);

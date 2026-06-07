@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../di/service_locator.dart';
 import '../router/router_notifier.dart';
+import '../security/permission_policy.dart';
 import '../services/app_lock_controller.dart';
+import '../storage/local_storage_service.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 
@@ -149,6 +151,7 @@ const _publicRoutes = {
 GoRouter _buildRouter() {
   final authRepo = sl<AuthRepository>();
   final appLock = sl<AppLockController>();
+  final localStorage = sl<LocalStorageService>();
   final notifier = RouterAuthNotifier(authRepo, appLock);
 
   return GoRouter(
@@ -184,13 +187,32 @@ GoRouter _buildRouter() {
       }
 
       // Redirect new user who hasn't completed onboarding to setup page
-      if (isLoggedIn && !cachedUser.onboardingCompleted && location != AppRoutes.smartBusinessSetup) {
+      if (isLoggedIn &&
+          !cachedUser.onboardingCompleted &&
+          location != AppRoutes.smartBusinessSetup) {
         return AppRoutes.smartBusinessSetup;
       }
 
       // Redirect setup completion page tries to access setup again
-      if (isLoggedIn && cachedUser.onboardingCompleted && location == AppRoutes.smartBusinessSetup) {
+      if (isLoggedIn &&
+          cachedUser.onboardingCompleted &&
+          location == AppRoutes.smartBusinessSetup) {
         return AppRoutes.home;
+      }
+
+      if (isLoggedIn && cachedUser.onboardingCompleted) {
+        final memberStatus = localStorage.activeMemberStatus ?? 'active';
+        final role = localStorage.activeMemberRole ?? 'owner';
+        final permissions = localStorage.activeMemberPermissions;
+        final canAccess = PermissionPolicy.canAccessRoute(
+          route: location,
+          role: role,
+          permissions: permissions,
+          memberStatus: memberStatus,
+        );
+        if (!canAccess && location != AppRoutes.home) {
+          return AppRoutes.home;
+        }
       }
 
       return null; // No redirect needed
@@ -232,7 +254,8 @@ GoRouter _buildRouter() {
           final category = state.uri.queryParameters['category'];
           final notes = state.uri.queryParameters['notes'];
           final imagePath = state.uri.queryParameters['imagePath'];
-          final isManualReceipt = state.uri.queryParameters['isManualReceipt'] == 'true';
+          final isManualReceipt =
+              state.uri.queryParameters['isManualReceipt'] == 'true';
 
           return AddTransactionPage(
             initialType: type == 'income' ? 1 : 0,

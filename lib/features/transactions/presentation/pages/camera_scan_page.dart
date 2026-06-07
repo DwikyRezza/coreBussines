@@ -31,7 +31,8 @@ class CameraScanPage extends StatelessWidget {
               children: [
                 // Top Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -41,28 +42,33 @@ class CameraScanPage extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Colors.white),
+                          icon: const Icon(Icons.close_rounded,
+                              color: Colors.white),
                           onPressed: () => context.pop(),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.flash_auto_rounded, color: Colors.white, size: 16),
+                            const Icon(Icons.flash_auto_rounded,
+                                color: Colors.white, size: 16),
                             const SizedBox(width: 8),
-                            Text('Auto', style: AppTypography.textTheme.labelMedium?.copyWith(color: Colors.white)),
+                            Text('Auto',
+                                style: AppTypography.textTheme.labelMedium
+                                    ?.copyWith(color: Colors.white)),
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 const Spacer(),
 
                 // Scanner Reticle
@@ -74,11 +80,17 @@ class CameraScanPage extends StatelessWidget {
                       // Grid lines mock
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(3, (index) => const Divider(color: Colors.white24, height: 1)),
+                        children: List.generate(
+                            3,
+                            (index) => const Divider(
+                                color: Colors.white24, height: 1)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(3, (index) => const VerticalDivider(color: Colors.white24, width: 1)),
+                        children: List.generate(
+                            3,
+                            (index) => const VerticalDivider(
+                                color: Colors.white24, width: 1)),
                       ),
                       // Corners
                       Align(
@@ -99,15 +111,21 @@ class CameraScanPage extends StatelessWidget {
                       ),
                       // Scanning Line
                       Align(
-                        alignment: const Alignment(0, -0.3), // Mock animated position
+                        alignment:
+                            const Alignment(0, -0.3), // Mock animated position
                         child: Container(
                           height: 2,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary, // Bright blue
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary, // Bright blue
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.6),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                               ),
@@ -157,9 +175,12 @@ class CameraScanPage extends StatelessWidget {
                           value: 0.7,
                           strokeWidth: 4,
                           color: Theme.of(context).colorScheme.primary,
-                          backgroundColor: Theme.of(context).colorScheme.outlineVariant,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.outlineVariant,
                         ),
-                        Icon(Icons.receipt_long_rounded, color: Theme.of(context).colorScheme.primary, size: 32),
+                        Icon(Icons.receipt_long_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 32),
                       ],
                     ),
                   ),
@@ -204,8 +225,10 @@ class _CornerBracket extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4),
-            left: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4),
+            top: BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 4),
+            left: BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 4),
           ),
           borderRadius: BorderRadius.only(topLeft: Radius.circular(12)),
         ),

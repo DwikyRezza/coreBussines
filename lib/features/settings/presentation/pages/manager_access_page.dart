@@ -22,11 +22,11 @@ class ManagerAccessPage extends StatefulWidget {
 class _ManagerAccessPageState extends State<ManagerAccessPage> {
   bool _userManagement = true;
   bool _systemConfig = false;
-  
+
   bool _viewTransactions = true;
   bool _approveRefunds = true;
   bool _initiateWire = false;
-  
+
   bool _performanceDashboards = true;
   bool _rawDataExport = false;
 
@@ -41,11 +41,13 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppSpacing.md),
-            
+
             // Header
             Row(
               children: [
-                Icon(Icons.shield_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
+                Icon(Icons.shield_outlined,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'ROLE MANAGEMENT',
@@ -75,26 +77,40 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
             const SizedBox(height: AppSpacing.xl),
 
             // Access Settings Group
-            Text('Access Settings', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            Text('Access Settings',
+                style: AppTypography.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
                   _SettingsRow(
                     title: 'User Management',
-                    subtitle: 'Allow role to create, suspend, and modify standard user accounts across the platform.',
+                    subtitle:
+                        'Allow role to create, suspend, and modify standard user accounts across the platform.',
                     value: _userManagement,
                     onChanged: (val) => setState(() => _userManagement = val),
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'System Configuration',
-                    subtitle: 'Grant access to global application settings, API keys, and integration webhooks.',
+                    subtitle:
+                        'Grant access to global application settings, API keys, and integration webhooks.',
                     value: _systemConfig,
                     onChanged: (val) => setState(() => _systemConfig = val),
                   ),
@@ -104,33 +120,50 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
             const SizedBox(height: AppSpacing.xl),
 
             // Transaction Permissions Group
-            Text('Transaction Permissions', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            Text('Transaction Permissions',
+                style: AppTypography.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
                   _SettingsRow(
                     title: 'View Transactions',
-                    subtitle: 'Read-only access to all inbound and outbound financial ledgers.',
+                    subtitle:
+                        'Read-only access to all inbound and outbound financial ledgers.',
                     value: _viewTransactions,
                     onChanged: (val) => setState(() => _viewTransactions = val),
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Approve Refunds',
-                    subtitle: 'Authorization to process customer refunds up to the standard daily limit.',
+                    subtitle:
+                        'Authorization to process customer refunds up to the standard daily limit.',
                     value: _approveRefunds,
                     onChanged: (val) => setState(() => _approveRefunds = val),
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Initiate Wire Transfers',
-                    subtitle: 'Permission to create new outbound bulk payouts and wire transfers.',
+                    subtitle:
+                        'Permission to create new outbound bulk payouts and wire transfers.',
                     value: _initiateWire,
                     onChanged: (val) => setState(() => _initiateWire = val),
                   ),
@@ -140,26 +173,41 @@ class _ManagerAccessPageState extends State<ManagerAccessPage> {
             const SizedBox(height: AppSpacing.xl),
 
             // Analytics Access Group
-            Text('Analytics Access', style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            Text('Analytics Access',
+                style: AppTypography.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .shadow
+                          .withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: Column(
                 children: [
                   _SettingsRow(
                     title: 'Performance Dashboards',
-                    subtitle: 'View high-level metrics, user engagement charts, and revenue summaries.',
+                    subtitle:
+                        'View high-level metrics, user engagement charts, and revenue summaries.',
                     value: _performanceDashboards,
-                    onChanged: (val) => setState(() => _performanceDashboards = val),
+                    onChanged: (val) =>
+                        setState(() => _performanceDashboards = val),
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _SettingsRow(
                     title: 'Raw Data Export (CSV/API)',
-                    subtitle: 'Ability to download unfiltered historical data tables and access reporting APIs.',
+                    subtitle:
+                        'Ability to download unfiltered historical data tables and access reporting APIs.',
                     value: _rawDataExport,
                     onChanged: (val) => setState(() => _rawDataExport = val),
                   ),
@@ -198,9 +246,14 @@ class _SettingsRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                Text(title,
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 8),
-                Text(subtitle, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(subtitle,
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -209,7 +262,8 @@ class _SettingsRow extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: Colors.white,
-            activeTrackColor: Theme.of(context).colorScheme.primary, // Deep blue
+            activeTrackColor:
+                Theme.of(context).colorScheme.primary, // Deep blue
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: Theme.of(context).colorScheme.outlineVariant,
           ),

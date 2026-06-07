@@ -106,18 +106,21 @@ class TagManagementPage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD).withOpacity(0.5), // Very light blue
+                  color: const Color(0xFFE3F2FD)
+                      .withOpacity(0.5), // Very light blue
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: const Color(0xFF63B3ED), // Light blue border
-                    style: BorderStyle.solid, // Note: Flutter doesn't have native dashed border without custom painter, using solid for mockup or we can use dotted_border package if available. Falling back to solid with light color simulating the intent.
+                    style: BorderStyle
+                        .solid, // Note: Flutter doesn't have native dashed border without custom painter, using solid for mockup or we can use dotted_border package if available. Falling back to solid with light color simulating the intent.
                     width: 2,
                   ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_circle_outline_rounded, color: Theme.of(context).colorScheme.primary),
+                    Icon(Icons.add_circle_outline_rounded,
+                        color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       'Create New Tag',
@@ -158,8 +161,10 @@ class TagManagementPage extends StatelessWidget {
               count: '89 associated items',
               icon: Icons.settings_rounded,
               iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
-              iconBgColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              onEdit: () => _showTagDialog(context, initialValue: 'Operasional'),
+              iconBgColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              onEdit: () =>
+                  _showTagDialog(context, initialValue: 'Operasional'),
               onDelete: () => _confirmDelete(context, 'Operasional'),
             ),
             const SizedBox(height: 100), // Bottom shell padding
@@ -197,14 +202,18 @@ class _TagCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+            decoration:
+                BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
             child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(width: 16),
@@ -212,18 +221,25 @@ class _TagCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
+                Text(title,
+                    style: AppTypography.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
-                Text(count, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(count,
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(Icons.edit_outlined, color: Theme.of(context).colorScheme.outline),
+            icon: Icon(Icons.edit_outlined,
+                color: Theme.of(context).colorScheme.outline),
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFC53030)),
+            icon: const Icon(Icons.delete_outline_rounded,
+                color: Color(0xFFC53030)),
             onPressed: onDelete,
           ),
         ],

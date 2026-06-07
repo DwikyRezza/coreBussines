@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -40,7 +41,8 @@ class AppLockLocalDataSourceImpl implements AppLockLocalDataSource {
     final biometricEnrolled = await _isBiometricEnrolled();
     return AppLockSettings(
       pinEnabled: pinEnabled,
-      biometricEnabled: biometricEnabled && biometricSupported && biometricEnrolled,
+      biometricEnabled:
+          biometricEnabled && biometricSupported && biometricEnrolled,
       biometricSupported: biometricSupported,
       biometricEnrolled: biometricEnrolled,
     );
@@ -88,7 +90,10 @@ class AppLockLocalDataSourceImpl implements AppLockLocalDataSource {
 
   @override
   Future<bool> authenticateWithBiometric() async {
-    if (!await _isBiometricSupported() || !await _isBiometricEnrolled()) return false;
+    if (kIsWeb) return false;
+    if (!await _isBiometricSupported() || !await _isBiometricEnrolled()) {
+      return false;
+    }
     return _localAuthentication.authenticate(
       localizedReason: 'Gunakan biometric untuk membuka CoreBusiness.',
       options: const AuthenticationOptions(
@@ -99,6 +104,7 @@ class AppLockLocalDataSourceImpl implements AppLockLocalDataSource {
   }
 
   Future<bool> _isBiometricSupported() async {
+    if (kIsWeb) return false;
     final canCheck = await _localAuthentication.canCheckBiometrics;
     final supported = await _localAuthentication.isDeviceSupported();
     return canCheck && supported;

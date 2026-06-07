@@ -98,7 +98,8 @@ class AnalyticsError extends AnalyticsState {
 
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   final TransactionRepository _transactionRepository;
-  StreamSubscription<Either<Failure, List<Transaction>>>? _transactionsSubscription;
+  StreamSubscription<Either<Failure, List<Transaction>>>?
+      _transactionsSubscription;
 
   AnalyticsBloc({required TransactionRepository transactionRepository})
       : _transactionRepository = transactionRepository,
@@ -121,7 +122,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     Emitter<AnalyticsState> emit,
   ) async {
     if (state is AnalyticsLoaded) {
-      emit((state as AnalyticsLoaded).copyWith(selectedTabIndex: event.tabIndex));
+      emit((state as AnalyticsLoaded)
+          .copyWith(selectedTabIndex: event.tabIndex));
     }
     emit(const AnalyticsLoading());
     await _subscribeTransactions(event.tabIndex);
@@ -186,9 +188,10 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
 
     final pointsMap = <DateTime, CashFlowPoint>{};
     for (final txn in transactions) {
-      final date = DateTime(txn.dateTime.year, txn.dateTime.month, txn.dateTime.day);
-      final current = pointsMap[date] ??
-          CashFlowPoint(date: date, income: 0, expense: 0);
+      final date =
+          DateTime(txn.dateTime.year, txn.dateTime.month, txn.dateTime.day);
+      final current =
+          pointsMap[date] ?? CashFlowPoint(date: date, income: 0, expense: 0);
       pointsMap[date] = CashFlowPoint(
         date: date,
         income: current.income + (txn.isIncome ? txn.amount : 0),

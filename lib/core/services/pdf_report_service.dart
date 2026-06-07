@@ -25,15 +25,18 @@ class PdfReportService {
     required DateTime month,
   }) async {
     final doc = pw.Document(
-      title: 'Laporan Bulanan — ${DateFormat('MMMM yyyy', 'id_ID').format(month)}',
+      title:
+          'Laporan Bulanan — ${DateFormat('MMMM yyyy', 'id_ID').format(month)}',
       author: 'CoreBusiness',
     );
 
     final monthLabel = DateFormat('MMMM yyyy', 'id_ID').format(month);
 
     // Filter transactions for the selected month
-    final monthlyTxns = transactions.where((t) =>
-        t.dateTime.year == month.year && t.dateTime.month == month.month).toList()
+    final monthlyTxns = transactions
+        .where((t) =>
+            t.dateTime.year == month.year && t.dateTime.month == month.month)
+        .toList()
       ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
 
     final totalIncome = monthlyTxns
@@ -82,14 +85,14 @@ class PdfReportService {
           // Category breakdown
           if (sortedCategories.isNotEmpty) ...[
             pw.Text('Breakdown Pengeluaran per Kategori',
-                style: pw.TextStyle(
-                    fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                style:
+                    pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 12),
             pw.Table.fromTextArray(
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+              headerStyle:
+                  pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
               cellStyle: const pw.TextStyle(fontSize: 10),
-              headerDecoration:
-                  const pw.BoxDecoration(color: PdfColors.blue50),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.blue50),
               cellAlignment: pw.Alignment.centerLeft,
               columnWidths: {
                 0: const pw.FlexColumnWidth(3),
@@ -121,10 +124,10 @@ class PdfReportService {
                 style: const pw.TextStyle(fontSize: 10))
           else
             pw.Table.fromTextArray(
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
+              headerStyle:
+                  pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
               cellStyle: const pw.TextStyle(fontSize: 9),
-              headerDecoration:
-                  const pw.BoxDecoration(color: PdfColors.blue50),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.blue50),
               cellAlignment: pw.Alignment.centerLeft,
               columnWidths: {
                 0: const pw.FlexColumnWidth(2),
@@ -283,8 +286,8 @@ class PdfReportService {
 
               // Line items
               pw.Table.fromTextArray(
-                headerStyle: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold, fontSize: 10),
+                headerStyle:
+                    pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
                 cellStyle: const pw.TextStyle(fontSize: 10),
                 headerDecoration:
                     const pw.BoxDecoration(color: PdfColors.grey100),
@@ -329,8 +332,8 @@ class PdfReportService {
               pw.Center(
                 child: pw.Text(
                   'Dokumen ini dibuat secara otomatis oleh CoreBusiness.',
-                  style: const pw.TextStyle(
-                      fontSize: 8, color: PdfColors.grey500),
+                  style:
+                      const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
                 ),
               ),
             ],
@@ -360,14 +363,13 @@ class PdfReportService {
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.blue900)),
             pw.Text('Laporan Keuangan Bulanan',
-                style: const pw.TextStyle(
-                    fontSize: 10, color: PdfColors.grey700)),
+                style:
+                    const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
           ],
         ),
         pw.SizedBox(height: 4),
         pw.Text('Periode: $monthLabel',
-            style: pw.TextStyle(
-                fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
         pw.Divider(color: PdfColors.blue900, thickness: 2),
         pw.SizedBox(height: 16),
       ],
@@ -408,8 +410,8 @@ class PdfReportService {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(label,
-                style: const pw.TextStyle(
-                    fontSize: 9, color: PdfColors.grey600)),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
             pw.SizedBox(height: 4),
             pw.Text(value,
                 style: pw.TextStyle(
@@ -427,11 +429,9 @@ class PdfReportService {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(label,
-            style:
-                const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
         pw.Text(amount,
-            style:
-                const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
       ],
     );
   }

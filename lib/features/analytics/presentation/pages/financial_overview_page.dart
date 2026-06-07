@@ -54,11 +54,13 @@ class FinancialOverviewPage extends StatelessWidget {
               children: [
                 Text(
                   'Category Breakdown',
-                  style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  style: AppTypography.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 Text(
                   'View All',
-                  style: AppTypography.textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary),
+                  style: AppTypography.textTheme.labelMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
                 ),
               ],
             ),
@@ -69,7 +71,8 @@ class FinancialOverviewPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -87,7 +90,9 @@ class FinancialOverviewPage extends StatelessWidget {
                     barColor: Theme.of(context).colorScheme.primary,
                     progress: 0.25,
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _CategoryRow(
                     icon: Icons.home_outlined,
                     iconColor: const Color(0xFFC53030),
@@ -98,11 +103,14 @@ class FinancialOverviewPage extends StatelessWidget {
                     barColor: const Color(0xFFC53030),
                     progress: 0.40,
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+                  Divider(
+                      height: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   _CategoryRow(
                     icon: Icons.directions_car_outlined,
                     iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                    iconBg: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    iconBg:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     title: 'Transport',
                     percentage: '15% of total',
                     amount: '\$637.50',
@@ -117,7 +125,8 @@ class FinancialOverviewPage extends StatelessWidget {
             // Spending Trend Bar Chart
             Text(
               'Spending Trend',
-              style: AppTypography.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: AppTypography.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: AppSpacing.md),
             Container(
@@ -127,7 +136,8 @@ class FinancialOverviewPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+                    color:
+                        Theme.of(context).colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -138,12 +148,26 @@ class FinancialOverviewPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Last 6 Months', style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      Text('Last 6 Months',
+                          style: AppTypography.textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                       Row(
                         children: [
-                          Container(width: 10, height: 10, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle)),
+                          Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle)),
                           const SizedBox(width: 6),
-                          Text('This Year', style: AppTypography.textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text('This Year',
+                              style: AppTypography.textTheme.labelSmall
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant)),
                         ],
                       ),
                     ],
@@ -162,29 +186,52 @@ class FinancialOverviewPage extends StatelessWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                final style = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10);
+                                final style = TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 10);
                                 String text;
                                 switch (value.toInt()) {
-                                  case 0: text = 'Jan'; break;
-                                  case 1: text = 'Feb'; break;
-                                  case 2: text = 'Mar'; break;
-                                  case 3: text = 'Apr'; break;
-                                  case 4: text = 'May'; break;
-                                  case 5: text = 'Jun'; break;
-                                  default: text = ''; break;
+                                  case 0:
+                                    text = 'Jan';
+                                    break;
+                                  case 1:
+                                    text = 'Feb';
+                                    break;
+                                  case 2:
+                                    text = 'Mar';
+                                    break;
+                                  case 3:
+                                    text = 'Apr';
+                                    break;
+                                  case 4:
+                                    text = 'May';
+                                    break;
+                                  case 5:
+                                    text = 'Jun';
+                                    break;
+                                  default:
+                                    text = '';
+                                    break;
                                 }
-                                return SideTitleWidget(axisSide: meta.axisSide, child: Text(text, style: style));
+                                return SideTitleWidget(
+                                    axisSide: meta.axisSide,
+                                    child: Text(text, style: style));
                               },
                               reservedSize: 28,
                             ),
                           ),
-                          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          leftTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
                         ),
                         gridData: FlGridData(show: false),
                         borderData: FlBorderData(show: false),
-                         barGroups: [
+                        barGroups: [
                           _buildBarGroup(context, 0, 30, 40),
                           _buildBarGroup(context, 1, 30, 60),
                           _buildBarGroup(context, 2, 25, 28),
@@ -205,17 +252,22 @@ class FinancialOverviewPage extends StatelessWidget {
     );
   }
 
-  BarChartGroupData _buildBarGroup(BuildContext context, int x, double y1, double y2) {
+  BarChartGroupData _buildBarGroup(
+      BuildContext context, int x, double y1, double y2) {
     return BarChartGroupData(
       x: x,
       barRods: [
         BarChartRodData(
           toY: y2,
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.2), // Light background bar
+          color: Theme.of(context)
+              .colorScheme
+              .primary
+              .withOpacity(0.2), // Light background bar
           width: 20,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
           rodStackItems: [
-            BarChartRodStackItem(0, y1, Theme.of(context).colorScheme.primary), // Solid foreground bar
+            BarChartRodStackItem(0, y1,
+                Theme.of(context).colorScheme.primary), // Solid foreground bar
           ],
         ),
       ],
@@ -254,22 +306,32 @@ class _OverviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTypography.textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(title,
+              style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 12),
-          Text(amount, style: AppTypography.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w800)),
+          Text(amount,
+              style: AppTypography.textTheme.headlineLarge
+                  ?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Row(
             children: [
               Icon(
-                isPositiveTrend ? Icons.trending_up_rounded : Icons.trending_up_rounded,
-                color: isPositiveTrend ? Theme.of(context).colorScheme.primary : const Color(0xFFC53030),
+                isPositiveTrend
+                    ? Icons.trending_up_rounded
+                    : Icons.trending_up_rounded,
+                color: isPositiveTrend
+                    ? Theme.of(context).colorScheme.primary
+                    : const Color(0xFFC53030),
                 size: 16,
               ),
               const SizedBox(width: 4),
               Text(
                 trend,
                 style: AppTypography.textTheme.labelMedium?.copyWith(
-                  color: isPositiveTrend ? Theme.of(context).colorScheme.primary : const Color(0xFFC53030),
+                  color: isPositiveTrend
+                      ? Theme.of(context).colorScheme.primary
+                      : const Color(0xFFC53030),
                 ),
               ),
             ],
@@ -317,25 +379,41 @@ class _CategoryRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: AppTypography.textTheme.labelLarge
+                        ?.copyWith(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
-                Text(percentage, style: AppTypography.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                Text(percentage,
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(amount, style: AppTypography.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+              Text(amount,
+                  style: AppTypography.textTheme.labelLarge
+                      ?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               SizedBox(
                 width: 80,
                 child: Stack(
                   children: [
-                    Container(height: 6, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(3))),
+                    Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(3))),
                     FractionallySizedBox(
                       widthFactor: progress,
-                      child: Container(height: 6, decoration: BoxDecoration(color: barColor, borderRadius: BorderRadius.circular(3))),
+                      child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(3))),
                     ),
                   ],
                 ),

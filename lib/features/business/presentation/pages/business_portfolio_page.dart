@@ -61,7 +61,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Buat Bisnis Baru', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Buat Bisnis Baru',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: nameController,
           decoration: const InputDecoration(
@@ -98,10 +99,14 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                 });
 
                 // 2. Tambahkan owner ke subkoleksi members
-                final userDoc = await _firestore.collection('users').doc(user.uid).get();
+                final userDoc =
+                    await _firestore.collection('users').doc(user.uid).get();
                 final userData = userDoc.data();
-                final userName = userData?['full_name'] as String? ?? user.displayName ?? user.email ?? 'Owner';
-                
+                final userName = userData?['full_name'] as String? ??
+                    user.displayName ??
+                    user.email ??
+                    'Owner';
+
                 await businessDoc.collection('members').doc(user.uid).set({
                   'user_id': user.uid,
                   'name': userName,
@@ -113,7 +118,10 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                 });
 
                 // 3. Tambahkan default cash wallet
-                await businessDoc.collection('wallets').doc('default_cash').set({
+                await businessDoc
+                    .collection('wallets')
+                    .doc('default_cash')
+                    .set({
                   'name': 'Cash',
                   'type': 'cash',
                   'balance': 0.0,
@@ -125,7 +133,9 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
               } catch (e) {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gagal membuat bisnis: $e'), backgroundColor: Theme.of(context).colorScheme.error),
+                  SnackBar(
+                      content: Text('Gagal membuat bisnis: $e'),
+                      backgroundColor: Theme.of(context).colorScheme.error),
                 );
               }
             },
@@ -198,7 +208,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
               children: [
                 const SizedBox(height: AppSpacing.md),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -211,7 +222,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                       ),
                       IconButton(
                         onPressed: () => _showCreateBusinessDialog(context),
-                        icon: Icon(Icons.add_business_rounded, color: colors.primary, size: 28),
+                        icon: Icon(Icons.add_business_rounded,
+                            color: colors.primary, size: 28),
                         tooltip: 'Tambah Bisnis Baru',
                       ),
                     ],
@@ -222,13 +234,16 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                 // Horizontal Portfolio Cards
                 if (businesses.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.pagePadding, vertical: 20),
                     child: Center(
                       child: Column(
                         children: [
-                          Icon(Icons.storefront_outlined, size: 64, color: colors.outline),
+                          Icon(Icons.storefront_outlined,
+                              size: 64, color: colors.outline),
                           const SizedBox(height: 12),
-                          const Text('Belum bergabung dengan bisnis apa pun.', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text('Belum bergabung dengan bisnis apa pun.',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -238,7 +253,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                     height: 160,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.pagePadding),
                       itemCount: businesses.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 16),
                       itemBuilder: (context, index) {
@@ -249,8 +265,12 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                           borderRadius: BorderRadius.circular(16),
                           child: _PortfolioCard(
                             title: biz['name'],
-                            subtitle: biz['role'] == 'owner' ? 'Owner / Pemilik' : 'Staff / Karyawan',
-                            icon: biz['role'] == 'owner' ? Icons.storefront_rounded : Icons.badge_rounded,
+                            subtitle: biz['role'] == 'owner'
+                                ? 'Owner / Pemilik'
+                                : 'Staff / Karyawan',
+                            icon: biz['role'] == 'owner'
+                                ? Icons.storefront_rounded
+                                : Icons.badge_rounded,
                             isActive: isCurrentActive,
                           ),
                         );
@@ -261,7 +281,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
 
                 // Dynamic Overview Section based on current selected workspace
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   child: Text(
                     'Pintasan Portofolio',
                     style: AppTypography.textTheme.titleLarge?.copyWith(
@@ -274,7 +295,8 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
 
                 // Overview card showing brief usage info
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pagePadding),
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -287,11 +309,13 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.info_outline_rounded, color: colors.primary, size: 20),
+                            Icon(Icons.info_outline_rounded,
+                                color: colors.primary, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               'Informasi Workspace Aktif',
-                              style: AppTypography.textTheme.titleMedium?.copyWith(
+                              style:
+                                  AppTypography.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -391,7 +415,8 @@ class _PortfolioCard extends StatelessWidget {
               ),
               if (isActive)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: colors.primaryContainer,
                     borderRadius: BorderRadius.circular(12),

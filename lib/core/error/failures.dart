@@ -24,7 +24,8 @@ class NetworkFailure extends Failure {
 }
 
 class CacheFailure extends Failure {
-  const CacheFailure({super.message = 'Terjadi kesalahan pada penyimpanan lokal.'});
+  const CacheFailure(
+      {super.message = 'Terjadi kesalahan pada penyimpanan lokal.'});
 }
 
 class AuthFailure extends Failure {
@@ -32,5 +33,6 @@ class AuthFailure extends Failure {
 }
 
 class UnexpectedFailure extends Failure {
-  const UnexpectedFailure({super.message = 'Terjadi kesalahan yang tidak terduga.'});
+  const UnexpectedFailure(
+      {super.message = 'Terjadi kesalahan yang tidak terduga.'});
 }

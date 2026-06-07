@@ -58,10 +58,11 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
           .where('targetUserId', isEqualTo: user.uid)
           .snapshots()
           .map((snapshot) {
-            final list = snapshot.docs.map(NotificationModel.fromFirestore).toList();
-            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            return list;
-          });
+        final list =
+            snapshot.docs.map(NotificationModel.fromFirestore).toList();
+        list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return list;
+      });
     });
   }
 

@@ -17,7 +17,8 @@ import '../../../home/data/models/home_models.dart';
 import '../../domain/entities/transaction_entities.dart';
 
 abstract class TransactionLocalDataSource {
-  Future<List<TransactionModel>> getFilteredTransactions(TransactionFilter filter);
+  Future<List<TransactionModel>> getFilteredTransactions(
+      TransactionFilter filter);
   Future<TransactionDetailModel> getTransactionDetail(String id);
   Future<void> addTransaction(TransactionModel transaction);
   Future<void> deleteTransaction(String id);

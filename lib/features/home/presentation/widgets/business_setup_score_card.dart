@@ -18,13 +18,31 @@ class BusinessSetupScoreCard extends StatefulWidget {
 class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
   bool _isExpanded = false;
 
-  Future<Map<String, dynamic>> _calculateScore(String businessId, BusinessContext context) async {
+  Future<Map<String, dynamic>> _calculateScore(
+      String businessId, BusinessContext context) async {
     final firestore = FirebaseFirestore.instance;
 
-    final businessDocFuture = firestore.collection('businesses').doc(businessId).get();
-    final walletsQueryFuture = firestore.collection('businesses').doc(businessId).collection('wallets').limit(1).get();
-    final categoriesQueryFuture = firestore.collection('businesses').doc(businessId).collection('categories').limit(1).get();
-    final membersQueryFuture = firestore.collection('businesses').doc(businessId).collection('members').where('role', isNotEqualTo: 'owner').limit(1).get();
+    final businessDocFuture =
+        firestore.collection('businesses').doc(businessId).get();
+    final walletsQueryFuture = firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('wallets')
+        .limit(1)
+        .get();
+    final categoriesQueryFuture = firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('categories')
+        .limit(1)
+        .get();
+    final membersQueryFuture = firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('members')
+        .where('role', isNotEqualTo: 'owner')
+        .limit(1)
+        .get();
     final pinSettingsFuture = sl<AppLockLocalDataSource>().getSettings();
 
     final results = await Future.wait([
@@ -45,12 +63,15 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
 
     // 8 Checklist items (each worth 12.5%)
     final checkList = <String, bool>{
-      'businessProfile': businessData['name'] != null && (businessData['name'] as String).trim().isNotEmpty,
+      'businessProfile': businessData['name'] != null &&
+          (businessData['name'] as String).trim().isNotEmpty,
       'ownerActive': context.role == 'owner',
       'walletCreated': walletsQuery.docs.isNotEmpty,
       'categoryCreated': categoriesQuery.docs.isNotEmpty,
-      'featureSelected': businessData['enabled_features'] != null && (businessData['enabled_features'] as List).isNotEmpty,
-      'logoUploaded': businessData['logo_url'] != null || businessData['logoUrl'] != null,
+      'featureSelected': businessData['enabled_features'] != null &&
+          (businessData['enabled_features'] as List).isNotEmpty,
+      'logoUploaded':
+          businessData['logo_url'] != null || businessData['logoUrl'] != null,
       'staffAdded': membersQuery.docs.isNotEmpty,
       'pinEnabled': pinSettings.pinEnabled == true,
     };
@@ -123,7 +144,8 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
                           color: colors.primaryContainer.withAlpha(128),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.speed_rounded, color: colors.primary, size: 24),
+                        child: Icon(Icons.speed_rounded,
+                            color: colors.primary, size: 24),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -132,7 +154,8 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
                           children: [
                             Text(
                               'Setup Bisnis $score% Selesai',
-                              style: AppTypography.textTheme.titleMedium?.copyWith(
+                              style:
+                                  AppTypography.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: colors.onSurface,
                               ),
@@ -143,8 +166,10 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
                               child: LinearProgressIndicator(
                                 value: progress,
                                 minHeight: 6,
-                                backgroundColor: colors.outlineVariant.withAlpha(100),
-                                valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                                backgroundColor:
+                                    colors.outlineVariant.withAlpha(100),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    colors.primary),
                               ),
                             ),
                           ],
@@ -161,18 +186,22 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  
+
                   // Actionable incomplete items CTA
                   _buildCTASection(context, colors, checklist),
 
                   const SizedBox(height: AppSpacing.xs),
                   Divider(color: colors.outlineVariant.withAlpha(128)),
-                  
+
                   // Collapse / Expand toggle
                   TextButton.icon(
                     onPressed: () => setState(() => _isExpanded = !_isExpanded),
-                    icon: Icon(_isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded),
-                    label: Text(_isExpanded ? 'Sembunyikan Checklist' : 'Tampilkan Checklist Lengkap'),
+                    icon: Icon(_isExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded),
+                    label: Text(_isExpanded
+                        ? 'Sembunyikan Checklist'
+                        : 'Tampilkan Checklist Lengkap'),
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       foregroundColor: colors.primary,
@@ -181,14 +210,22 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
 
                   if (_isExpanded) ...[
                     const SizedBox(height: AppSpacing.xs),
-                    _buildChecklistItem('Profil bisnis dibuat', checklist['businessProfile']!),
-                    _buildChecklistItem('Role Owner aktif', checklist['ownerActive']!),
-                    _buildChecklistItem('Fitur utama dipilih', checklist['featureSelected']!),
-                    _buildChecklistItem('Wallet awal dibuat', checklist['walletCreated']!),
-                    _buildChecklistItem('Kategori transaksi dibuat', checklist['categoryCreated']!),
-                    _buildChecklistItem('Logo bisnis diupload', checklist['logoUploaded']!),
-                    _buildChecklistItem('Karyawan ditambahkan', checklist['staffAdded']!),
-                    _buildChecklistItem('PIN keamanan aktif', checklist['pinEnabled']!),
+                    _buildChecklistItem(
+                        'Profil bisnis dibuat', checklist['businessProfile']!),
+                    _buildChecklistItem(
+                        'Role Owner aktif', checklist['ownerActive']!),
+                    _buildChecklistItem(
+                        'Fitur utama dipilih', checklist['featureSelected']!),
+                    _buildChecklistItem(
+                        'Wallet awal dibuat', checklist['walletCreated']!),
+                    _buildChecklistItem('Kategori transaksi dibuat',
+                        checklist['categoryCreated']!),
+                    _buildChecklistItem(
+                        'Logo bisnis diupload', checklist['logoUploaded']!),
+                    _buildChecklistItem(
+                        'Karyawan ditambahkan', checklist['staffAdded']!),
+                    _buildChecklistItem(
+                        'PIN keamanan aktif', checklist['pinEnabled']!),
                   ]
                 ],
               ),
@@ -199,7 +236,8 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
     );
   }
 
-  Widget _buildCTASection(BuildContext context, ColorScheme colors, Map<String, bool> checklist) {
+  Widget _buildCTASection(
+      BuildContext context, ColorScheme colors, Map<String, bool> checklist) {
     // Collect incomplete items that have a clear CTA
     final ctas = <Widget>[];
 
@@ -248,7 +286,9 @@ class _BusinessSetupScoreCardState extends State<BusinessSetupScoreCard> {
       child: Row(
         children: [
           Icon(
-            isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+            isDone
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked_rounded,
             color: isDone ? colors.primary : colors.outline,
             size: 18,
           ),

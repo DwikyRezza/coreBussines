@@ -16,7 +16,8 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _progressController;
 
   @override
@@ -46,7 +47,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         child: Column(
           children: [
             const Spacer(flex: 3),
-            
+
             // 3D Chart Illustration Mock
             Center(
               child: Container(
@@ -79,9 +80,10 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                         bottom: i * 40.0,
                         left: 20,
                         right: 20,
-                        child: Container(height: 1, color: Colors.white.withOpacity(0.1)),
+                        child: Container(
+                            height: 1, color: Colors.white.withOpacity(0.1)),
                       ),
-                    
+
                     // Bars
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +96,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                         _build3DBar(100),
                       ],
                     ),
-                    
+
                     // Trend lines
                     CustomPaint(
                       size: const Size(200, 200),
@@ -104,9 +106,9 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                 ),
               ),
             ),
-            
+
             const SizedBox(height: AppSpacing.xxl),
-            
+
             // App Icon
             Container(
               padding: const EdgeInsets.all(8),
@@ -121,7 +123,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // App Title
             Text(
               'CoreBusiness',
@@ -132,7 +134,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            
+
             // Subtitle
             Text(
               'Manage your business, finance,\nand inventory in one place.',
@@ -142,9 +144,9 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                 height: 1.4,
               ),
             ),
-            
+
             const Spacer(flex: 4),
-            
+
             // Loading Bar
             SizedBox(
               width: 100,
@@ -156,7 +158,8 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                     child: LinearProgressIndicator(
                       value: _progressController.value,
                       backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
                       minHeight: 4,
                     ),
                   );
@@ -164,7 +167,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             // Version Info
             Text(
               'v2.4.0',
@@ -214,7 +217,7 @@ class _TrendLinePainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-      
+
     final paint2 = Paint()
       ..color = Colors.white.withOpacity(0.5)
       ..strokeWidth = 2
@@ -222,18 +225,22 @@ class _TrendLinePainter extends CustomPainter {
 
     final path1 = Path()
       ..moveTo(20, size.height - 40)
-      ..quadraticBezierTo(size.width * 0.5, size.height - 100, size.width - 40, 40);
-      
+      ..quadraticBezierTo(
+          size.width * 0.5, size.height - 100, size.width - 40, 40);
+
     final path2 = Path()
       ..moveTo(20, size.height - 20)
-      ..quadraticBezierTo(size.width * 0.6, size.height - 60, size.width - 20, 80);
+      ..quadraticBezierTo(
+          size.width * 0.6, size.height - 60, size.width - 20, 80);
 
     canvas.drawPath(path1, paint1);
     canvas.drawPath(path2, paint2);
-    
+
     // Draw arrow heads
-    canvas.drawCircle(const Offset(160, 40), 3, paint1..style = PaintingStyle.fill);
-    canvas.drawCircle(const Offset(180, 80), 3, paint1..color = Colors.white.withOpacity(0.5));
+    canvas.drawCircle(
+        const Offset(160, 40), 3, paint1..style = PaintingStyle.fill);
+    canvas.drawCircle(const Offset(180, 80), 3,
+        paint1..color = Colors.white.withOpacity(0.5));
   }
 
   @override

@@ -63,5 +63,6 @@ class ScheduleModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, title, dateTime, reminderMinutes, note, isCompleted];
+  List<Object?> get props =>
+      [id, title, dateTime, reminderMinutes, note, isCompleted];
 }
