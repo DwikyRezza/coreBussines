@@ -165,7 +165,12 @@ GoRouter _buildRouter() {
       final cachedUser = (authRepo as AuthRepositoryImpl).cachedUser;
       final isLoggedIn = cachedUser != null;
       final isPublic = _publicRoutes.contains(location);
+      final isSetup = location == AppRoutes.smartBusinessSetup;
       final isLock = location == AppRoutes.lock;
+
+      // If user is not logged in yet (rehydrating) and trying to access /setup,
+      // redirect to splash to wait for auth rehydration to complete.
+      if (!isLoggedIn && isSetup) return AppRoutes.splash;
 
       // Unauthenticated user trying to access a protected route
       if (!isLoggedIn && !isPublic) return AppRoutes.login;
@@ -488,11 +493,15 @@ GoRouter _buildRouter() {
         builder: (context, state) => const DashboardCustomizePage(),
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Route not found: ${state.uri}'),
-      ),
-    ),
+    errorBuilder: (context, state) {
+      // Route not found or builder error — restart from splash.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go(AppRoutes.splash);
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    },
   );
 }
 
