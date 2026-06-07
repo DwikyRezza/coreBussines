@@ -194,7 +194,27 @@ class _BusinessPortfolioPageState extends State<BusinessPortfolioPage> {
         stream: _watchUserBusinesses(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
+            final errStr = snapshot.error.toString();
+            final isPermissionDenied = errStr.contains('permission-denied') || errStr.contains('Permission denied');
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.gpp_bad_rounded, color: Theme.of(context).colorScheme.error, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      isPermissionDenied
+                          ? 'Akses Ditolak (Permission Denied).\n\nSilakan pastikan Firestore Security Rules terbaru di file `firestore.rules` sudah di-deploy/di-copy ke Firebase Console Anda.'
+                          : 'Terjadi kesalahan: ${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
